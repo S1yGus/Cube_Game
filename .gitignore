@@ -1,5 +1,6 @@
 Binaries/
 Build/
+BuildFromBat/
 DerivedDataCache/
 Intermediate/
 Saved/
@@ -14,3 +15,4 @@ Saved/
 *.xcodeproj
 *.xcworkspace
 *.log
+Build.bat
