@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
-constexpr static uint8 CountdownTimerRate = 1;
+constexpr static int32 CountdownTimerRate = 1;
 const static FVector2D SpeedRange{1.0f, 999.0f};
 constexpr static int32 MaxMultiplier = 8;
 
@@ -71,6 +71,8 @@ void ACGGameMode::ChangeSpeed(int32 NewSpeed)
 
 void ACGGameMode::ChangeScore(ECubeType CubeType)
 {
+    ChangeMultiplier(CubeType);
+
     const auto DifficultyVlues = GetDifficultyVlues();
     if (!DifficultyVlues)
         return;
@@ -78,7 +80,6 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
     if (!DifficultyVlues->ScoreChangeMap.Contains(CubeType))
         return;
 
-    ChangeMultiplier(CubeType);
     SetScore(Score + Multiplier * DifficultyVlues->ScoreChangeMap[CubeType]);
 
     if (Score / DifficultyVlues->ScoreToSpeedUp > Speed)
@@ -155,7 +156,11 @@ void ACGGameMode::SetScore(int32 NewScore)
 
 void ACGGameMode::ChangeMultiplier(ECubeType CubeType)
 {
-    if (CubeType == PreviousCubeType)
+    const auto DifficultyVlues = GetDifficultyVlues();
+    if (!DifficultyVlues)
+        return;
+
+    if (DifficultyVlues->ScoreChangeMap.Contains(CubeType) && DifficultyVlues->ScoreChangeMap[CubeType] > 0 && CubeType == PreviousCubeType)
     {
         if (Multiplier + 1 <= MaxMultiplier)
         {

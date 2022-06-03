@@ -28,16 +28,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bonus")
     TMap<EBonusType, TSubclassOf<ACGBaseBonusActor>> BonusesMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0"))
     float UberDuration = 10.0f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0"))
     float UberFireFrequency = 0.3f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Speed")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Speed", Meta = (ClampMin = "0.0"))
     float SpeedDuration = 2.0f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Speed")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Speed", Meta = (ClampMin = "0.0"))
     float SpeedMultiplier = 2.0f;
 
 private:

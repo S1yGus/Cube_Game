@@ -17,7 +17,7 @@ public:
     void SetDuration(float NewDuration) { ShieldDuration = NewDuration; }
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0"))
     float ShieldDuration = 7.0f;
 
     virtual void BeginPlay() override;

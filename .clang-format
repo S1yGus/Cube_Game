@@ -2,7 +2,7 @@ Language: Cpp
 BasedOnStyle: Microsoft
 IndentWidth: '4'
 UseTab: Never
-ColumnLimit: '160'
+ColumnLimit: '170'
 AccessModifierOffset: '-4'
 SortIncludes: false
 AllowShortBlocksOnASingleLine: Never

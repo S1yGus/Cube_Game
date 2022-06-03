@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/Cubes/CGIndicatorBonusCubeActor.h"
+#include "Gameplay/Cubes/Bonuses/CGIndicatorBonusCubeActor.h"
 #include "CGBaseBonusActor.generated.h"
 
 class USoundCue;
@@ -12,6 +12,9 @@ UCLASS()
 class CUBE_GAME_API ACGBaseBonusActor : public ACGIndicatorBonusCubeActor
 {
     GENERATED_BODY()
+
+public:
+    ACGBaseBonusActor();
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")

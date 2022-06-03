@@ -12,7 +12,6 @@
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
 
-constexpr static int32 MovementStep = 200;
 constexpr static float MovementTimerRate = 0.016f;
 constexpr static float MovementSpeed = 10.0f;
 
@@ -63,7 +62,7 @@ void ACGPlayer::SetupPlayer()
 
 FVector ACGPlayer::GetCurrentPositionLocation() const
 {
-    return FVector{static_cast<double>(CurrentPosition * MovementStep), 0.0, 0.0};
+    return FVector{CurrentPosition * MovementStep, 0.0, PositionZOffset};
 }
 
 void ACGPlayer::MoveRight()

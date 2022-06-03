@@ -35,8 +35,14 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCGFXComponent* FXComponent;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0"))
     int32 PositionsAmount = 4;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0"))
+    float MovementStep = 200.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0"))
+    float PositionZOffset = 65.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     USoundCue* OutOfPosition;

@@ -61,10 +61,10 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPowerupedSignature, EPowerupType);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnScoreChangedSignature, uint32);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMultiplierChangedSignature, ECubeType, uint32);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, uint32);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimeChangedSignature, uint32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnScoreChangedSignature, int32);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMultiplierChangedSignature, ECubeType, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimeChangedSignature, int32);
 DECLARE_MULTICAST_DELEGATE(FOnLowTimeSignature);
 
 USTRUCT(BlueprintType)
@@ -84,21 +84,21 @@ struct FDifficulty
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     TMap<ECubeType, float> SpawnWeightMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0"))
     int32 InitialTime = 10;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
     float DistanceBetweenCubes = 200.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     FVector2D CubesSpeedRange{100.0f, 10000.0f};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
     int32 ScoreToSpeedUp = 1000;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    uint8 MaxRecursionDepth = 4;
+    int32 MaxNumOfCubesInLine = 4;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    float ChanceToTriggerRecursion = 0.5;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
+    float ChanceToAddCubeInLine = 0.4;
 };

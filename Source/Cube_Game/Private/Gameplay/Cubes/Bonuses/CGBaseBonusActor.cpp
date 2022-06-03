@@ -5,6 +5,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 
+ACGBaseBonusActor::ACGBaseBonusActor()
+{
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+}
+
 void ACGBaseBonusActor::BeginPlay()
 {
     Super::BeginPlay();

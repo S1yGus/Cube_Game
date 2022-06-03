@@ -13,7 +13,7 @@ UCGBonusComponent::UCGBonusComponent()
 
 void UCGBonusComponent::SetRandomBonus()
 {
-    const auto RandBonusNum = FMath::RandHelper(static_cast<int32>(EBonusType::Max));
+    const auto RandBonusNum = FMath::RandHelper(static_cast<int32>(EBonusType::Max) - 1) + 1;
     SetBonus(static_cast<EBonusType>(RandBonusNum));
 }
 

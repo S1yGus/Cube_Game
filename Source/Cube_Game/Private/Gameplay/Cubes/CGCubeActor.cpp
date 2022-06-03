@@ -6,6 +6,9 @@
 ACGCubeActor::ACGCubeActor()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
 void ACGCubeActor::Tick(float DeltaSeconds)

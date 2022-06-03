@@ -43,7 +43,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     TMap<EDifficulty, FDifficulty> DifficultyMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0"))
     int32 LowTimeThreshold = 5;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")

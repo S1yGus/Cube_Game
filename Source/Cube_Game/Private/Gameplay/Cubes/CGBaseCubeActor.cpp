@@ -9,13 +9,14 @@ ACGBaseCubeActor::ACGBaseCubeActor()
     PrimaryActorTick.bCanEverTick = false;
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
-    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    StaticMeshComponent->CastShadow = false;
     SetRootComponent(StaticMeshComponent);
 }
 
 void ACGBaseCubeActor::Teardown()
 {
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     TargetScale = FVector::ZeroVector;
     GetWorldTimerManager().SetTimer(ScaleTimerHandle, this, &ACGBaseCubeActor::OnChangingScale, ScalingTimerRate, true);
 }

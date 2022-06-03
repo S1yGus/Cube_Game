@@ -31,12 +31,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
     TMap<ECubeType, UMaterialInstance*> ReceivingMaterialsMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
-    float TimeOfMaterialChanging = 2.0f;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material", Meta = (ClampMin = "0.0"))
+    float TimeOfMaterialChanging = 0.25f;
 
 private:
     FTimerHandle MaterialTimerHandle;
 
-    UStaticMeshComponent* GetOwnerMesh() const;
+    inline UStaticMeshComponent* GetOwnerMesh() const;
     void OnReturnDefaultMaterial();
 };

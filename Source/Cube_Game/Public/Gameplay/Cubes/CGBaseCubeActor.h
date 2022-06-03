@@ -23,7 +23,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UStaticMeshComponent* StaticMeshComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scale")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scale", Meta = (ClampMin = "0.0"))
     float ScaleInterpSpeed = 9.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scale")
