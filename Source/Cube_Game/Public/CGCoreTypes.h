@@ -8,9 +8,12 @@ UENUM(BlueprintType)
 enum class EGameState : uint8
 {
     WaitingToStart,
-    InMainMenu,
-    InOptions,
-    InGame,
+    MainMenu,
+    Options,
+    OptionsWarning,
+    DifficultySelection,
+    Game,
+    PopUpHint,
     Pause,
     GameOver,
     Max
@@ -53,19 +56,24 @@ UENUM(BlueprintType)
 enum class EPowerupType : uint8
 {
     Uber,
-    Speed,
     Max
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, float);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPowerupedSignature, EPowerupType);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnScoreChangedSignature, int32);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMultiplierChangedSignature, ECubeType, int32);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, int32);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimeChangedSignature, int32);
-DECLARE_MULTICAST_DELEGATE(FOnLowTimeSignature);
+UENUM(BlueprintType)
+enum class EPopUpType : uint8
+{
+    Off,
+    Multiplier,
+    Amount,
+    Max
+};
+
+UENUM(BlueprintType)
+enum class EHint : uint8
+{
+    Startup,
+    Max
+};
 
 USTRUCT(BlueprintType)
 struct FDifficulty
@@ -102,3 +110,86 @@ struct FDifficulty
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
     float ChanceToAddCubeInLine = 0.4;
 };
+
+USTRUCT(BlueprintType)
+struct FPopUpHint
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FText Title;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FLinearColor TitleColor;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FText HintText;
+};
+
+USTRUCT(BlueprintType)
+struct FVideoSettings
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0", ClampMax = "4"))
+    int32 Quality = 3;
+};
+
+USTRUCT(BlueprintType)
+struct FSoundSettings
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    float MasterVolume = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    float FXVolume = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    float MusicVolume = 0.5f;
+};
+
+USTRUCT(BlueprintType)
+struct FHints
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
+    TMap<EHint, bool> HintsMap = {TPair<EHint, bool>{EHint::Startup, true}};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
+    TMap<ECubeType, bool> ReceivingHintsMap = {
+        TPair<ECubeType, bool>{ECubeType::GoodCube, true},       //
+        TPair<ECubeType, bool>{ECubeType::BadCube, true},        //
+        TPair<ECubeType, bool>{ECubeType::ScoreCube, true},      //
+        TPair<ECubeType, bool>{ECubeType::TimeCube, true},       //
+        TPair<ECubeType, bool>{ECubeType::BonusCube, true},      //
+        TPair<ECubeType, bool>{ECubeType::SpeedCube, true},      //
+        TPair<ECubeType, bool>{ECubeType::PowerUpCube, true},    //
+    };                                                           //
+};
+
+USTRUCT(BlueprintType)
+struct FGameSettings
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    EPopUpType PopUp = EPopUpType::Multiplier;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    FHints Hints;
+};
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPowerupedSignature, EPowerupType);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnScoreChangedSignature, int32, int32, int32);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMultiplierChangedSignature, ECubeType, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimeChangedSignature, int32);
+DECLARE_MULTICAST_DELEGATE(FOnLowTimeSignature);
+DECLARE_MULTICAST_DELEGATE(FOnClickedButtonSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnShowPopUpHintSignature, const FPopUpHint&);

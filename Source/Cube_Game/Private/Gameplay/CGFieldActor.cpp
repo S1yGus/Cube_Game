@@ -28,8 +28,8 @@ void ACGFieldActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    SetupField();
     RestoreSpawnPositions();
+    SetupField();
 }
 
 void ACGFieldActor::SetupField()
@@ -37,7 +37,7 @@ void ACGFieldActor::SetupField()
     if (const auto GameMode = GetGameMode())
     {
         GameMode->OnSpeedChanged.AddUObject(this, &ACGFieldActor::OnSpeedChanged);
-        OnSpeedChanged(GameMode->GetSpeed());    // init cubes spawning
+        OnSpeedChanged(GameMode->GetSpeed());    // Init cubes spawning.
 
         GameMode->OnMultiplierChanged.AddUObject(this, &ACGFieldActor::OnMultiplierChanged);
     }
@@ -205,7 +205,7 @@ ECubeType ACGFieldActor::GetRandomCubeType() const
 
     const auto RandNum = FMath::FRand();
     TArray<ECubeType> RandItems;
-    for (const auto ItemPair : DifficultyVlues->SpawnWeightMap)
+    for (const auto& ItemPair : DifficultyVlues->SpawnWeightMap)
     {
         if (RandNum > ItemPair.Value)
             continue;

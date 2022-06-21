@@ -11,6 +11,8 @@
 #include "Player/Components/CGFXComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
+#include "CGGameInstance.h"
+#include "Saves/CGSettingsSave.h"
 
 constexpr static float MovementTimerRate = 0.016f;
 constexpr static float MovementSpeed = 10.0f;
@@ -148,4 +150,33 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
     {
         BonusComponent->UseRandomPowerup();
     }
+
+    ShowPopUpHint(CubeType);
+}
+
+void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
+{
+    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    if (!GameInstance)
+        return;
+
+    const auto SettingsSave = GameInstance->GetSettingsSave();
+    if (!SettingsSave)
+        return;
+
+    auto GameSettings = SettingsSave->GetGameSettings();
+    if (!GameSettings.Hints.ReceivingHintsMap.Contains(CubeType))
+        return;
+
+    if (!GameSettings.Hints.ReceivingHintsMap[CubeType])
+        return;
+
+    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    if (!GameMode || !GameMode->GetReceivingHints().Contains(CubeType))
+        return;
+
+    GameMode->ShowPopUpHint(GameMode->GetReceivingHints()[CubeType]);
+
+    GameSettings.Hints.ReceivingHintsMap[CubeType] = false;
+    GameInstance->SetGameSettings(GameSettings);
 }

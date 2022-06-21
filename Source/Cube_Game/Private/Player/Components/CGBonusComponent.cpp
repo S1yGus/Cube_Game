@@ -39,9 +39,6 @@ void UCGBonusComponent::UseRandomPowerup()
         case EPowerupType::Uber:
             UseUberPowerup();
             break;
-        case EPowerupType::Speed:
-            UseSpeedPowerup();
-            break;
         default:
             break;
     }
@@ -98,30 +95,4 @@ void UCGBonusComponent::OnUberPowerupFired()
 
     UberTime += UberFireFrequency;
     SpawnBonus(EBonusType::Missile);
-}
-
-void UCGBonusComponent::UseSpeedPowerup()
-{
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
-    if (!GameMode)
-        return;
-
-    PreviousSpeed = GameMode->GetSpeed();
-    GameMode->ChangeSpeed(PreviousSpeed * SpeedMultiplier);
-
-    GetWorld()->GetTimerManager().SetTimer(SpeedTimerHandle, this, &UCGBonusComponent::OnSpeedPowerupFinished, SpeedDuration);
-}
-
-void UCGBonusComponent::OnSpeedPowerupFinished()
-{
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
-    if (!GameMode || !GetOwner())
-        return;
-
-    const auto DifficultyVlues = GameMode->GetDifficultyVlues();
-    if (!DifficultyVlues)
-        return;
-
-    const auto CurrentSpeed = GameMode->GetScore() / DifficultyVlues->ScoreToSpeedUp;
-    GameMode->ChangeSpeed(CurrentSpeed > PreviousSpeed ? CurrentSpeed : PreviousSpeed);
 }

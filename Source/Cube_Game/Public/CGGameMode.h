@@ -7,8 +7,6 @@
 #include "CGCoreTypes.h"
 #include "CGGameMode.generated.h"
 
-class USoundCue;
-
 UCLASS()
 class CUBE_GAME_API ACGGameMode : public ACGGameModeBase
 {
@@ -22,20 +20,24 @@ public:
     FOnSpeedChangedSignature OnSpeedChanged;
     FOnScoreChangedSignature OnScoreChanged;
     FOnMultiplierChangedSignature OnMultiplierChanged;
+    FOnShowPopUpHintSignature OnShowPopUpHintSignature;
 
     virtual void StartPlay() override;
-    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
     virtual bool ClearPause() override;
+    virtual void PreInitializeComponents() override;
 
     void ChangeTime(ECubeType CubeType);
     void ChangeSpeed(ECubeType CubeType);
-    void ChangeSpeed(int32 NewSpeed);
     void ChangeScore(ECubeType CubeType);
 
+    int32 GetTime() const { return Time; }
     int32 GetSpeed() const { return Speed; }
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
     const FDifficulty* GetDifficultyVlues() const;
+
+    void ShowPopUpHint(const FPopUpHint& PopUpHint);
+    const TMap<ECubeType, FPopUpHint>& GetReceivingHints() const { return ReceivingHintsMap; }
 
     void GameOver();
 
@@ -46,11 +48,15 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0"))
     int32 LowTimeThreshold = 5;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* LowTimeSound;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
+    TMap<EHint, FPopUpHint> PopUpHintsMap;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
+    TMap<ECubeType, FPopUpHint> ReceivingHintsMap;
 
 private:
     FTimerHandle CountdownTimerHandle;
+    FTimerHandle StartupHintTimerHandle;
 
     int32 Time = 0;
     int32 Speed = 1;
@@ -61,9 +67,10 @@ private:
 
     void SetupGameMode();
     void OnCountdown();
+    void OnShowStartupHint();
 
-    void SetTime(int32 NewTime);
-    void SetSpeed(int32 NewSpeed);
-    void SetScore(int32 NewScore);
+    void AddTime(int32 TimeToAdd);
+    void AddSpeed(int32 SpeedToAdd);
+    void AddScore(int32 ScoreToAdd);
     void ChangeMultiplier(ECubeType CubeType);
 };

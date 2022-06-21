@@ -72,4 +72,5 @@ private:
                                  const FHitResult& SweepResult);              //
 
     void ReceiveCube(ECubeType CubeType);
+    void ShowPopUpHint(ECubeType CubeType);
 };

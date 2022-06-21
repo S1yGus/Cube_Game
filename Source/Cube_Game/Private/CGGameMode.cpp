@@ -5,36 +5,29 @@
 #include "Player/CGPlayerController.h"
 #include "Player/CGPlayer.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/GameplayStatics.h"
-#include "Sound/SoundCue.h"
+#include "UI/CGHUDGame.h"
+#include "Saves/CGSettingsSave.h"
 
 constexpr static int32 CountdownTimerRate = 1;
 const static FVector2D SpeedRange{1.0f, 999.0f};
 constexpr static int32 MaxMultiplier = 8;
+constexpr static int32 StartupHintTimerRate = 2;
 
 ACGGameMode::ACGGameMode()
 {
     PlayerControllerClass = ACGPlayerController::StaticClass();
     DefaultPawnClass = ACGPlayer::StaticClass();
+    HUDClass = ACGHUDGame::StaticClass();
 }
 
 void ACGGameMode::StartPlay()
 {
     Super::StartPlay();
 
-    SetupGameMode();
-    SetGameState(EGameState::InGame);
+    SetGameState(EGameState::Game);
 
     GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &ACGGameMode::OnCountdown, CountdownTimerRate, true);
-}
-
-bool ACGGameMode::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
-{
-    if (!Super::SetPause(PC, CanUnpauseDelegate))
-        return false;
-
-    SetGameState(EGameState::Pause);
-    return true;
+    GetWorld()->GetTimerManager().SetTimer(StartupHintTimerHandle, this, &ACGGameMode::OnShowStartupHint, StartupHintTimerRate);
 }
 
 bool ACGGameMode::ClearPause()
@@ -42,8 +35,15 @@ bool ACGGameMode::ClearPause()
     if (!Super::ClearPause())
         return false;
 
-    SetGameState(EGameState::InGame);
+    SetGameState(EGameState::Game);
     return true;
+}
+
+void ACGGameMode::PreInitializeComponents()
+{
+    Super::PreInitializeComponents();
+
+    SetupGameMode();
 }
 
 void ACGGameMode::ChangeTime(ECubeType CubeType)
@@ -52,7 +52,7 @@ void ACGGameMode::ChangeTime(ECubeType CubeType)
     if (!DifficultyVlues || !DifficultyVlues->TimeChangeMap.Contains(CubeType))
         return;
 
-    SetTime(Time + DifficultyVlues->TimeChangeMap[CubeType]);
+    AddTime(DifficultyVlues->TimeChangeMap[CubeType]);
 }
 
 void ACGGameMode::ChangeSpeed(ECubeType CubeType)
@@ -61,12 +61,7 @@ void ACGGameMode::ChangeSpeed(ECubeType CubeType)
     if (!DifficultyVlues || !DifficultyVlues->SpeedChangeMap.Contains(CubeType))
         return;
 
-    SetSpeed(Speed + DifficultyVlues->SpeedChangeMap[CubeType]);
-}
-
-void ACGGameMode::ChangeSpeed(int32 NewSpeed)
-{
-    SetSpeed(NewSpeed);
+    AddSpeed(DifficultyVlues->SpeedChangeMap[CubeType]);
 }
 
 void ACGGameMode::ChangeScore(ECubeType CubeType)
@@ -74,18 +69,18 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
     ChangeMultiplier(CubeType);
 
     const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues)
+    if (!DifficultyVlues || !DifficultyVlues->ScoreChangeMap.Contains(CubeType))
         return;
 
-    if (!DifficultyVlues->ScoreChangeMap.Contains(CubeType))
-        return;
-
-    SetScore(Score + Multiplier * DifficultyVlues->ScoreChangeMap[CubeType]);
-
-    if (Score / DifficultyVlues->ScoreToSpeedUp > Speed)
+    const auto ScoreRemains = Score % DifficultyVlues->ScoreToSpeedUp;
+    const auto ScoreToAdd = Multiplier * DifficultyVlues->ScoreChangeMap[CubeType];
+    const auto SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyVlues->ScoreToSpeedUp;
+    if (SpeedToAdd >= 1)
     {
-        ChangeSpeed(Score / DifficultyVlues->ScoreToSpeedUp);
+        AddSpeed(static_cast<int32>(SpeedToAdd));
     }
+
+    AddScore(ScoreToAdd);
 }
 
 int32 ACGGameMode::GetCubeSpeed() const
@@ -108,9 +103,18 @@ const FDifficulty* ACGGameMode::GetDifficultyVlues() const
     return &DifficultyMap[GameInstance->GetDifficulty()];
 }
 
+void ACGGameMode::ShowPopUpHint(const FPopUpHint& PopUpHint)
+{
+    SetGameState(EGameState::PopUpHint);
+    SetPause(GetWorld()->GetFirstPlayerController());
+
+    OnShowPopUpHintSignature.Broadcast(PopUpHint);
+}
+
 void ACGGameMode::GameOver()
 {
     SetGameState(EGameState::GameOver);
+    SetPause(GetWorld()->GetFirstPlayerController());
 }
 
 void ACGGameMode::SetupGameMode()
@@ -122,18 +126,43 @@ void ACGGameMode::SetupGameMode()
 
 void ACGGameMode::OnCountdown()
 {
-    SetTime(-CountdownTimerRate);
+    AddTime(-CountdownTimerRate);
 
     if (Time < LowTimeThreshold)
     {
         OnLowTime.Broadcast();
-        UGameplayStatics::PlaySound2D(GetWorld(), LowTimeSound);
     }
 }
 
-void ACGGameMode::SetTime(int32 NewTime)
+void ACGGameMode::OnShowStartupHint()
 {
-    Time = UKismetMathLibrary::Max(NewTime, 0);
+    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    if (!GameInstance)
+        return;
+
+    const auto SettingsSave = GameInstance->GetSettingsSave();
+    if (!SettingsSave)
+        return;
+
+    auto GameSettings = SettingsSave->GetGameSettings();
+    if (!GameSettings.Hints.HintsMap.Contains(EHint::Startup))
+        return;
+
+    if (!GameSettings.Hints.HintsMap[EHint::Startup])
+        return;
+
+    if (!PopUpHintsMap.Contains(EHint::Startup))
+        return;
+
+    ShowPopUpHint(PopUpHintsMap[EHint::Startup]);
+
+    GameSettings.Hints.HintsMap[EHint::Startup] = false;
+    GameInstance->SetGameSettings(GameSettings);
+}
+
+void ACGGameMode::AddTime(int32 TimeToAdd)
+{
+    Time = UKismetMathLibrary::Max(Time + TimeToAdd, 0);
     OnTimeChanged.Broadcast(Time);
 
     if (Time == 0)
@@ -142,16 +171,16 @@ void ACGGameMode::SetTime(int32 NewTime)
     }
 }
 
-void ACGGameMode::SetSpeed(int32 NewSpeed)
+void ACGGameMode::AddSpeed(int32 SpeedToAdd)
 {
-    Speed = UKismetMathLibrary::Max(NewSpeed, 1);
+    Speed = UKismetMathLibrary::Max(Speed + SpeedToAdd, 1);
     OnSpeedChanged.Broadcast(Speed);
 }
 
-void ACGGameMode::SetScore(int32 NewScore)
+void ACGGameMode::AddScore(int32 ScoreToAdd)
 {
-    Score = UKismetMathLibrary::Max(NewScore, 0);
-    OnScoreChanged.Broadcast(Score);
+    Score = UKismetMathLibrary::Max(Score + ScoreToAdd, 0);
+    OnScoreChanged.Broadcast(Score, ScoreToAdd, Multiplier);
 }
 
 void ACGGameMode::ChangeMultiplier(ECubeType CubeType)

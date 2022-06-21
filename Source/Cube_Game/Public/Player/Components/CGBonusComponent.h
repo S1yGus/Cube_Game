@@ -34,17 +34,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0"))
     float UberFireFrequency = 0.3f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Speed", Meta = (ClampMin = "0.0"))
-    float SpeedDuration = 2.0f;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Speed", Meta = (ClampMin = "0.0"))
-    float SpeedMultiplier = 2.0f;
-
 private:
     FTimerHandle UberTimerHandle;
-    FTimerHandle SpeedTimerHandle;
     float UberTime = 0;
-    int32 PreviousSpeed = 0;
 
     EBonusType Bonus = EBonusType::None;
 
@@ -53,7 +45,4 @@ private:
 
     void UseUberPowerup();
     void OnUberPowerupFired();
-
-    void UseSpeedPowerup();
-    void OnSpeedPowerupFinished();
 };

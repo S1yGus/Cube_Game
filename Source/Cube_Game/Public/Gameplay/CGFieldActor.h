@@ -50,7 +50,7 @@ protected:
     float SpawnXOffset = 100.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
-    float SpawnYOffset = -1650.0f;
+    float SpawnYOffset = -1600.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
     float SpawnZOffset = 65.0f;
