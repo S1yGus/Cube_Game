@@ -2,9 +2,9 @@
 
 #include "UI/Menu/CGGameOverUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
+#include "UI/CGTextUserWidget.h"
 #include "CGGameInstance.h"
 #include "CGGameMode.h"
-#include "Components/TextBlock.h"
 
 void UCGGameOverUserWidget::NativeOnInitialized()
 {
@@ -54,19 +54,21 @@ void UCGGameOverUserWidget::OnClickedQuitButton()
 
 void UCGGameOverUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::GameOver || !ScoreTextBlock)
+    if (NewGameState != EGameState::GameOver || !GameOverText)
         return;
 
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
     if (!GameMode)
         return;
 
-    ScoreTextBlock->SetText(FormatGameOverText(GameMode->GetScore()));
+    GameOverText->SetText(FormatGameOverText(GameMode->GetScore()));
 }
 
 FText UCGGameOverUserWidget::FormatGameOverText(int32 Score)
 {
-    return FText::FromString(FString::Printf(TEXT("You have scored %d points."), Score));
+    FStringFormatOrderedArguments GameOverArg;
+    GameOverArg.Add(Score);
+    return FText::FromString(FString::Format(*GameOverFormatStr, GameOverArg));
 }
 
 void UCGGameOverUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)

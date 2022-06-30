@@ -2,12 +2,12 @@
 
 #include "UI/Menu/CGOptionsUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
+#include "UI/CGTextUserWidget.h"
 #include "UI/CGHUDBase.h"
 #include "CGGameModeBase.h"
 #include "CGGameInstance.h"
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
-#include "Components/TextBlock.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -124,6 +124,7 @@ void UCGOptionsUserWidget::Setup()
         WidgetButtons.Add(ResetHintsButton);
     }
 
+    // Back.
     if (BackButton)
     {
         BackButton->OnClickedButton.AddUObject(this, &UCGOptionsUserWidget::OnClickedBackButton);
@@ -144,6 +145,7 @@ void UCGOptionsUserWidget::UpdateOptions()
     UpdateMusicVolumeSlider();
 
     UpdatePopUpComboBox();
+    UpdateResetHintsButton();
 }
 
 void UCGOptionsUserWidget::UpdateScreenModeComboBox()
@@ -222,11 +224,11 @@ void UCGOptionsUserWidget::UpdateMasterVolumeSlider()
 
 void UCGOptionsUserWidget::UpdateMasterVolumeText()
 {
-    if (!MasterVolumeTextBlock)
+    if (!MasterVolumeText)
         return;
 
     const auto MasterVolumeStr = FString::Printf(TEXT("%.0f%%"), MasterVolumeSlider->GetNormalizedValue() * 100.0f);
-    MasterVolumeTextBlock->SetText(FText::FromString(MasterVolumeStr));
+    MasterVolumeText->SetText(FText::FromString(MasterVolumeStr));
 }
 
 void UCGOptionsUserWidget::UpdateFXVolumeSlider()
@@ -242,11 +244,11 @@ void UCGOptionsUserWidget::UpdateFXVolumeSlider()
 
 void UCGOptionsUserWidget::UpdateFXVolumeText()
 {
-    if (!FXVolumeTextBlock)
+    if (!FXVolumeText)
         return;
 
     const auto FXVolumeStr = FString::Printf(TEXT("%.0f%%"), FXVolumeSlider->GetNormalizedValue() * 100.0f);
-    FXVolumeTextBlock->SetText(FText::FromString(FXVolumeStr));
+    FXVolumeText->SetText(FText::FromString(FXVolumeStr));
 }
 
 void UCGOptionsUserWidget::UpdateMusicVolumeSlider()
@@ -262,11 +264,11 @@ void UCGOptionsUserWidget::UpdateMusicVolumeSlider()
 
 void UCGOptionsUserWidget::UpdateMusicVolumeText()
 {
-    if (!MusicVolumeTextBlock)
+    if (!MusicVolumeText)
         return;
 
     const auto MusicVolumeStr = FString::Printf(TEXT("%.0f%%"), MusicVolumeSlider->GetNormalizedValue() * 100.0f);
-    MusicVolumeTextBlock->SetText(FText::FromString(MusicVolumeStr));
+    MusicVolumeText->SetText(FText::FromString(MusicVolumeStr));
 }
 
 void UCGOptionsUserWidget::UpdatePopUpComboBox()
@@ -277,6 +279,39 @@ void UCGOptionsUserWidget::UpdatePopUpComboBox()
 
     const auto PopUpType = SettingsSave->GetGameSettings().PopUp;
     PopUpComboBox->SetSelectedIndex(static_cast<int32>(PopUpType));
+}
+
+void UCGOptionsUserWidget::UpdateResetHintsButton()
+{
+    if (!ResetHintsButton)
+        return;
+
+    const auto SettingsSave = GetSettingsSave();
+    if (!SettingsSave)
+        return;
+
+    bool bCanReset = false;
+    const auto GameSettings = SettingsSave->GetGameSettings();
+    for (const auto& HintPair : GameSettings.Hints.HintsMap)
+    {
+        if (!HintPair.Value)    // If hint already have been shown.
+        {
+            bCanReset = true;
+            break;
+        }
+    }
+
+    for (const auto& HintPair : GameSettings.Hints.ReceivingHintsMap)
+    {
+        if (bCanReset || !HintPair.Value)    // If hint already have been shown.
+        {
+            bCanReset = true;
+            break;
+        }
+    }
+    
+    ResetHintsButton->SetIsEnabled(bCanReset);
+    ResetHintsButton->SetRenderOpacity(static_cast<float>(bCanReset));
 }
 
 void UCGOptionsUserWidget::OnSelectionChangedScreenMode(FString SelectedItem, ESelectInfo::Type SelectionType)
@@ -470,6 +505,8 @@ void UCGOptionsUserWidget::OnClickedResetHintsButton()
     }
 
     GameInstance->SetGameSettings(GameSettings);
+
+    UpdateResetHintsButton();
 }
 
 void UCGOptionsUserWidget::OnClickedBackButton()

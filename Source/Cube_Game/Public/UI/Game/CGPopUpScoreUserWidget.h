@@ -28,9 +28,13 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Colors")
     FLinearColor DecreaseScoreColor{FLinearColor::Red};
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Colors")
+    FString Spacer{"x"};
+
     virtual void NativeOnInitialized() override;
 
 private:
     void OnScoreChanged(int32 NewScore, int32 DeltaScore, int32 NewMultiplier);
+
     FText FormatPopUpScore(int32 DeltaScore, int32 NewMultiplier, EPopUpType PopUpType = EPopUpType::Multiplier);
 };

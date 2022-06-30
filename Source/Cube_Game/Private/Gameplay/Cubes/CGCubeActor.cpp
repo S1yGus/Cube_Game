@@ -3,6 +3,8 @@
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
 
+constexpr static int32 LifeDistance = 2500;
+
 ACGCubeActor::ACGCubeActor()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -16,13 +18,22 @@ void ACGCubeActor::Tick(float DeltaSeconds)
     Moving(DeltaSeconds);
 }
 
-void ACGCubeActor::Moving(float DeltaSeconds)
+void ACGCubeActor::BeginPlay()
+{
+    Super::BeginPlay();
+
+    SetLifeSpan(LifeDistance / GetCubeSpeed());
+}
+
+int32 ACGCubeActor::GetCubeSpeed() const
 {
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
-    if (!GameMode)
-        return;
+    return GameMode ? GameMode->GetCubeSpeed() : 0;
+}
 
+void ACGCubeActor::Moving(float DeltaSeconds)
+{
     auto NewLocation = GetActorLocation();
-    NewLocation.Y = NewLocation.Y + GameMode->GetCubeSpeed() * DeltaSeconds;
+    NewLocation.Y = NewLocation.Y + GetCubeSpeed() * DeltaSeconds;
     SetActorLocation(NewLocation);
 }

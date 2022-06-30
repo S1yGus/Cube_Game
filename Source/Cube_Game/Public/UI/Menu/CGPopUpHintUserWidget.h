@@ -33,7 +33,6 @@ protected:
 
 private:
     void OnShowPopUpHint(const FPopUpHint& PopUpHint);
-
     void OnClickedResumeButton();
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;

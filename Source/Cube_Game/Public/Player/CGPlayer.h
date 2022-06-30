@@ -51,12 +51,11 @@ protected:
 
 private:
     FTimerHandle MovementTimerHandle;
-
     int32 CurrentPosition = 0;
 
-    void SetupPlayer();
-
     inline FVector GetCurrentPositionLocation() const;
+
+    void SetupPlayer();
 
     void MoveRight();
     void MoveLeft();

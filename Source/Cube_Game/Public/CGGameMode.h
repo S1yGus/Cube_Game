@@ -22,41 +22,49 @@ public:
     FOnMultiplierChangedSignature OnMultiplierChanged;
     FOnShowPopUpHintSignature OnShowPopUpHintSignature;
 
-    virtual void StartPlay() override;
-    virtual bool ClearPause() override;
-    virtual void PreInitializeComponents() override;
-
-    void ChangeTime(ECubeType CubeType);
-    void ChangeSpeed(ECubeType CubeType);
-    void ChangeScore(ECubeType CubeType);
-
     int32 GetTime() const { return Time; }
     int32 GetSpeed() const { return Speed; }
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
     const FDifficulty* GetDifficultyVlues() const;
-
-    void ShowPopUpHint(const FPopUpHint& PopUpHint);
     const TMap<ECubeType, FPopUpHint>& GetReceivingHints() const { return ReceivingHintsMap; }
 
+    void ChangeTime(ECubeType CubeType);
+    void ChangeSpeed(ECubeType CubeType);
+    void ChangeScore(ECubeType CubeType);
+
+    void ShowPopUpHint(const FPopUpHint& PopUpHint);
+
     void GameOver();
+
+    virtual void StartPlay() override;
+    virtual bool ClearPause() override;
+    virtual void PreInitializeComponents() override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     TMap<EDifficulty, FDifficulty> DifficultyMap;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
+    FVector2D SpeedRange{1.0f, 999.0f};
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0"))
     int32 LowTimeThreshold = 5;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<EHint, FPopUpHint> PopUpHintsMap;
+    TMap<EHint, FPopUpHint> GameplayHintsMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<ECubeType, FPopUpHint> ReceivingHintsMap;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0"))
+    float StartupHintDelay = 2.0f;
+
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
     FTimerHandle CountdownTimerHandle;
-    FTimerHandle StartupHintTimerHandle;
+    FTimerHandle DelayHintTimerHandle;
 
     int32 Time = 0;
     int32 Speed = 1;
@@ -67,7 +75,12 @@ private:
 
     void SetupGameMode();
     void OnCountdown();
-    void OnShowStartupHint();
+
+    void ShowGameplayHint(EHint Hint, float Delay = 0.0f);
+    void FormatHints();
+    void OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultiplier);
+    void OnShowLowTimeHint();
+    void OnShowSpeedUpHint(int32 NewSpeed);
 
     void AddTime(int32 TimeToAdd);
     void AddSpeed(int32 SpeedToAdd);

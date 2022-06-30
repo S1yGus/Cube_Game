@@ -5,6 +5,11 @@
 #include "CGGameModeBase.h"
 #include "GameFramework/GameUserSettings.h"
 
+FText UCGOptionsWarningUserWidget::GetCountdownTime() const
+{
+    return FText::AsNumber(static_cast<int32>(CountdownTime));
+}
+
 void UCGOptionsWarningUserWidget::ResetWidget()
 {
     for (const auto& Button : WidgetButtons)
@@ -13,11 +18,6 @@ void UCGOptionsWarningUserWidget::ResetWidget()
     }
 
     CountdownTime = CancelSettingsTime;
-}
-
-FText UCGOptionsWarningUserWidget::GetCountdownTime() const
-{
-    return FText::AsNumber(static_cast<int32>(CountdownTime));
 }
 
 void UCGOptionsWarningUserWidget::NativeOnInitialized()

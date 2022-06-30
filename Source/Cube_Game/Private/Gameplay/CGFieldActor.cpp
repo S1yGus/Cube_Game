@@ -28,8 +28,58 @@ void ACGFieldActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    RestoreSpawnPositions();
     SetupField();
+    
+    RestoreSpawnPositions();
+    GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, GetSpawnTimerRate(), true);
+}
+
+float ACGFieldActor::GetSpawnTimerRate() const
+{
+    const auto GameMode = GetGameMode();
+    const auto DifficultyVlues = GetDifficultyVlues();
+    if (!GameMode || !DifficultyVlues)
+        return 0.0f;
+
+    return DifficultyVlues->DistanceBetweenCubes / GameMode->GetCubeSpeed();
+}
+
+ECubeType ACGFieldActor::GetRandomCubeType() const
+{
+    const auto DifficultyVlues = GetDifficultyVlues();
+    if (!DifficultyVlues)
+        return ECubeType::None;
+
+    const auto RandNum = FMath::FRand();
+    TArray<ECubeType> RandItems;
+    for (const auto& ItemPair : DifficultyVlues->SpawnWeightMap)
+    {
+        if (RandNum > ItemPair.Value)
+            continue;
+
+        RandItems.Add(ItemPair.Key);
+    }
+
+    if (RandItems.Num() == 0)
+        return ECubeType::None;
+
+    return RandItems[FMath::RandHelper(RandItems.Num())];
+}
+
+ACGGameMode* ACGFieldActor::GetGameMode() const
+{
+    return GetWorld()->GetAuthGameMode<ACGGameMode>();
+}
+
+const FDifficulty* ACGFieldActor::GetDifficultyVlues() const
+{
+    return GetGameMode() ? GetGameMode()->GetDifficultyVlues() : nullptr;
+}
+
+const APawn* ACGFieldActor::GetPlayerPawn() const
+{
+    const auto PlayerController = GetWorld()->GetFirstPlayerController();
+    return PlayerController ? PlayerController->GetPawn() : nullptr;
 }
 
 void ACGFieldActor::SetupField()
@@ -37,8 +87,6 @@ void ACGFieldActor::SetupField()
     if (const auto GameMode = GetGameMode())
     {
         GameMode->OnSpeedChanged.AddUObject(this, &ACGFieldActor::OnSpeedChanged);
-        OnSpeedChanged(GameMode->GetSpeed());    // Init cubes spawning.
-
         GameMode->OnMultiplierChanged.AddUObject(this, &ACGFieldActor::OnMultiplierChanged);
     }
 
@@ -56,7 +104,7 @@ void ACGFieldActor::OnSpawnCube()
     if (++CubesInLine <= GetDifficultyVlues()->MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
     {
         const auto RandIndex = FMath::RandHelper(SpawnPositions.Num());
-        SpawnOneCube(SpawnPositions[RandIndex]);
+        SpawnCube(SpawnPositions[RandIndex]);
         SpawnPositions.RemoveAt(RandIndex);
 
         if (UKismetMathLibrary::RandomBoolWithWeight(GetDifficultyVlues()->ChanceToAddCubeInLine))
@@ -66,10 +114,16 @@ void ACGFieldActor::OnSpawnCube()
         }
     }
 
+    if (bRestartSpawn)
+    {
+        GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, GetSpawnTimerRate(), true);
+        bRestartSpawn = false;
+    }
+
     RestoreSpawnPositions();
 }
 
-void ACGFieldActor::SpawnOneCube(int32 SpawnPosition)
+void ACGFieldActor::SpawnCube(int32 SpawnPosition)
 {
     const FVector RelativeSpawnLocation{SpawnPosition * SpawnStep + SpawnXOffset, SpawnYOffset, SpawnZOffset};
     const auto SpawnTransform = FTransform{RelativeSpawnLocation} * GetTransform();
@@ -83,10 +137,7 @@ void ACGFieldActor::SpawnOneCube(int32 SpawnPosition)
 
 void ACGFieldActor::OnSpeedChanged(int32 NewSpeed)
 {
-    if (float SpawnTimerRate; GetSpawnTimerRate(SpawnTimerRate))
-    {
-        GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, SpawnTimerRate, true);
-    }
+    bRestartSpawn = true;
 }
 
 void ACGFieldActor::RestoreSpawnPositions()
@@ -104,7 +155,7 @@ void ACGFieldActor::OnMultiplierChanged(ECubeType CubeType, int32 Multiplier)
 {
     if (Multiplier == 1 && Indicators.Num() != 0)
     {
-        for (const auto Indicator : Indicators)
+        for (const auto& Indicator : Indicators)
         {
             Indicator->Teardown();
         }
@@ -184,52 +235,4 @@ void ACGFieldActor::OnBonusIndicatorDestroyed(AActor* DestroyedActor)
         return;
 
     SpawnBonusIndicator(NewBonusIndicatorType);
-}
-
-bool ACGFieldActor::GetSpawnTimerRate(float& TimerRate) const
-{
-    const auto GameMode = GetGameMode();
-    const auto DifficultyVlues = GetDifficultyVlues();
-    if (!GameMode || !DifficultyVlues)
-        return false;
-
-    TimerRate = DifficultyVlues->DistanceBetweenCubes / GameMode->GetCubeSpeed();
-    return true;
-}
-
-ECubeType ACGFieldActor::GetRandomCubeType() const
-{
-    const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues)
-        return ECubeType::None;
-
-    const auto RandNum = FMath::FRand();
-    TArray<ECubeType> RandItems;
-    for (const auto& ItemPair : DifficultyVlues->SpawnWeightMap)
-    {
-        if (RandNum > ItemPair.Value)
-            continue;
-
-        RandItems.Add(ItemPair.Key);
-    }
-
-    if (RandItems.Num() == 0)
-        return ECubeType::None;
-
-    return RandItems[FMath::RandHelper(RandItems.Num())];
-}
-
-ACGGameMode* ACGFieldActor::GetGameMode() const
-{
-    return GetWorld()->GetAuthGameMode<ACGGameMode>();
-}
-
-const FDifficulty* ACGFieldActor::GetDifficultyVlues() const
-{
-    return GetGameMode() ? GetGameMode()->GetDifficultyVlues() : nullptr;
-}
-
-inline const APawn* ACGFieldActor::GetPlayerPawn() const
-{
-    return GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
 }

@@ -3,23 +3,6 @@
 #include "Player/CGPlayerController.h"
 #include "CGGameMode.h"
 
-void ACGPlayerController::SetupInputComponent()
-{
-    Super::SetupInputComponent();
-
-    InputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ACGPlayerController::OnSetPause);
-}
-
-void ACGPlayerController::BeginPlay()
-{
-    Super::BeginPlay();
-
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
-    {
-        GameMode->OnGameStateChanged.AddUObject(this, &ACGPlayerController::OnGameStateChanged);
-    }
-}
-
 void ACGPlayerController::OnSetPause()
 {
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
@@ -34,6 +17,23 @@ void ACGPlayerController::OnSetPause()
     {
         GameMode->SetPause(this);
         GameMode->SetGameState(EGameState::Pause);
+    }
+}
+
+void ACGPlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    InputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ACGPlayerController::OnSetPause);
+}
+
+void ACGPlayerController::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
+    {
+        GameMode->OnGameStateChanged.AddUObject(this, &ACGPlayerController::OnGameStateChanged);
     }
 }
 

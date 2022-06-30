@@ -72,6 +72,9 @@ UENUM(BlueprintType)
 enum class EHint : uint8
 {
     Startup,
+    SpeedUp,
+    Multiplier,
+    LowTime,
     Max
 };
 
@@ -156,7 +159,12 @@ struct FHints
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<EHint, bool> HintsMap = {TPair<EHint, bool>{EHint::Startup, true}};
+    TMap<EHint, bool> HintsMap = {
+        TPair<EHint, bool>{EHint::Startup, true},       //
+        TPair<EHint, bool>{EHint::Multiplier, true},    //
+        TPair<EHint, bool>{EHint::LowTime, true},       //
+        TPair<EHint, bool>{EHint::SpeedUp, true}        //
+    };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<ECubeType, bool> ReceivingHintsMap = {

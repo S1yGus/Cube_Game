@@ -15,10 +15,14 @@ class CUBE_GAME_API ACGCubeActor : public ACGIndicatorCubeActor
 public:
     ACGCubeActor();
 
-    virtual void Tick(float DeltaSeconds) override;
-
     ECubeType GetCubeType() const { return CubeType; }
 
+    virtual void Tick(float DeltaSeconds) override;
+
+protected:
+    virtual void BeginPlay() override;
+
 private:
+    inline int32 GetCubeSpeed() const;
     void Moving(float DeltaSeconds);
 };

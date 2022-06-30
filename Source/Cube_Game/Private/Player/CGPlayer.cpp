@@ -4,7 +4,6 @@
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Engine/TargetPoint.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/Components/CGBonusComponent.h"
@@ -57,14 +56,14 @@ void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     PlayerInputComponent->BindAction("UseBonus", EInputEvent::IE_Pressed, BonusComponent, &UCGBonusComponent::UseCurrentBonus);
 }
 
-void ACGPlayer::SetupPlayer()
-{
-    CurrentPosition = FMath::RandHelper(PositionsAmount);
-}
-
 FVector ACGPlayer::GetCurrentPositionLocation() const
 {
     return FVector{CurrentPosition * MovementStep, 0.0, PositionZOffset};
+}
+
+void ACGPlayer::SetupPlayer()
+{
+    CurrentPosition = FMath::RandHelper(PositionsAmount);
 }
 
 void ACGPlayer::MoveRight()
@@ -134,6 +133,7 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
 {
     FXComponent->PlayReceivingSound(CubeType);
     FXComponent->SetReceivingMaterial(CubeType);
+    FXComponent->MakeCameraShake(CubeType);
 
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
     {

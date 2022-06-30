@@ -27,6 +27,22 @@ void UCGFXComponent::SetReceivingMaterial(ECubeType CubeType)
     GetWorld()->GetTimerManager().SetTimer(MaterialTimerHandle, this, &UCGFXComponent::OnReturnDefaultMaterial, TimeOfMaterialChanging);
 }
 
+void UCGFXComponent::MakeCameraShake(ECubeType CubeType)
+{
+    if (!CubesCameraShakeMap.Contains(CubeType))
+        return;
+
+    MakeCameraShake(CubesCameraShakeMap[CubeType]);
+}
+
+void UCGFXComponent::MakeCameraShake(EBonusType BonusType)
+{
+    if (!BonusesCameraShakeMap.Contains(BonusType))
+        return;
+
+    MakeCameraShake(BonusesCameraShakeMap[BonusType]);
+}
+
 UStaticMeshComponent* UCGFXComponent::GetOwnerMesh() const
 {
     return GetOwner() ? GetOwner()->FindComponentByClass<UStaticMeshComponent>() : nullptr;
@@ -38,4 +54,20 @@ void UCGFXComponent::OnReturnDefaultMaterial()
         return;
 
     GetOwnerMesh()->SetMaterial(0, DefaultMaterial);
+}
+
+void UCGFXComponent::MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeClass, float Scale)
+{
+    if (!CameraShakeClass)
+        return;
+
+    const auto OwnerPawn = GetOwner<APawn>();
+    if (!OwnerPawn)
+        return;
+
+    const auto PlayerController = OwnerPawn->GetController<APlayerController>();
+    if (!PlayerController || !PlayerController->PlayerCameraManager)
+        return;
+
+    PlayerController->PlayerCameraManager->StartCameraShake(CameraShakeClass, Scale);
 }

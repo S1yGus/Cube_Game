@@ -17,7 +17,7 @@ class CUBE_GAME_API ACGBaseCubeActor : public AActor
 public:
     ACGBaseCubeActor();
 
-    void Teardown();
+    virtual void Teardown();
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -31,6 +31,7 @@ protected:
 
     virtual void BeginPlay() override;
     virtual void OnScalingDone();
+    virtual void OnScalin();
 
 private:
     FTimerHandle ScaleTimerHandle;

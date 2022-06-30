@@ -13,14 +13,14 @@ class CUBE_GAME_API UCGSettingsSave : public USaveGame
     GENERATED_BODY()
 
 public:
-    const FVideoSettings& GetVideoSettings() const { return VideoSettings; };
-    void SetVideoSettings(const FVideoSettings& NewVideoSettings) { VideoSettings = NewVideoSettings; }
+    inline const FVideoSettings& GetVideoSettings() const { return VideoSettings; };
+    inline void SetVideoSettings(const FVideoSettings& NewVideoSettings) { VideoSettings = NewVideoSettings; }
 
-    const FSoundSettings& GetSoundSettings() const { return SoundSettings; };
-    void SetSoundSettings(const FSoundSettings& NewSoundSettings) { SoundSettings = NewSoundSettings; }
+    inline const FSoundSettings& GetSoundSettings() const { return SoundSettings; };
+    inline void SetSoundSettings(const FSoundSettings& NewSoundSettings) { SoundSettings = NewSoundSettings; }
 
-    const FGameSettings& GetGameSettings() const { return GameSettings; };
-    void SetGameSettings(const FGameSettings& NewGameSettings) { GameSettings = NewGameSettings; }
+    inline const FGameSettings& GetGameSettings() const { return GameSettings; };
+    inline void SetGameSettings(const FGameSettings& NewGameSettings) { GameSettings = NewGameSettings; }
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")

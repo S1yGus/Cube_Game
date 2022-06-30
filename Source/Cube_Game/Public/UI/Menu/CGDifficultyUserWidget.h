@@ -27,11 +27,11 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
+    void SetDifficulty(EDifficulty NewDifficulty);
+
     void OnClickedEasyButton();
     void OnClickedMediumButton();
     void OnClickedHardButton();
-
-    void SetDifficulty(EDifficulty NewDifficulty);
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
 };

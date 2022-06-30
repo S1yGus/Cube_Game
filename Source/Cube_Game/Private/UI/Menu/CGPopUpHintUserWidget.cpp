@@ -1,8 +1,8 @@
 // Cube_Game, All rights reserved.
 
 #include "UI/Menu/CGPopUpHintUserWidget.h"
-#include "CGGameMode.h"
 #include "UI/Menu/CGButtonUserWidget.h"
+#include "CGGameMode.h"
 #include "Components/TextBlock.h"
 
 void UCGPopUpHintUserWidget::ResetWidget()

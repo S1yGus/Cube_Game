@@ -33,6 +33,10 @@ void ACGBaseCubeActor::OnScalingDone()
 {
 }
 
+void ACGBaseCubeActor::OnScalin()
+{
+}
+
 void ACGBaseCubeActor::OnChangingScale()
 {
     SetActorScale3D(FMath::VInterpConstantTo(GetActorScale3D(), TargetScale, ScalingTimerRate, ScaleInterpSpeed));
@@ -50,4 +54,6 @@ void ACGBaseCubeActor::OnChangingScale()
         GetWorldTimerManager().ClearTimer(ScaleTimerHandle);
         OnScalingDone();
     }
+
+    OnScalin();
 }

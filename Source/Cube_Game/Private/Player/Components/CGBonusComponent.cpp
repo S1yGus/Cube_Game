@@ -5,6 +5,7 @@
 #include "Player/CGPlayer.h"
 #include "Gameplay/Cubes/Bonuses/CGShieldBonusActor.h"
 #include "CGGameMode.h"
+#include "Player/Components/CGFXComponent.h"
 
 UCGBonusComponent::UCGBonusComponent()
 {
@@ -55,26 +56,31 @@ void UCGBonusComponent::SetBonus(EBonusType NewBonus)
 
 ACGBaseBonusActor* UCGBonusComponent::SpawnBonus(EBonusType BonusType)
 {
-    if (!BonusesMap.Contains(BonusType) || !GetOwner())
+    if (!BonusClassesMap.Contains(BonusType) || !GetOwner())
         return nullptr;
 
     const auto PlayrMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
     if (!PlayrMesh)
         return nullptr;
 
-    return GetWorld()->SpawnActor<ACGBaseBonusActor>(BonusesMap[BonusType], PlayrMesh->GetComponentTransform());
+    if (const auto FXComponent = GetOwner()->FindComponentByClass<UCGFXComponent>())
+    {
+        FXComponent->MakeCameraShake(BonusType);
+    }
+
+    return GetWorld()->SpawnActor<ACGBaseBonusActor>(BonusClassesMap[BonusType], PlayrMesh->GetComponentTransform());
 }
 
 void UCGBonusComponent::UseUberPowerup()
 {
-    if (!BonusesMap.Contains(EBonusType::Shield) || !GetOwner())
+    if (!BonusClassesMap.Contains(EBonusType::Shield) || !GetOwner())
         return;
 
     const auto PlayrMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
     if (!PlayrMesh)
         return;
 
-    const auto Shield = GetWorld()->SpawnActorDeferred<ACGShieldBonusActor>(BonusesMap[EBonusType::Shield], PlayrMesh->GetComponentTransform());
+    const auto Shield = GetWorld()->SpawnActorDeferred<ACGShieldBonusActor>(BonusClassesMap[EBonusType::Shield], PlayrMesh->GetComponentTransform());
     if (!Shield)
         return;
 

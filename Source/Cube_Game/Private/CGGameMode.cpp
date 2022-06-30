@@ -9,9 +9,8 @@
 #include "Saves/CGSettingsSave.h"
 
 constexpr static int32 CountdownTimerRate = 1;
-const static FVector2D SpeedRange{1.0f, 999.0f};
 constexpr static int32 MaxMultiplier = 8;
-constexpr static int32 StartupHintTimerRate = 2;
+constexpr static float SpeedUpHintDelay = 0.3f;
 
 ACGGameMode::ACGGameMode()
 {
@@ -20,30 +19,24 @@ ACGGameMode::ACGGameMode()
     HUDClass = ACGHUDGame::StaticClass();
 }
 
-void ACGGameMode::StartPlay()
+int32 ACGGameMode::GetCubeSpeed() const
 {
-    Super::StartPlay();
+    const auto DifficultyVlues = GetDifficultyVlues();
+    const auto CubesSpeedRange = DifficultyVlues ? DifficultyVlues->CubesSpeedRange : FDifficulty{}.CubesSpeedRange;
 
-    SetGameState(EGameState::Game);
-
-    GetWorld()->GetTimerManager().SetTimer(CountdownTimerHandle, this, &ACGGameMode::OnCountdown, CountdownTimerRate, true);
-    GetWorld()->GetTimerManager().SetTimer(StartupHintTimerHandle, this, &ACGGameMode::OnShowStartupHint, StartupHintTimerRate);
+    return FMath::GetMappedRangeValueClamped(SpeedRange, CubesSpeedRange, static_cast<float>(Speed));
 }
 
-bool ACGGameMode::ClearPause()
+const FDifficulty* ACGGameMode::GetDifficultyVlues() const
 {
-    if (!Super::ClearPause())
-        return false;
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
+    if (!GameInstance)
+        return nullptr;
 
-    SetGameState(EGameState::Game);
-    return true;
-}
+    if (!DifficultyMap.Contains(GameInstance->GetDifficulty()))
+        return nullptr;
 
-void ACGGameMode::PreInitializeComponents()
-{
-    Super::PreInitializeComponents();
-
-    SetupGameMode();
+    return &DifficultyMap[GameInstance->GetDifficulty()];
 }
 
 void ACGGameMode::ChangeTime(ECubeType CubeType)
@@ -83,26 +76,6 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
     AddScore(ScoreToAdd);
 }
 
-int32 ACGGameMode::GetCubeSpeed() const
-{
-    const auto DifficultyVlues = GetDifficultyVlues();
-    const auto CubesSpeedRange = DifficultyVlues ? DifficultyVlues->CubesSpeedRange : FDifficulty{}.CubesSpeedRange;
-
-    return FMath::GetMappedRangeValueClamped(SpeedRange, CubesSpeedRange, static_cast<float>(Speed));
-}
-
-const FDifficulty* ACGGameMode::GetDifficultyVlues() const
-{
-    const auto GameInstance = GetGameInstance<UCGGameInstance>();
-    if (!GameInstance)
-        return nullptr;
-
-    if (!DifficultyMap.Contains(GameInstance->GetDifficulty()))
-        return nullptr;
-
-    return &DifficultyMap[GameInstance->GetDifficulty()];
-}
-
 void ACGGameMode::ShowPopUpHint(const FPopUpHint& PopUpHint)
 {
     SetGameState(EGameState::PopUpHint);
@@ -117,11 +90,48 @@ void ACGGameMode::GameOver()
     SetPause(GetWorld()->GetFirstPlayerController());
 }
 
+void ACGGameMode::StartPlay()
+{
+    Super::StartPlay();
+
+    SetGameState(EGameState::Game);
+    GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ACGGameMode::OnCountdown, CountdownTimerRate, true);
+
+    FormatHints();
+    ShowGameplayHint(EHint::Startup, StartupHintDelay);
+}
+
+bool ACGGameMode::ClearPause()
+{
+    if (!Super::ClearPause())
+        return false;
+
+    SetGameState(EGameState::Game);
+    return true;
+}
+
+void ACGGameMode::PreInitializeComponents()
+{
+    Super::PreInitializeComponents();
+
+    SetupGameMode();
+}
+
+void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    GetWorldTimerManager().ClearTimer(DelayHintTimerHandle);    // Cos the timer starts lambda.
+}
+
 void ACGGameMode::SetupGameMode()
 {
     const auto DifficultyVlues = GetDifficultyVlues();
-
     Time = DifficultyVlues ? DifficultyVlues->InitialTime : FDifficulty{}.InitialTime;
+
+    OnMultiplierChanged.AddUObject(this, &ACGGameMode::OnShowMultiplierHint);
+    OnLowTime.AddUObject(this, &ACGGameMode::OnShowLowTimeHint);
+    OnSpeedChanged.AddUObject(this, &ACGGameMode::OnShowSpeedUpHint);
 }
 
 void ACGGameMode::OnCountdown()
@@ -134,7 +144,7 @@ void ACGGameMode::OnCountdown()
     }
 }
 
-void ACGGameMode::OnShowStartupHint()
+void ACGGameMode::ShowGameplayHint(EHint Hint, float Delay)
 {
     const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
@@ -145,19 +155,59 @@ void ACGGameMode::OnShowStartupHint()
         return;
 
     auto GameSettings = SettingsSave->GetGameSettings();
-    if (!GameSettings.Hints.HintsMap.Contains(EHint::Startup))
+    if (!GameSettings.Hints.HintsMap.Contains(Hint))
         return;
 
-    if (!GameSettings.Hints.HintsMap[EHint::Startup])
+    if (!GameSettings.Hints.HintsMap[Hint])
         return;
 
-    if (!PopUpHintsMap.Contains(EHint::Startup))
+    if (!GameplayHintsMap.Contains(Hint))
         return;
 
-    ShowPopUpHint(PopUpHintsMap[EHint::Startup]);
+    if (Delay)
+    {
+        GetWorldTimerManager().SetTimer(                               //
+            DelayHintTimerHandle,                                      //
+            [=]() { this->ShowPopUpHint(GameplayHintsMap[Hint]); },    //
+            Delay,                                                     //
+            false);                                                    //
+    }
+    else
+    {
+        ShowPopUpHint(GameplayHintsMap[Hint]);
+    }
 
-    GameSettings.Hints.HintsMap[EHint::Startup] = false;
+    GameSettings.Hints.HintsMap[Hint] = false;
     GameInstance->SetGameSettings(GameSettings);
+}
+
+void ACGGameMode::FormatHints()
+{
+    // Format SpeedUp hint.
+    if (GameplayHintsMap.Contains(EHint::SpeedUp) && GameplayHintsMap[EHint::SpeedUp].HintText.ToString().Contains("{0}"))
+    {
+        if (const auto GetDifficulty = GetDifficultyVlues())
+        {
+            FStringFormatOrderedArguments SpeedUpHintArg;
+            SpeedUpHintArg.Add(GetDifficulty->ScoreToSpeedUp);
+            GameplayHintsMap[EHint::SpeedUp].HintText = FText::FromString(FString::Format(*GameplayHintsMap[EHint::SpeedUp].HintText.ToString(), SpeedUpHintArg));
+        }
+    }
+}
+
+void ACGGameMode::OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultiplier)
+{
+    ShowGameplayHint(EHint::Multiplier);
+}
+
+void ACGGameMode::OnShowLowTimeHint()
+{
+    ShowGameplayHint(EHint::LowTime);
+}
+
+void ACGGameMode::OnShowSpeedUpHint(int32 NewSpeed)
+{
+    ShowGameplayHint(EHint::SpeedUp, SpeedUpHintDelay);
 }
 
 void ACGGameMode::AddTime(int32 TimeToAdd)

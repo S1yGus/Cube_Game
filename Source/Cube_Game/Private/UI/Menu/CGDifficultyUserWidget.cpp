@@ -24,6 +24,15 @@ void UCGDifficultyUserWidget::NativeOnInitialized()
     }
 }
 
+void UCGDifficultyUserWidget::SetDifficulty(EDifficulty NewDifficulty)
+{
+    const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
+    if (!GameInstnce)
+        return;
+
+    GameInstnce->SetDifficulty(NewDifficulty);
+}
+
 void UCGDifficultyUserWidget::OnClickedEasyButton()
 {
     SetDifficulty(EDifficulty::Easy);
@@ -40,15 +49,6 @@ void UCGDifficultyUserWidget::OnClickedHardButton()
 {
     SetDifficulty(EDifficulty::Hard);
     ShowFadeoutAnimation();
-}
-
-void UCGDifficultyUserWidget::SetDifficulty(EDifficulty NewDifficulty)
-{
-    const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
-    if (!GameInstnce)
-        return;
-
-    GameInstnce->SetDifficulty(NewDifficulty);
 }
 
 void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)

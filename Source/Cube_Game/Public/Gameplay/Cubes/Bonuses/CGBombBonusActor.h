@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/Cubes/Bonuses/CGFollowingBonusActor.h"
+#include "Gameplay/Cubes/Bonuses/CGAttachedBonusActor.h"
 #include "CGBombBonusActor.generated.h"
 
 UCLASS()
-class CUBE_GAME_API ACGBombBonusActor : public ACGFollowingBonusActor
+class CUBE_GAME_API ACGBombBonusActor : public ACGAttachedBonusActor
 {
     GENERATED_BODY()
 

@@ -16,10 +16,10 @@ class CUBE_GAME_API UCGOptionsWarningUserWidget : public UCGAnimatedUserWidget, 
     GENERATED_BODY()
 
 public:
-    virtual void ResetWidget() override;
-
     UFUNCTION(BlueprintCallable)
     FText GetCountdownTime() const;
+
+    virtual void ResetWidget() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))

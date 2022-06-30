@@ -26,13 +26,13 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bonus")
-    TMap<EBonusType, TSubclassOf<ACGBaseBonusActor>> BonusesMap;
+    TMap<EBonusType, TSubclassOf<ACGBaseBonusActor>> BonusClassesMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0"))
     float UberDuration = 10.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0"))
-    float UberFireFrequency = 0.3f;
+    float UberFireFrequency = 0.5f;
 
 private:
     FTimerHandle UberTimerHandle;

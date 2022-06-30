@@ -46,13 +46,13 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0.0"))
     float SpawnStep = 200.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset")
     float SpawnXOffset = 100.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset")
     float SpawnYOffset = -1600.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset")
     float SpawnZOffset = 65.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Indicators")
@@ -64,10 +64,10 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0.0"))
     float IndicatorsSpawnStep = 207.15f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators | Offset")
     float IndicatorsSpawnYOffset = -100.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators | Offset")
     float IndicatorsSpawnZOffset = 65.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0"))
@@ -77,21 +77,27 @@ protected:
 
 private:
     FTimerHandle SpawnTimerHandle;
+    bool bRestartSpawn = false;
 
     int32 CubesInLine = 0;
     TArray<int32> SpawnPositions;
 
     UPROPERTY()
     TArray<ACGIndicatorCubeActor*> Indicators;
-
     UPROPERTY()
     ACGIndicatorBonusCubeActor* BonusIndicator;
     EBonusType NewBonusIndicatorType = EBonusType::None;
 
+    float GetSpawnTimerRate() const;
+    ECubeType GetRandomCubeType() const;
+    inline ACGGameMode* GetGameMode() const;
+    inline const FDifficulty* GetDifficultyVlues() const;
+    inline const APawn* GetPlayerPawn() const;
+
     void SetupField();
 
     void OnSpawnCube();
-    void SpawnOneCube(int32 SpawnPosition);
+    void SpawnCube(int32 SpawnPosition);
     void OnSpeedChanged(int32 NewSpeed);
     void RestoreSpawnPositions();
 
@@ -101,13 +107,6 @@ private:
     void OnBonusChanged(EBonusType BonusType);
     void ChangeFieldColor(EBonusType BonusType);
     void SpawnBonusIndicator(EBonusType BonusType);
-
     UFUNCTION()
     void OnBonusIndicatorDestroyed(AActor* DestroyedActor);
-
-    bool GetSpawnTimerRate(float& TimerRate) const;
-    ECubeType GetRandomCubeType() const;
-    inline ACGGameMode* GetGameMode() const;
-    inline const FDifficulty* GetDifficultyVlues() const;
-    inline const APawn* GetPlayerPawn() const;
 };

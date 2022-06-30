@@ -35,8 +35,8 @@ void UCGPopUpScoreUserWidget::OnScoreChanged(int32 NewScore, int32 DeltaScore, i
 
 FText UCGPopUpScoreUserWidget::FormatPopUpScore(int32 DeltaScore, int32 NewMultiplier, EPopUpType PopUpType)
 {
-    const auto Multiplier = (NewMultiplier == 1) || (PopUpType == EPopUpType::Amount) ? FString{} : FString::FromInt(NewMultiplier);
-    const auto Spacer = (NewMultiplier == 1) || (PopUpType == EPopUpType::Amount) ? FString{} : FString{" X "};
-    const auto Score = FString::FromInt(FMath::Abs(PopUpType == EPopUpType::Amount ? DeltaScore : DeltaScore / NewMultiplier));
-    return FText::FromString(FString{Multiplier + Spacer + Score});
+    const auto MultiplierStr = (NewMultiplier == 1) || (PopUpType == EPopUpType::Amount) ? FString{} : FString::FromInt(NewMultiplier);
+    const auto SpacerStr = (NewMultiplier == 1) || (PopUpType == EPopUpType::Amount) ? FString{} : Spacer;
+    const auto ScoreStr = FString::FromInt(FMath::Abs(PopUpType == EPopUpType::Amount ? DeltaScore : DeltaScore / NewMultiplier));
+    return FText::FromString(FString{MultiplierStr + SpacerStr + ScoreStr});
 }

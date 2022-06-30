@@ -9,9 +9,9 @@
 #include "CGOptionsUserWidget.generated.h"
 
 class UCGButtonUserWidget;
+class UCGTextUserWidget;
 class UComboBoxString;
 class USlider;
-class UTextBlock;
 class UCGSettingsSave;
 
 UCLASS()
@@ -50,13 +50,13 @@ protected:
     USlider* MusicVolumeSlider;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* MasterVolumeTextBlock;
+    UCGTextUserWidget* MasterVolumeText;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* FXVolumeTextBlock;
+    UCGTextUserWidget* FXVolumeText;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* MusicVolumeTextBlock;
+    UCGTextUserWidget* MusicVolumeText;
 
     // Game.
     UPROPERTY(Meta = (BindWidget))
@@ -65,6 +65,7 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* ResetHintsButton;
 
+    // Back.
     UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* BackButton;
 
@@ -102,43 +103,37 @@ private:
 
     // Game.
     void UpdatePopUpComboBox();
+    void UpdateResetHintsButton();
 
+    // Video.
     UFUNCTION()
     void OnSelectionChangedScreenMode(FString SelectedItem, ESelectInfo::Type SelectionType);
-
     UFUNCTION()
     void OnSelectionChangedResolution(FString SelectedItem, ESelectInfo::Type SelectionType);
-
     UFUNCTION()
     void OnSelectionChangedVSync(FString SelectedItem, ESelectInfo::Type SelectionType);
-
     UFUNCTION()
     void OnSelectionChangedAspectRatio(FString SelectedItem, ESelectInfo::Type SelectionType);
-
     UFUNCTION()
     void OnSelectionChangedQuality(FString SelectedItem, ESelectInfo::Type SelectionType);
 
+    // Sound.
     UFUNCTION()
     void OnValueChangedMasterVolume(float Value);
-
     UFUNCTION()
     void OnMouseCaptureEndMasterVolume();
-
     UFUNCTION()
     void OnValueChangedFXVolume(float Value);
-
     UFUNCTION()
     void OnMouseCaptureEndFXVolume();
-
     UFUNCTION()
     void OnValueChangedMusicVolume(float Value);
-
     UFUNCTION()
     void OnMouseCaptureEndMusicVolume();
 
+    // Game.
     UFUNCTION()
     void OnSelectionChangedPopUp(FString SelectedItem, ESelectInfo::Type SelectionType);
-
     void OnClickedResetHintsButton();
 
     void OnClickedBackButton();
