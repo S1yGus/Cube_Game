@@ -40,6 +40,8 @@ private:
 
     EGameState GameStateToSet = EGameState::WaitingToStart;
 
+    void Setup();
+
     void OnClickedResumeButton();
     void OnClickedOptionsButton();
     void OnClickedMenuButton();

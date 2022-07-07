@@ -23,6 +23,9 @@ protected:
     UCGButtonUserWidget* GameButton;
 
     UPROPERTY(Meta = (BindWidget))
+    UCGButtonUserWidget* LeaderButton;
+
+    UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* OptionsButton;
 
     UPROPERTY(Meta = (BindWidget))
@@ -37,6 +40,7 @@ private:
     EGameState GameStateToSet = EGameState::WaitingToStart;
 
     void OnClickedGameButton();
+    void OnClickedLeaderButton();
     void OnClickedOptionsButton();
     void OnClickedQuitButton();
 

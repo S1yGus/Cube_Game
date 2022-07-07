@@ -1,4 +1,3 @@
-Language: Cpp
 BasedOnStyle: Microsoft
 IndentWidth: '4'
 UseTab: Never
@@ -14,3 +13,7 @@ AllowShortCaseLabelsOnASingleLine: false
 IndentCaseLabels: true
 PointerAlignment: Left
 AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Custom
+BraceWrapping:
+	BeforeLambdaBody: true
+AllowShortLambdasOnASingleLine: None

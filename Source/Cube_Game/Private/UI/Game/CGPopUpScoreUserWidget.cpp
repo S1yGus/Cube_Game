@@ -21,7 +21,7 @@ void UCGPopUpScoreUserWidget::OnScoreChanged(int32 NewScore, int32 DeltaScore, i
     if (!ScoreTextBlock || !PopUpAnimation)
         return;
 
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     const auto SettingsSave = GameInstance->GetSettingsSave();
     const auto PopUpType = SettingsSave->GetGameSettings().PopUp;
     if (PopUpType == EPopUpType::Off)

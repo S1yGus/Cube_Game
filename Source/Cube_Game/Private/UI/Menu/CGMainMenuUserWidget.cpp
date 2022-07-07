@@ -23,6 +23,12 @@ void UCGMainMenuUserWidget::NativeOnInitialized()
         WidgetButtons.Add(GameButton);
     }
 
+    if (LeaderButton)
+    {
+        LeaderButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedLeaderButton);
+        WidgetButtons.Add(LeaderButton);
+    }
+
     if (OptionsButton)
     {
         OptionsButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedOptionsButton);
@@ -39,6 +45,12 @@ void UCGMainMenuUserWidget::NativeOnInitialized()
 void UCGMainMenuUserWidget::OnClickedGameButton()
 {
     GameStateToSet = EGameState::DifficultySelection;
+    ShowFadeoutAnimation();
+}
+
+void UCGMainMenuUserWidget::OnClickedLeaderButton()
+{
+    GameStateToSet = EGameState::Leaderboard;
     ShowFadeoutAnimation();
 }
 

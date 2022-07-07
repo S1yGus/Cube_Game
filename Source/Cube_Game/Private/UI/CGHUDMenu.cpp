@@ -25,5 +25,10 @@ void ACGHUDMenu::SetupWidgets()
         GameWidgets.Add(EGameState::DifficultySelection, CreateWidget<UUserWidget>(GetWorld(), DifficultySelectionWidgetClass));
     }
 
+    if (LeaderboardWidgetClass)
+    {
+        GameWidgets.Add(EGameState::Leaderboard, CreateWidget<UUserWidget>(GetWorld(), LeaderboardWidgetClass));
+    }
+
     Super::SetupWidgets();
 }

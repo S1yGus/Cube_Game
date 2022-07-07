@@ -4,7 +4,6 @@
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "UI/CGTextUserWidget.h"
 #include "UI/CGHUDBase.h"
-#include "CGGameModeBase.h"
 #include "CGGameInstance.h"
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
@@ -12,6 +11,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Saves/CGSettingsSave.h"
+#include "Saves/CGLeaderboardSave.h"
 
 void UCGOptionsUserWidget::ResetWidget()
 {
@@ -34,13 +34,19 @@ void UCGOptionsUserWidget::NativeOnInitialized()
 
 const UCGSettingsSave* UCGOptionsUserWidget::GetSettingsSave() const
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     return GameInstance ? GameInstance->GetSettingsSave() : nullptr;
+}
+
+inline const UCGLeaderboardSave* UCGOptionsUserWidget::GetLeaderboardSave() const
+{
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
+    return GameInstance ? GameInstance->GetLeaderboardSave() : nullptr;
 }
 
 void UCGOptionsUserWidget::SetVideoSettings(const FVideoSettings& NewVideoSettings)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -49,7 +55,7 @@ void UCGOptionsUserWidget::SetVideoSettings(const FVideoSettings& NewVideoSettin
 
 void UCGOptionsUserWidget::SetSoundSettings(const FSoundSettings& NewSoundSettings)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -58,7 +64,7 @@ void UCGOptionsUserWidget::SetSoundSettings(const FSoundSettings& NewSoundSettin
 
 void UCGOptionsUserWidget::SetGameSettings(const FGameSettings& NewGameSettings)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -100,6 +106,12 @@ void UCGOptionsUserWidget::Setup()
         MasterVolumeSlider->OnMouseCaptureEnd.AddDynamic(this, &UCGOptionsUserWidget::OnMouseCaptureEndMasterVolume);
     }
 
+    if (UIVolumeSlider)
+    {
+        UIVolumeSlider->OnValueChanged.AddDynamic(this, &UCGOptionsUserWidget::OnValueChangedUIVolume);
+        UIVolumeSlider->OnMouseCaptureEnd.AddDynamic(this, &UCGOptionsUserWidget::OnMouseCaptureEndUIVolume);
+    }
+
     if (FXVolumeSlider)
     {
         FXVolumeSlider->OnValueChanged.AddDynamic(this, &UCGOptionsUserWidget::OnValueChangedFXVolume);
@@ -121,7 +133,11 @@ void UCGOptionsUserWidget::Setup()
     if (ResetHintsButton)
     {
         ResetHintsButton->OnClickedButton.AddUObject(this, &UCGOptionsUserWidget::OnClickedResetHintsButton);
-        WidgetButtons.Add(ResetHintsButton);
+    }
+
+    if (ClearLeaderboardButton)
+    {
+        ClearLeaderboardButton->OnClickedButton.AddUObject(this, &UCGOptionsUserWidget::OnClickedClearLeaderboardButton);
     }
 
     // Back.
@@ -141,11 +157,13 @@ void UCGOptionsUserWidget::UpdateOptions()
     UpdateQualityComboBox();
 
     UpdateMasterVolumeSlider();
+    UpdateUIVolumeSlider();
     UpdateFXVolumeSlider();
     UpdateMusicVolumeSlider();
 
     UpdatePopUpComboBox();
     UpdateResetHintsButton();
+    UpdateClearLeaderboardButton();
 }
 
 void UCGOptionsUserWidget::UpdateScreenModeComboBox()
@@ -231,6 +249,26 @@ void UCGOptionsUserWidget::UpdateMasterVolumeText()
     MasterVolumeText->SetText(FText::FromString(MasterVolumeStr));
 }
 
+void UCGOptionsUserWidget::UpdateUIVolumeSlider()
+{
+    const auto SettingsSave = GetSettingsSave();
+    if (!SettingsSave || !UIVolumeSlider)
+        return;
+
+    UIVolumeSlider->SetValue(SettingsSave->GetSoundSettings().UIVolume);
+
+    UpdateUIVolumeText();
+}
+
+void UCGOptionsUserWidget::UpdateUIVolumeText()
+{
+    if (!UIVolumeText)
+        return;
+
+    const auto UIVolumeStr = FString::Printf(TEXT("%.0f%%"), UIVolumeSlider->GetNormalizedValue() * 100.0f);
+    UIVolumeText->SetText(FText::FromString(UIVolumeStr));
+}
+
 void UCGOptionsUserWidget::UpdateFXVolumeSlider()
 {
     const auto SettingsSave = GetSettingsSave();
@@ -309,9 +347,20 @@ void UCGOptionsUserWidget::UpdateResetHintsButton()
             break;
         }
     }
-    
+
     ResetHintsButton->SetIsEnabled(bCanReset);
-    ResetHintsButton->SetRenderOpacity(static_cast<float>(bCanReset));
+}
+
+void UCGOptionsUserWidget::UpdateClearLeaderboardButton()
+{
+    if (!ClearLeaderboardButton)
+        return;
+
+    const auto LeaderboardSave = GetLeaderboardSave();
+    if (!LeaderboardSave)
+        return;
+
+    ClearLeaderboardButton->SetIsEnabled(!LeaderboardSave->GetLeaderboard().IsEmpty());
 }
 
 void UCGOptionsUserWidget::OnSelectionChangedScreenMode(FString SelectedItem, ESelectInfo::Type SelectionType)
@@ -389,7 +438,7 @@ void UCGOptionsUserWidget::OnSelectionChangedQuality(FString SelectedItem, ESele
 
 void UCGOptionsUserWidget::OnValueChangedMasterVolume(float Value)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -414,9 +463,36 @@ void UCGOptionsUserWidget::OnMouseCaptureEndMasterVolume()
     SetSoundSettings(SoundSettings);
 }
 
+void UCGOptionsUserWidget::OnValueChangedUIVolume(float Value)
+{
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
+    if (!GameInstance)
+        return;
+
+    UGameplayStatics::SetSoundMixClassOverride(GetWorld(),                            //
+                                               GameInstance->GetDefaultSoundMix(),    //
+                                               GameInstance->GetUISoundClass(),       //
+                                               Value,                                 //
+                                               1.0f,                                  //
+                                               0.0f);                                 //
+
+    UpdateUIVolumeText();
+}
+
+void UCGOptionsUserWidget::OnMouseCaptureEndUIVolume()
+{
+    const auto SettingsSave = GetSettingsSave();
+    if (!SettingsSave)
+        return;
+
+    auto SoundSettings = SettingsSave->GetSoundSettings();
+    SoundSettings.UIVolume = UIVolumeSlider->GetNormalizedValue();
+    SetSoundSettings(SoundSettings);
+}
+
 void UCGOptionsUserWidget::OnValueChangedFXVolume(float Value)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -443,7 +519,7 @@ void UCGOptionsUserWidget::OnMouseCaptureEndFXVolume()
 
 void UCGOptionsUserWidget::OnValueChangedMusicVolume(float Value)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -485,7 +561,7 @@ void UCGOptionsUserWidget::OnSelectionChangedPopUp(FString SelectedItem, ESelect
 
 void UCGOptionsUserWidget::OnClickedResetHintsButton()
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 
@@ -507,6 +583,16 @@ void UCGOptionsUserWidget::OnClickedResetHintsButton()
     GameInstance->SetGameSettings(GameSettings);
 
     UpdateResetHintsButton();
+}
+
+void UCGOptionsUserWidget::OnClickedClearLeaderboardButton()
+{
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
+    if (!GameInstance)
+        return;
+
+    GameInstance->ClearLeaderboard();
+    UpdateClearLeaderboardButton();
 }
 
 void UCGOptionsUserWidget::OnClickedBackButton()

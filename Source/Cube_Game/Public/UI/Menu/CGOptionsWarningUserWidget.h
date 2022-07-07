@@ -40,6 +40,8 @@ private:
 
     float CountdownTime = 0.0f;
 
+    void Setup();
+
     void OnSaveSettings();
     void OnCancelSettings();
 

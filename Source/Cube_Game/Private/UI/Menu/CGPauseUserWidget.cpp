@@ -2,7 +2,7 @@
 
 #include "UI/Menu/CGPauseUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
-#include "CGGameMode.h"
+#include "CGGameModeBase.h"
 #include "CGGameInstance.h"
 
 void UCGPauseUserWidget::ResetWidget()
@@ -19,6 +19,11 @@ void UCGPauseUserWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
+    Setup();
+}
+
+void UCGPauseUserWidget::Setup()
+{
     if (ResumeButton)
     {
         ResumeButton->OnClickedButton.AddUObject(this, &UCGPauseUserWidget::OnClickedResumeButton);
@@ -64,7 +69,7 @@ void UCGPauseUserWidget::OnClickedMenuButton()
 
 void UCGPauseUserWidget::OnClickedQuitButton()
 {
-    const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;
 
@@ -73,7 +78,7 @@ void UCGPauseUserWidget::OnClickedQuitButton()
 
 void UCGPauseUserWidget::SetGameState(EGameState NewGameState)
 {
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>();
+    const auto GameMode = GetGameModeBase();
     if (!GameMode)
         return;
 
@@ -94,7 +99,7 @@ void UCGPauseUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimati
 
     if (GameStateToSet == EGameState::MainMenu)
     {
-        const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
+        const auto GameInstnce = GetGameInstance<UCGGameInstance>();
         if (!GameInstnce)
             return;
 

@@ -16,6 +16,7 @@ enum class EGameState : uint8
     PopUpHint,
     Pause,
     GameOver,
+    Leaderboard,
     Max
 };
 
@@ -147,6 +148,9 @@ struct FSoundSettings
     float MasterVolume = 0.5f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    float UIVolume = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     float FXVolume = 0.5f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
@@ -188,6 +192,21 @@ struct FGameSettings
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     FHints Hints;
+};
+
+USTRUCT(BlueprintType)
+struct FPlayerRecord
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PlayerRecord")
+    FText Name;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PlayerRecord")
+    int32 Score;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PlayerRecord")
+    FDateTime DateTime;
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, float);

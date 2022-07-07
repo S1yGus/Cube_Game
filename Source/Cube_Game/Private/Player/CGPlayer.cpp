@@ -156,7 +156,7 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
 
 void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
 {
-    const auto GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstance = GetGameInstance<UCGGameInstance>();
     if (!GameInstance)
         return;
 

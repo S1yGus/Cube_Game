@@ -29,7 +29,7 @@ void ACGFieldActor::BeginPlay()
     Super::BeginPlay();
 
     SetupField();
-    
+
     RestoreSpawnPositions();
     GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, GetSpawnTimerRate(), true);
 }

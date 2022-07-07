@@ -17,9 +17,14 @@ void UCGAnimatedUserWidget::ShowFadeoutAnimation()
     UGameplayStatics::PlaySound2D(GetWorld(), FadeoutSound);
 }
 
+ACGGameModeBase* UCGAnimatedUserWidget::GetGameModeBase() const
+{
+    return GetWorld()->GetAuthGameMode<ACGGameModeBase>();
+}
+
 void UCGAnimatedUserWidget::SetGameState(EGameState NewGameState)
 {
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>();
+    const auto GameMode = GetGameModeBase();
     if (!GameMode)
         return;
 

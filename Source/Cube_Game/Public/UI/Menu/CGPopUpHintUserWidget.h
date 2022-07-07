@@ -10,6 +10,7 @@
 
 class UTextBlock;
 class UCGButtonUserWidget;
+class ACGGameMode;
 
 UCLASS()
 class CUBE_GAME_API UCGPopUpHintUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface

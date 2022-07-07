@@ -13,6 +13,7 @@ class UCGTextUserWidget;
 class UComboBoxString;
 class USlider;
 class UCGSettingsSave;
+class UCGLeaderboardSave;
 
 UCLASS()
 class CUBE_GAME_API UCGOptionsUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface
@@ -44,6 +45,9 @@ protected:
     USlider* MasterVolumeSlider;
 
     UPROPERTY(Meta = (BindWidget))
+    USlider* UIVolumeSlider;
+
+    UPROPERTY(Meta = (BindWidget))
     USlider* FXVolumeSlider;
 
     UPROPERTY(Meta = (BindWidget))
@@ -51,6 +55,9 @@ protected:
 
     UPROPERTY(Meta = (BindWidget))
     UCGTextUserWidget* MasterVolumeText;
+
+    UPROPERTY(Meta = (BindWidget))
+    UCGTextUserWidget* UIVolumeText;
 
     UPROPERTY(Meta = (BindWidget))
     UCGTextUserWidget* FXVolumeText;
@@ -65,6 +72,9 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* ResetHintsButton;
 
+    UPROPERTY(Meta = (BindWidget))
+    UCGButtonUserWidget* ClearLeaderboardButton;
+
     // Back.
     UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* BackButton;
@@ -77,7 +87,8 @@ private:
 
     EGameState GameStateToSet = EGameState::WaitingToStart;
 
-    const UCGSettingsSave* GetSettingsSave() const;
+    inline const UCGSettingsSave* GetSettingsSave() const;
+    inline const UCGLeaderboardSave* GetLeaderboardSave() const;
     void SetVideoSettings(const FVideoSettings& NewVideoSettings);
     void SetSoundSettings(const FSoundSettings& NewSoundSettings);
     void SetGameSettings(const FGameSettings& NewGameSettings);
@@ -96,6 +107,8 @@ private:
     // Sound.
     void UpdateMasterVolumeSlider();
     void UpdateMasterVolumeText();
+    void UpdateUIVolumeSlider();
+    void UpdateUIVolumeText();
     void UpdateFXVolumeSlider();
     void UpdateFXVolumeText();
     void UpdateMusicVolumeSlider();
@@ -104,6 +117,7 @@ private:
     // Game.
     void UpdatePopUpComboBox();
     void UpdateResetHintsButton();
+    void UpdateClearLeaderboardButton();
 
     // Video.
     UFUNCTION()
@@ -123,6 +137,10 @@ private:
     UFUNCTION()
     void OnMouseCaptureEndMasterVolume();
     UFUNCTION()
+    void OnValueChangedUIVolume(float Value);
+    UFUNCTION()
+    void OnMouseCaptureEndUIVolume();
+    UFUNCTION()
     void OnValueChangedFXVolume(float Value);
     UFUNCTION()
     void OnMouseCaptureEndFXVolume();
@@ -135,6 +153,7 @@ private:
     UFUNCTION()
     void OnSelectionChangedPopUp(FString SelectedItem, ESelectInfo::Type SelectionType);
     void OnClickedResetHintsButton();
+    void OnClickedClearLeaderboardButton();
 
     void OnClickedBackButton();
 

@@ -20,6 +20,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> DifficultySelectionWidgetClass;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> LeaderboardWidgetClass;
+
     virtual void BackToRootMenu() override;
 
 private:

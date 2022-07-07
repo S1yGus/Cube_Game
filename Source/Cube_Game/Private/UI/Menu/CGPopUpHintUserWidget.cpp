@@ -47,7 +47,7 @@ void UCGPopUpHintUserWidget::OnAnimationFinished_Implementation(const UWidgetAni
     if (Animation != FadeoutAnimation)
         return;
 
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetGameModeBase();
     if (!GameMode)
         return;
 

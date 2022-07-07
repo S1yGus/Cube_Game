@@ -4,6 +4,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Saves/CGSettingsSave.h"
+#include "Saves/CGLeaderboardSave.h"
 #include "GameFramework/GameUserSettings.h"
 
 void UCGGameInstance::SetVideoSettings(const FVideoSettings& NewVideoSettings)
@@ -36,6 +37,32 @@ void UCGGameInstance::SetGameSettings(const FGameSettings& NewGameSettings)
     UGameplayStatics::SaveGameToSlot(SettingsSave, SettingsSaveSlotName, 0);
 }
 
+void UCGGameInstance::AddToLeaderboard(const FPlayerRecord& PlayerRecord)
+{
+    if (!LeaderboardSave)
+        return;
+
+    LeaderboardSave->AddToLeaderboard(PlayerRecord);
+    UGameplayStatics::SaveGameToSlot(LeaderboardSave, LeaderboardSaveSlotName, 0);
+}
+
+void UCGGameInstance::SortLeaderboard(std::function<bool(const FPlayerRecord&, const FPlayerRecord&)> Predicate)
+{
+    if (!LeaderboardSave)
+        return;
+
+    LeaderboardSave->SortLeaderboard(Predicate);
+}
+
+void UCGGameInstance::ClearLeaderboard()
+{
+    if (!LeaderboardSave)
+        return;
+
+    LeaderboardSave->ClearLeaderboard();
+    UGameplayStatics::SaveGameToSlot(LeaderboardSave, LeaderboardSaveSlotName, 0);
+}
+
 void UCGGameInstance::OpenMainMenu()
 {
     if (MenuLevelName == NAME_None)
@@ -62,6 +89,7 @@ void UCGGameInstance::OnStart()
     Super::OnStart();
 
     CheckSettingsSave();
+    CheckLeaderboardSave();
 }
 
 void UCGGameInstance::CheckSettingsSave()
@@ -98,6 +126,11 @@ void UCGGameInstance::ApplySoundSettings()
         UGameplayStatics::SetSoundMixClassOverride(GetWorld(), DefaultSoundMix, MasterSoundClass, SoundSettings.MasterVolume, 1.0f, 0.0f);
     }
 
+    if (UISoundClass)
+    {
+        UGameplayStatics::SetSoundMixClassOverride(GetWorld(), DefaultSoundMix, UISoundClass, SoundSettings.UIVolume, 1.0f, 0.0f);
+    }
+
     if (FXSoundClass)
     {
         UGameplayStatics::SetSoundMixClassOverride(GetWorld(), DefaultSoundMix, FXSoundClass, SoundSettings.FXVolume, 1.0f, 0.0f);
@@ -111,4 +144,16 @@ void UCGGameInstance::ApplySoundSettings()
 
 void UCGGameInstance::ApplyGameSettings()
 {
+}
+
+void UCGGameInstance::CheckLeaderboardSave()
+{
+    if (UGameplayStatics::DoesSaveGameExist(LeaderboardSaveSlotName, 0))
+    {
+        LeaderboardSave = Cast<UCGLeaderboardSave>(UGameplayStatics::LoadGameFromSlot(LeaderboardSaveSlotName, 0));
+    }
+    else
+    {
+        LeaderboardSave = Cast<UCGLeaderboardSave>(UGameplayStatics::CreateSaveGameObject(UCGLeaderboardSave::StaticClass()));
+    }
 }

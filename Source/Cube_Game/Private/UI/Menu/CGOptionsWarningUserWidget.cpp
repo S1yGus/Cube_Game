@@ -24,17 +24,7 @@ void UCGOptionsWarningUserWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    if (SaveButton)
-    {
-        SaveButton->OnClickedButton.AddUObject(this, &UCGOptionsWarningUserWidget::OnSaveSettings);
-        WidgetButtons.Add(SaveButton);
-    }
-
-    if (CancelButton)
-    {
-        CancelButton->OnClickedButton.AddUObject(this, &UCGOptionsWarningUserWidget::OnCancelSettings);
-        WidgetButtons.Add(CancelButton);
-    }
+    Setup();
 }
 
 void UCGOptionsWarningUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -45,6 +35,21 @@ void UCGOptionsWarningUserWidget::NativeTick(const FGeometry& MyGeometry, float 
     if (CountdownTime <= 0.0f && !IsAnimationPlaying(FadeoutAnimation))
     {
         OnCancelSettings();
+    }
+}
+
+void UCGOptionsWarningUserWidget::Setup()
+{
+    if (SaveButton)
+    {
+        SaveButton->OnClickedButton.AddUObject(this, &UCGOptionsWarningUserWidget::OnSaveSettings);
+        WidgetButtons.Add(SaveButton);
+    }
+
+    if (CancelButton)
+    {
+        CancelButton->OnClickedButton.AddUObject(this, &UCGOptionsWarningUserWidget::OnCancelSettings);
+        WidgetButtons.Add(CancelButton);
     }
 }
 

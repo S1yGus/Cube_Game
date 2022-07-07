@@ -26,7 +26,7 @@ void UCGDifficultyUserWidget::NativeOnInitialized()
 
 void UCGDifficultyUserWidget::SetDifficulty(EDifficulty NewDifficulty)
 {
-    const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;
 
@@ -58,7 +58,7 @@ void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAn
     if (Animation != FadeoutAnimation)
         return;
 
-    const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;
 

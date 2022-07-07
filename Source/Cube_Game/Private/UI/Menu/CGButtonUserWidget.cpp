@@ -57,5 +57,6 @@ void UCGButtonUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimat
     if (Animation == OnClickedAnimation)
     {
         OnClickedButton.Broadcast();
+        Button->SetIsEnabled(true);
     }
 }
