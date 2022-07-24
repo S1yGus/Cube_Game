@@ -3,22 +3,21 @@
 #include "UI/CGHUDBase.h"
 #include "CGGameModeBase.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "Interfaces/CGWidgetInterface.h"
 
 void ACGHUDBase::BeginPlay()
 {
     Super::BeginPlay();
 
     SetupWidgets();
-
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
-    {
-        GameMode->OnGameStateChanged.AddUObject(this, &ACGHUDBase::OnGameStateChanged);
-    }
 }
 
 void ACGHUDBase::SetupWidgets()
 {
+    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
+    {
+        GameMode->OnGameStateChanged.AddUObject(this, &ACGHUDBase::OnGameStateChanged);
+    }
+
     if (OptionsWidgetClass)
     {
         GameWidgets.Add(EGameState::Options, CreateWidget<UUserWidget>(GetWorld(), OptionsWidgetClass));
@@ -59,11 +58,6 @@ void ACGHUDBase::OnGameStateChanged(EGameState GameState)
         if (const auto AnimatedWidget = Cast<UCGAnimatedUserWidget>(CurrentWidget))
         {
             AnimatedWidget->ShowStartupAnimation();
-        }
-
-        if (const auto CGWidget = Cast<ICGWidgetInterface>(CurrentWidget))
-        {
-            CGWidget->ResetWidget();
         }
     }
 }

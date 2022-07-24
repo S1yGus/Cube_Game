@@ -70,7 +70,7 @@ enum class EPopUpType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EHint : uint8
+enum class EHintType : uint8
 {
     Startup,
     SpeedUp,
@@ -116,7 +116,7 @@ struct FDifficulty
 };
 
 USTRUCT(BlueprintType)
-struct FPopUpHint
+struct FHintData
 {
     GENERATED_USTRUCT_BODY()
 
@@ -134,9 +134,6 @@ USTRUCT(BlueprintType)
 struct FVideoSettings
 {
     GENERATED_USTRUCT_BODY()
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0", ClampMax = "4"))
-    int32 Quality = 3;
 };
 
 USTRUCT(BlueprintType)
@@ -144,30 +141,30 @@ struct FSoundSettings
 {
     GENERATED_USTRUCT_BODY()
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float MasterVolume = 0.5f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float UIVolume = 0.5f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float FXVolume = 0.5f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float MusicVolume = 0.5f;
 };
 
 USTRUCT(BlueprintType)
-struct FHints
+struct FHintsStatus
 {
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<EHint, bool> HintsMap = {
-        TPair<EHint, bool>{EHint::Startup, true},       //
-        TPair<EHint, bool>{EHint::Multiplier, true},    //
-        TPair<EHint, bool>{EHint::LowTime, true},       //
-        TPair<EHint, bool>{EHint::SpeedUp, true}        //
+    TMap<EHintType, bool> HintsMap = {
+        TPair<EHintType, bool>{EHintType::Startup, true},       //
+        TPair<EHintType, bool>{EHintType::Multiplier, true},    //
+        TPair<EHintType, bool>{EHintType::LowTime, true},       //
+        TPair<EHintType, bool>{EHintType::SpeedUp, true}        //
     };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
@@ -188,10 +185,10 @@ struct FGameSettings
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    EPopUpType PopUp = EPopUpType::Multiplier;
+    EPopUpType PopUpType = EPopUpType::Multiplier;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    FHints Hints;
+    FHintsStatus HintsStatus;
 };
 
 USTRUCT(BlueprintType)
@@ -219,4 +216,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimeChangedSignature, int32);
 DECLARE_MULTICAST_DELEGATE(FOnLowTimeSignature);
 DECLARE_MULTICAST_DELEGATE(FOnClickedButtonSignature);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnShowPopUpHintSignature, const FPopUpHint&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnShowPopUpHintSignature, const FHintData&);
+DECLARE_MULTICAST_DELEGATE(FOnPressedEscSignature);
+DECLARE_MULTICAST_DELEGATE(FOnPressedEnterSignature);
+DECLARE_MULTICAST_DELEGATE(FOnResolutionChangedSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);

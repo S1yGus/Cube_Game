@@ -2,41 +2,67 @@
 
 #include "UI/Menu/CGPopUpHintUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
+#include "UI/CGTextUserWidget.h"
 #include "CGGameMode.h"
 #include "Components/TextBlock.h"
+
+void UCGPopUpHintUserWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+
+    Setup();
+}
+
+void UCGPopUpHintUserWidget::Setup()
+{
+    check(ResumeButton);
+    check(TitleText);
+    check(HintTextBlock);
+
+    ResumeButton->OnClickedButton.AddUObject(this, &UCGPopUpHintUserWidget::OnClickedResumeButton);
+
+    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+    {
+        GameMode->OnShowPopUpHintSignature.AddUObject(this, &UCGPopUpHintUserWidget::OnShowPopUpHint);
+        GameMode->OnGameStateChanged.AddUObject(this, &UCGPopUpHintUserWidget::OnGameStateChanged);
+        GameMode->OnPressedEnt.AddUObject(this, &UCGPopUpHintUserWidget::OnPressedEnter);
+        GameMode->OnPressedEsc.AddUObject(this, &UCGPopUpHintUserWidget::OnPressedEnter);
+    }
+}
 
 void UCGPopUpHintUserWidget::ResetWidget()
 {
     ResumeButton->ResetButton();
 }
 
-void UCGPopUpHintUserWidget::NativeOnInitialized()
+void UCGPopUpHintUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    Super::NativeOnInitialized();
-
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
-    {
-        GameMode->OnShowPopUpHintSignature.AddUObject(this, &UCGPopUpHintUserWidget::OnShowPopUpHint);
-    }
-
-    if (ResumeButton)
-    {
-        ResumeButton->OnClickedButton.AddUObject(this, &UCGPopUpHintUserWidget::OnClickedResumeButton);
-    }
-}
-
-void UCGPopUpHintUserWidget::OnShowPopUpHint(const FPopUpHint& PopUpHint)
-{
-    if (!HintTextBlock || !TitleTextBlock)
+    if (NewGameState != EGameState::PopUpHint)
         return;
 
-    TitleTextBlock->SetText(PopUpHint.Title);
-    TitleTextBlock->SetColorAndOpacity(PopUpHint.TitleColor);
-    HintTextBlock->SetText(PopUpHint.HintText);
+    ResetWidget();
+}
+
+void UCGPopUpHintUserWidget::OnPressedEnter()
+{
+    if (!IsVisible())
+        return;
+
+    OnClickedResumeButton();
+}
+
+void UCGPopUpHintUserWidget::OnShowPopUpHint(const FHintData& HintData)
+{
+    TitleText->SetText(HintData.Title);
+    TitleText->SetColor(HintData.TitleColor);
+    HintTextBlock->SetText(HintData.HintText);
 }
 
 void UCGPopUpHintUserWidget::OnClickedResumeButton()
 {
+    if (IsAnyAnimationPlaying())
+        return;
+
     ShowFadeoutAnimation();
 }
 

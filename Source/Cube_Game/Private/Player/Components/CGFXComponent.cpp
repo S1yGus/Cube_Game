@@ -9,6 +9,13 @@ UCGFXComponent::UCGFXComponent()
     PrimaryComponentTick.bCanEverTick = false;
 }
 
+void UCGFXComponent::OutOfPosition()
+{
+    UGameplayStatics::PlaySound2D(GetWorld(), OutOfPositionSounds);
+
+    MakeCameraShake(OutOfPositionCameraShake);
+}
+
 void UCGFXComponent::PlayReceivingSound(ECubeType CubeType)
 {
     if (!ReceivingSoundsMap.Contains(CubeType))

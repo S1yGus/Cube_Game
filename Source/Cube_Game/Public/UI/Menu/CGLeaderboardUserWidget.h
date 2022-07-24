@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "Interfaces/CGWidgetInterface.h"
 #include "CGLeaderboardUserWidget.generated.h"
 
 class UVerticalBox;
@@ -13,12 +12,9 @@ class UCGPlayerRecordRowUserWidget;
 class UCGLeaderboardSave;
 
 UCLASS()
-class CUBE_GAME_API UCGLeaderboardUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface
+class CUBE_GAME_API UCGLeaderboardUserWidget : public UCGAnimatedUserWidget
 {
     GENERATED_BODY()
-
-public:
-    virtual void ResetWidget() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))
@@ -46,13 +42,13 @@ private:
     bool bScoreAscending = true;
     bool bDateAscending = true;
 
-    inline const UCGLeaderboardSave* GetLeaderboardSave() const;
-
     void Setup();
+    void ResetWidget();
 
     void UpdateLeaderboard();
 
     void OnGameStateChanged(EGameState NewGameState);
+    void OnPressedEsc();
     void OnClickedNameButton();
     void OnClickedScoreButton();
     void OnClickedDateButton();

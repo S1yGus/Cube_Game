@@ -4,157 +4,58 @@
 
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "Interfaces/CGWidgetInterface.h"
 #include "CGCoreTypes.h"
 #include "CGOptionsUserWidget.generated.h"
 
+class UVerticalBox;
 class UCGButtonUserWidget;
-class UCGTextUserWidget;
-class UComboBoxString;
-class USlider;
-class UCGSettingsSave;
-class UCGLeaderboardSave;
+class UCGComboBoxSettingUserWidget;
+class UCGSliderSettingUserWidget;
+class UCGButtonSettingUserWidget;
+class UCGSetting;
 
 UCLASS()
-class CUBE_GAME_API UCGOptionsUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface
+class CUBE_GAME_API UCGOptionsUserWidget : public UCGAnimatedUserWidget
 {
     GENERATED_BODY()
 
-public:
-    virtual void ResetWidget() override;
-
 protected:
-    // Video.
     UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* ScreenModeComboBox;
+    UVerticalBox* VideoSettingsVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* ResolutionComboBox;
+    UVerticalBox* SoundSettingsVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* VSyncComboBox;
+    UVerticalBox* GameSettingsVerticalBox;
 
-    UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* AspectRatioComboBox;
-
-    UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* QualityComboBox;
-
-    // Sound.
-    UPROPERTY(Meta = (BindWidget))
-    USlider* MasterVolumeSlider;
-
-    UPROPERTY(Meta = (BindWidget))
-    USlider* UIVolumeSlider;
-
-    UPROPERTY(Meta = (BindWidget))
-    USlider* FXVolumeSlider;
-
-    UPROPERTY(Meta = (BindWidget))
-    USlider* MusicVolumeSlider;
-
-    UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* MasterVolumeText;
-
-    UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* UIVolumeText;
-
-    UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* FXVolumeText;
-
-    UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* MusicVolumeText;
-
-    // Game.
-    UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* PopUpComboBox;
-
-    UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* ResetHintsButton;
-
-    UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* ClearLeaderboardButton;
-
-    // Back.
     UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* BackButton;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCGComboBoxSettingUserWidget> ComboBoxSettingWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCGSliderSettingUserWidget> SliderSettingWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCGButtonSettingUserWidget> ButtonSettingWidgetClass;
 
     virtual void NativeOnInitialized() override;
 
 private:
-    UPROPERTY()
-    TArray<UCGButtonUserWidget*> WidgetButtons;
-
     EGameState GameStateToSet = EGameState::WaitingToStart;
 
-    inline const UCGSettingsSave* GetSettingsSave() const;
-    inline const UCGLeaderboardSave* GetLeaderboardSave() const;
-    void SetVideoSettings(const FVideoSettings& NewVideoSettings);
-    void SetSoundSettings(const FSoundSettings& NewSoundSettings);
-    void SetGameSettings(const FGameSettings& NewGameSettings);
+    void InitSettingsWidgets(const TArray<UCGSetting*>& SettingsArray, UVerticalBox* VerticalBox);
 
     void Setup();
+    void ResetWidget();
 
     void UpdateOptions();
 
-    // Video.
-    void UpdateScreenModeComboBox();
-    void UpdateScreenResolutionComboBox();
-    void UpdateVSyncComboBox();
-    void UpdateAspectRatioComboBox();
-    void UpdateQualityComboBox();
-
-    // Sound.
-    void UpdateMasterVolumeSlider();
-    void UpdateMasterVolumeText();
-    void UpdateUIVolumeSlider();
-    void UpdateUIVolumeText();
-    void UpdateFXVolumeSlider();
-    void UpdateFXVolumeText();
-    void UpdateMusicVolumeSlider();
-    void UpdateMusicVolumeText();
-
-    // Game.
-    void UpdatePopUpComboBox();
-    void UpdateResetHintsButton();
-    void UpdateClearLeaderboardButton();
-
-    // Video.
-    UFUNCTION()
-    void OnSelectionChangedScreenMode(FString SelectedItem, ESelectInfo::Type SelectionType);
-    UFUNCTION()
-    void OnSelectionChangedResolution(FString SelectedItem, ESelectInfo::Type SelectionType);
-    UFUNCTION()
-    void OnSelectionChangedVSync(FString SelectedItem, ESelectInfo::Type SelectionType);
-    UFUNCTION()
-    void OnSelectionChangedAspectRatio(FString SelectedItem, ESelectInfo::Type SelectionType);
-    UFUNCTION()
-    void OnSelectionChangedQuality(FString SelectedItem, ESelectInfo::Type SelectionType);
-
-    // Sound.
-    UFUNCTION()
-    void OnValueChangedMasterVolume(float Value);
-    UFUNCTION()
-    void OnMouseCaptureEndMasterVolume();
-    UFUNCTION()
-    void OnValueChangedUIVolume(float Value);
-    UFUNCTION()
-    void OnMouseCaptureEndUIVolume();
-    UFUNCTION()
-    void OnValueChangedFXVolume(float Value);
-    UFUNCTION()
-    void OnMouseCaptureEndFXVolume();
-    UFUNCTION()
-    void OnValueChangedMusicVolume(float Value);
-    UFUNCTION()
-    void OnMouseCaptureEndMusicVolume();
-
-    // Game.
-    UFUNCTION()
-    void OnSelectionChangedPopUp(FString SelectedItem, ESelectInfo::Type SelectionType);
-    void OnClickedResetHintsButton();
-    void OnClickedClearLeaderboardButton();
-
+    void OnGameStateChanged(EGameState NewGameState);
+    void OnPressedEsc();
+    void OnResolutionChanged();
     void OnClickedBackButton();
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;

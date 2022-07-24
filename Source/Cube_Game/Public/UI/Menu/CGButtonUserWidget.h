@@ -19,6 +19,7 @@ public:
     FOnClickedButtonSignature OnClickedButton;
 
     void ResetButton();
+    void SetText(const FText& NewText);
 
 protected:
     UPROPERTY(Meta = (BindWidget))
@@ -40,12 +41,12 @@ protected:
     virtual void NativePreConstruct() override;
 
 private:
+    void Setup();
+
     UFUNCTION()
     void OnClicked();
-
     UFUNCTION()
     void OnHovered();
-
     UFUNCTION()
     void OnUnhovered();
 

@@ -15,6 +15,7 @@ class CUBE_GAME_API ACGHUDBase : public AHUD
     GENERATED_BODY()
 
 public:
+    inline UUserWidget* GetCurretnWidget() { return CurrentWidget; }
     virtual void BackToRootMenu(){};
 
 protected:

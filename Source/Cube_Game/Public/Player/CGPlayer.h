@@ -7,7 +7,6 @@
 #include "CGCoreTypes.h"
 #include "CGPlayer.generated.h"
 
-class USoundCue;
 class UWidgetComponent;
 class UCGBonusComponent;
 class UCGFXComponent;
@@ -44,14 +43,12 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0"))
     float PositionZOffset = 65.0f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* OutOfPosition;
-
     virtual void BeginPlay() override;
 
 private:
     FTimerHandle MovementTimerHandle;
     int32 CurrentPosition = 0;
+    TMap<ECubeType, bool> ReceivingHintsMap;
 
     inline FVector GetCurrentPositionLocation() const;
 
@@ -72,4 +69,5 @@ private:
 
     void ReceiveCube(ECubeType CubeType);
     void ShowPopUpHint(ECubeType CubeType);
+    void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 };

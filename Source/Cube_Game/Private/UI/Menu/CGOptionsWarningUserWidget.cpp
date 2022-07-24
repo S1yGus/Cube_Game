@@ -3,21 +3,11 @@
 #include "UI/Menu/CGOptionsWarningUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "CGGameModeBase.h"
-#include "GameFramework/GameUserSettings.h"
+#include "Settings/CGGameUserSettings.h"
 
 FText UCGOptionsWarningUserWidget::GetCountdownTime() const
 {
     return FText::AsNumber(static_cast<int32>(CountdownTime));
-}
-
-void UCGOptionsWarningUserWidget::ResetWidget()
-{
-    for (const auto& Button : WidgetButtons)
-    {
-        Button->ResetButton();
-    }
-
-    CountdownTime = CancelSettingsTime;
 }
 
 void UCGOptionsWarningUserWidget::NativeOnInitialized()
@@ -40,30 +30,80 @@ void UCGOptionsWarningUserWidget::NativeTick(const FGeometry& MyGeometry, float 
 
 void UCGOptionsWarningUserWidget::Setup()
 {
-    if (SaveButton)
+    check(SaveButton);
+    check(CancelButton);
+
+    SaveButton->OnClickedButton.AddUObject(this, &ThisClass::OnSaveSettings);
+    WidgetButtons.Add(SaveButton);
+    CancelButton->OnClickedButton.AddUObject(this, &ThisClass::OnCancelSettings);
+    WidgetButtons.Add(CancelButton);
+
+    if (const auto GameMode = GetGameModeBase())
     {
-        SaveButton->OnClickedButton.AddUObject(this, &UCGOptionsWarningUserWidget::OnSaveSettings);
-        WidgetButtons.Add(SaveButton);
+        GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
+        GameMode->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
+        GameMode->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+    }
+}
+
+void UCGOptionsWarningUserWidget::ResetWidget()
+{
+    for (const auto& Button : WidgetButtons)
+    {
+        Button->ResetButton();
     }
 
-    if (CancelButton)
-    {
-        CancelButton->OnClickedButton.AddUObject(this, &UCGOptionsWarningUserWidget::OnCancelSettings);
-        WidgetButtons.Add(CancelButton);
-    }
+    CountdownTime = CancelSettingsTime;
+}
+
+void UCGOptionsWarningUserWidget::OnGameStateChanged(EGameState NewGameState)
+{
+    if (NewGameState != EGameState::OptionsWarning)
+        return;
+
+    ResetWidget();
+}
+
+void UCGOptionsWarningUserWidget::OnPressedEnter()
+{
+    if (!IsVisible())
+        return;
+
+    OnSaveSettings();
+}
+
+void UCGOptionsWarningUserWidget::OnPressedEsc()
+{
+    if (!IsVisible())
+        return;
+
+    OnCancelSettings();
 }
 
 void UCGOptionsWarningUserWidget::OnSaveSettings()
 {
-    GEngine->GetGameUserSettings()->SaveSettings();
+    if (IsAnyAnimationPlaying())
+        return;
+
+    const auto GameUserSettings = UCGGameUserSettings::Get();
+    if (!GameUserSettings)
+        return;
+
+    GameUserSettings->ConfirmVideoMode();
 
     ShowFadeoutAnimation();
 }
 
 void UCGOptionsWarningUserWidget::OnCancelSettings()
 {
-    GEngine->GetGameUserSettings()->LoadSettings();
-    GEngine->GetGameUserSettings()->ApplyResolutionSettings(false);
+    if (IsAnyAnimationPlaying())
+        return;
+
+    const auto GameUserSettings = UCGGameUserSettings::Get();
+    if (!GameUserSettings)
+        return;
+
+    GameUserSettings->SetLastConfirmedResolutionSettings();
 
     ShowFadeoutAnimation();
 }

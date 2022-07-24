@@ -3,17 +3,26 @@
 #include "UI/Game/CGInfoUserWidget.h"
 #include "CGGameMode.h"
 #include "Components/TextBlock.h"
-#include "CGUtils.h"
 
 void UCGInfoUserWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
+
+    Setup();
+}
+
+void UCGInfoUserWidget::Setup()
+{
+    check(ScoreTextBlock);
+    check(TimeTextBlock);
+    check(SpeedTextBlock);
 
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
     {
         GameMode->OnScoreChanged.AddUObject(this, &UCGInfoUserWidget::OnScoreChanged);
         GameMode->OnTimeChanged.AddUObject(this, &UCGInfoUserWidget::OnTimeChanged);
         GameMode->OnSpeedChanged.AddUObject(this, &UCGInfoUserWidget::OnSpeedChanged);
+
         OnScoreChanged(GameMode->GetScore());
         OnTimeChanged(GameMode->GetTime());
         OnSpeedChanged(GameMode->GetSpeed());
@@ -22,24 +31,15 @@ void UCGInfoUserWidget::NativeOnInitialized()
 
 void UCGInfoUserWidget::OnScoreChanged(int32 NewScore, int32 DeltaScore, int32 NewMultiplier)
 {
-    if (!ScoreTextBlock)
-        return;
-
-    ScoreTextBlock->SetText(CGUtils::TextFromInt(NewScore));
+    ScoreTextBlock->SetText(FText::AsNumber(NewScore));
 }
 
 void UCGInfoUserWidget::OnTimeChanged(int32 NewTime)
 {
-    if (!TimeTextBlock)
-        return;
-
-    TimeTextBlock->SetText(CGUtils::TextFromInt(NewTime));
+    TimeTextBlock->SetText(FText::AsNumber(NewTime));
 }
 
 void UCGInfoUserWidget::OnSpeedChanged(int32 NewSpeed)
 {
-    if (!SpeedTextBlock)
-        return;
-
-    SpeedTextBlock->SetText(CGUtils::TextFromInt(NewSpeed));
+    SpeedTextBlock->SetText(FText::AsNumber(NewSpeed));
 }

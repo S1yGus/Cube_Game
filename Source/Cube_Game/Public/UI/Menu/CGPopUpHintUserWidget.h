@@ -4,25 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "Interfaces/CGWidgetInterface.h"
 #include "CGCoreTypes.h"
 #include "CGPopUpHintUserWidget.generated.h"
 
+class UCGTextUserWidget;
 class UTextBlock;
 class UCGButtonUserWidget;
-class ACGGameMode;
 
 UCLASS()
-class CUBE_GAME_API UCGPopUpHintUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface
+class CUBE_GAME_API UCGPopUpHintUserWidget : public UCGAnimatedUserWidget
 {
     GENERATED_BODY()
 
-public:
-    virtual void ResetWidget() override;
-
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* TitleTextBlock;
+    UCGTextUserWidget* TitleText;
 
     UPROPERTY(Meta = (BindWidget))
     UTextBlock* HintTextBlock;
@@ -33,7 +29,12 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    void OnShowPopUpHint(const FPopUpHint& PopUpHint);
+    void Setup();
+    void ResetWidget();
+
+    void OnGameStateChanged(EGameState NewGameState);
+    void OnPressedEnter();
+    void OnShowPopUpHint(const FHintData& HintData);
     void OnClickedResumeButton();
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;

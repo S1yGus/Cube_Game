@@ -27,4 +27,6 @@ protected:
 
     UPROPERTY(Meta = (BindWidget))
     UCGTextUserWidget* DateText;
+
+    virtual void NativeOnInitialized() override;
 };

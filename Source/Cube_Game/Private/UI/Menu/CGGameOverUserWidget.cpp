@@ -18,48 +18,35 @@ void UCGGameOverUserWidget::NativeOnInitialized()
 
 void UCGGameOverUserWidget::Setup()
 {
-    if (AddButton)
-    {
-        AddButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedAddButton);
-    }
+    check(AddButton);
+    check(PlayAgainButton);
+    check(MenuButton);
+    check(QuitButton);
+    check(NameEditableText);
 
-    if (PlayAgainButton)
-    {
-        PlayAgainButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedPlayAgainButton);
-    }
-
-    if (MenuButton)
-    {
-        MenuButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedMenuButton);
-    }
-
-    if (QuitButton)
-    {
-        QuitButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedQuitButton);
-    }
+    AddButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedAddButton);
+    PlayAgainButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedPlayAgainButton);
+    MenuButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedMenuButton);
+    QuitButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedQuitButton);
+    NameEditableText->OnTextChanged.AddDynamic(this, &UCGGameOverUserWidget::OnNameTextChanged);
 
     if (const auto GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &UCGGameOverUserWidget::OnGameStateChanged);
     }
-
-    if (NameEditableText)
-    {
-        NameEditableText->OnTextChanged.AddDynamic(this, &UCGGameOverUserWidget::OnNameTextChanged);
-    }
 }
 
 void UCGGameOverUserWidget::UpdateAddButton()
 {
-    if (!AddButton || !NameEditableText)
-        return;
-
     const auto NameLen = NameEditableText->GetText().ToString().Len();
     AddButton->SetIsEnabled(!(NameLen < PlayerNameMinLen || NameLen > PlayerNameMaxLen));
 }
 
 void UCGGameOverUserWidget::OnClickedAddButton()
 {
+    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
+        return;
+
     PlayAnimation(AddAnimation);
 
     const auto GameInstnce = GetGameInstance<UCGGameInstance>();
@@ -73,18 +60,27 @@ void UCGGameOverUserWidget::OnClickedAddButton()
 
 void UCGGameOverUserWidget::OnClickedPlayAgainButton()
 {
+    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
+        return;
+
     GameStateToSet = EGameState::Game;
     ShowFadeoutAnimation();
 }
 
 void UCGGameOverUserWidget::OnClickedMenuButton()
 {
+    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
+        return;
+
     GameStateToSet = EGameState::MainMenu;
     ShowFadeoutAnimation();
 }
 
 void UCGGameOverUserWidget::OnClickedQuitButton()
 {
+    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
+        return;
+
     const auto GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;
@@ -94,7 +90,7 @@ void UCGGameOverUserWidget::OnClickedQuitButton()
 
 void UCGGameOverUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::GameOver || !GameOverText)
+    if (NewGameState != EGameState::GameOver)
         return;
 
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();

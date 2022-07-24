@@ -7,7 +7,7 @@ void UCGLeaderboardSave::AddToLeaderboard(const FPlayerRecord& PlayerRecord)
     Leaderboard.Add(PlayerRecord);
 }
 
-void UCGLeaderboardSave::SortLeaderboard(std::function<bool(const FPlayerRecord&, const FPlayerRecord&)> Predicate)
+void UCGLeaderboardSave::SortLeaderboard(TFunction<bool(const FPlayerRecord&, const FPlayerRecord&)> Predicate)
 {
     Leaderboard.Sort(Predicate);
 }

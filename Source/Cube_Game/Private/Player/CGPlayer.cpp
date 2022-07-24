@@ -4,14 +4,11 @@
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Sound/SoundCue.h"
-#include "Kismet/GameplayStatics.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Player/Components/CGFXComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
-#include "CGGameInstance.h"
-#include "Saves/CGSettingsSave.h"
+#include "Settings/CGGameUserSettings.h"
 
 constexpr static float MovementTimerRate = 0.016f;
 constexpr static float MovementSpeed = 10.0f;
@@ -64,6 +61,12 @@ FVector ACGPlayer::GetCurrentPositionLocation() const
 void ACGPlayer::SetupPlayer()
 {
     CurrentPosition = FMath::RandHelper(PositionsAmount);
+
+    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    {
+        GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
+        ReceivingHintsMap = GameUserSettings->GetHintsStatus().ReceivingHintsMap;
+    }
 }
 
 void ACGPlayer::MoveRight()
@@ -71,7 +74,7 @@ void ACGPlayer::MoveRight()
     if (CurrentPosition + 1 >= PositionsAmount)
     {
         CurrentPosition = PositionsAmount - 1;
-        UGameplayStatics::PlaySound2D(GetWorld(), OutOfPosition);
+        FXComponent->OutOfPosition();
     }
     else
     {
@@ -86,7 +89,7 @@ void ACGPlayer::MoveLeft()
     if (CurrentPosition - 1 < 0)
     {
         CurrentPosition = 0;
-        UGameplayStatics::PlaySound2D(GetWorld(), OutOfPosition);
+        FXComponent->OutOfPosition();
     }
     else
     {
@@ -156,19 +159,10 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
 
 void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
 {
-    const auto GameInstance = GetGameInstance<UCGGameInstance>();
-    if (!GameInstance)
+    if (!ReceivingHintsMap.Contains(CubeType))
         return;
 
-    const auto SettingsSave = GameInstance->GetSettingsSave();
-    if (!SettingsSave)
-        return;
-
-    auto GameSettings = SettingsSave->GetGameSettings();
-    if (!GameSettings.Hints.ReceivingHintsMap.Contains(CubeType))
-        return;
-
-    if (!GameSettings.Hints.ReceivingHintsMap[CubeType])
+    if (!ReceivingHintsMap[CubeType])
         return;
 
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
@@ -177,6 +171,15 @@ void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
 
     GameMode->ShowPopUpHint(GameMode->GetReceivingHints()[CubeType]);
 
-    GameSettings.Hints.ReceivingHintsMap[CubeType] = false;
-    GameInstance->SetGameSettings(GameSettings);
+    ReceivingHintsMap[CubeType] = false;
+
+    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    {
+        GameUserSettings->SetReceivingHintsStatus(ReceivingHintsMap);
+    }
+}
+
+void ACGPlayer::OnHintsStatusChanged(const FHintsStatus& NewHintsStatus)
+{
+    ReceivingHintsMap = NewHintsStatus.ReceivingHintsMap;
 }

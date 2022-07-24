@@ -8,6 +8,7 @@
 
 class UWidgetAnimation;
 class USoundCue;
+class ACGGameMode;
 
 UCLASS()
 class CUBE_GAME_API UCGHUDUserWidget : public UUserWidget
@@ -24,5 +25,8 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
+    inline ACGGameMode* GetGameMode() const;
+
     void OnLowTime();
+    void OnPressedEsc();
 };

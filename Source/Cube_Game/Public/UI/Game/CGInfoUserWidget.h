@@ -26,6 +26,8 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
+    void Setup();
+
     void OnScoreChanged(int32 NewScore, int32 DeltaScore = 0, int32 NewMultiplier = 1);
     void OnTimeChanged(int32 NewTime);
     void OnSpeedChanged(int32 NewSpeed);

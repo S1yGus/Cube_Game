@@ -5,17 +5,12 @@
 
 void UCGTextUserWidget::SetText(const FText& NewText)
 {
-    if (!TextBlock)
-        return;
-
+    Text = NewText;
     TextBlock->SetText(NewText);
 }
 
 void UCGTextUserWidget::SetColor(const FLinearColor& NewColor)
 {
-    if (!TextBlock)
-        return;
-
     TextBlock->SetColorAndOpacity(FSlateColor{NewColor});
 }
 
@@ -23,8 +18,7 @@ void UCGTextUserWidget::NativePreConstruct()
 {
     Super::NativePreConstruct();
 
-    if (TextBlock)
-    {
-        TextBlock->SetText(Text);
-    }
+    check(TextBlock);
+
+    TextBlock->SetText(Text);
 }

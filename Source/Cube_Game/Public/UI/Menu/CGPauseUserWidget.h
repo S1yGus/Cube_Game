@@ -4,19 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "Interfaces/CGWidgetInterface.h"
 #include "CGCoreTypes.h"
 #include "CGPauseUserWidget.generated.h"
 
 class UCGButtonUserWidget;
 
 UCLASS()
-class CUBE_GAME_API UCGPauseUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface
+class CUBE_GAME_API UCGPauseUserWidget : public UCGAnimatedUserWidget
 {
     GENERATED_BODY()
-
-public:
-    virtual void ResetWidget() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))
@@ -41,7 +37,10 @@ private:
     EGameState GameStateToSet = EGameState::WaitingToStart;
 
     void Setup();
+    void ResetWidget();
 
+    void OnGameStateChanged(EGameState NewGameState);
+    void OnPressedEsc();
     void OnClickedResumeButton();
     void OnClickedOptionsButton();
     void OnClickedMenuButton();

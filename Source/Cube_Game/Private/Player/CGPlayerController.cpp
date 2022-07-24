@@ -2,39 +2,35 @@
 
 #include "Player/CGPlayerController.h"
 #include "CGGameMode.h"
-
-void ACGPlayerController::OnSetPause()
-{
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
-    if (!GameMode)
-        return;
-
-    if (GameMode->IsPaused())
-    {
-        GameMode->ClearPause();
-    }
-    else
-    {
-        GameMode->SetPause(this);
-        GameMode->SetGameState(EGameState::Pause);
-    }
-}
+#include "UI/CGHUDBase.h"
+#include "Blueprint/UserWidget.h"
 
 void ACGPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    InputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ACGPlayerController::OnSetPause);
+    check(InputComponent);
+
+    if (const auto GameModeBase = GetGameModeBase())
+    {
+        InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, GameModeBase, &ACGGameModeBase::OnPressedEnter).bExecuteWhenPaused = true;
+        InputComponent->BindAction("Esc", EInputEvent::IE_Pressed, GameModeBase, &ACGGameModeBase::OnPressedEscape).bExecuteWhenPaused = true;
+    }
 }
 
 void ACGPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
+    if (const auto GameModeBase = GetGameModeBase())
     {
-        GameMode->OnGameStateChanged.AddUObject(this, &ACGPlayerController::OnGameStateChanged);
+        GameModeBase->OnGameStateChanged.AddUObject(this, &ACGPlayerController::OnGameStateChanged);
     }
+}
+
+inline ACGGameModeBase* ACGPlayerController::GetGameModeBase() const
+{
+    return GetWorld()->GetAuthGameMode<ACGGameModeBase>();
 }
 
 void ACGPlayerController::OnGameStateChanged(EGameState NewGameState)
@@ -46,7 +42,7 @@ void ACGPlayerController::OnGameStateChanged(EGameState NewGameState)
     }
     else
     {
-        SetInputMode(FInputModeUIOnly());
+        SetInputMode(FInputModeGameAndUI().SetHideCursorDuringCapture(false));
         bShowMouseCursor = true;
     }
 }

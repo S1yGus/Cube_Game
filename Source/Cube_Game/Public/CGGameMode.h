@@ -27,17 +27,19 @@ public:
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
     const FDifficulty* GetDifficultyVlues() const;
-    const TMap<ECubeType, FPopUpHint>& GetReceivingHints() const { return ReceivingHintsMap; }
+    const TMap<ECubeType, FHintData>& GetReceivingHints() const { return ReceivingHintsMap; }
 
     void ChangeTime(ECubeType CubeType);
     void ChangeSpeed(ECubeType CubeType);
     void ChangeScore(ECubeType CubeType);
 
-    void ShowPopUpHint(const FPopUpHint& PopUpHint);
+    void ShowPopUpHint(const FHintData& HintData);
 
     void GameOver();
 
     virtual void StartPlay() override;
+    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause());
+    bool SetPause(EGameState NewGameState);
     virtual bool ClearPause() override;
     virtual void PreInitializeComponents() override;
 
@@ -52,10 +54,10 @@ protected:
     int32 LowTimeThreshold = 5;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<EHint, FPopUpHint> GameplayHintsMap;
+    TMap<EHintType, FHintData> GameplayHintsMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<ECubeType, FPopUpHint> ReceivingHintsMap;
+    TMap<ECubeType, FHintData> ReceivingHintsMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0"))
     float StartupHintDelay = 2.0f;
@@ -73,14 +75,17 @@ private:
 
     ECubeType PreviousCubeType = ECubeType::None;
 
+    TMap<EHintType, bool> HintsMap;
+
     void SetupGameMode();
     void OnCountdown();
 
-    void ShowGameplayHint(EHint Hint, float Delay = 0.0f);
+    void ShowGameplayHint(EHintType Hint, float Delay = 0.0f);
     void FormatHints();
     void OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultiplier);
     void OnShowLowTimeHint();
     void OnShowSpeedUpHint(int32 NewSpeed);
+    void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 
     void AddTime(int32 TimeToAdd);
     void AddSpeed(int32 SpeedToAdd);

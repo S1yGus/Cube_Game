@@ -32,7 +32,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     USoundCue* FadeoutSound;
 
-    inline ACGGameModeBase* GetGameModeBase() const;
+    ACGGameModeBase* GetGameModeBase() const;
 
     virtual void SetGameState(EGameState NewGameState);
 };

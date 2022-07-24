@@ -2,7 +2,7 @@
 
 #include "Player/CGPlayerCamera.h"
 #include "Camera/CameraComponent.h"
-#include "CGGameInstance.h"
+#include "Settings/CGGameUserSettings.h"
 
 ACGPlayerCamera::ACGPlayerCamera()
 {
@@ -19,9 +19,9 @@ void ACGPlayerCamera::BeginPlay()
 
     check(CameraComponent);
 
-    if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
+    if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameInstance->OnAspectRatioChanged.AddUObject(this, &ACGPlayerCamera::OnAspectRatioChanged);
+        GameUserSettings->OnAspectRatioChanged.AddUObject(this, &ThisClass::OnAspectRatioChanged);
     }
 }
 

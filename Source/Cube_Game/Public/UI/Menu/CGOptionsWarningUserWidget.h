@@ -4,22 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "Interfaces/CGWidgetInterface.h"
 #include "CGCoreTypes.h"
 #include "CGOptionsWarningUserWidget.generated.h"
 
 class UCGButtonUserWidget;
 
 UCLASS()
-class CUBE_GAME_API UCGOptionsWarningUserWidget : public UCGAnimatedUserWidget, public ICGWidgetInterface
+class CUBE_GAME_API UCGOptionsWarningUserWidget : public UCGAnimatedUserWidget
 {
     GENERATED_BODY()
 
 public:
     UFUNCTION(BlueprintCallable)
     FText GetCountdownTime() const;
-
-    virtual void ResetWidget() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))
@@ -41,7 +38,11 @@ private:
     float CountdownTime = 0.0f;
 
     void Setup();
+    void ResetWidget();
 
+    void OnGameStateChanged(EGameState NewGameState);
+    void OnPressedEnter();
+    void OnPressedEsc();
     void OnSaveSettings();
     void OnCancelSettings();
 

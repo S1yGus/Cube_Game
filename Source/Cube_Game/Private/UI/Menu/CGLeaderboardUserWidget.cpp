@@ -2,16 +2,10 @@
 
 #include "UI/Menu/CGLeaderboardUserWidget.h"
 #include "CGGameModeBase.h"
+#include "CGGameInstance.h"
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "Components/VerticalBox.h"
-#include "CGGameInstance.h"
 #include "UI/Menu/CGPlayerRecordRowUserWidget.h"
-#include "Saves/CGLeaderboardSave.h"
-
-void UCGLeaderboardUserWidget::ResetWidget()
-{
-    BackButton->ResetButton();
-}
 
 void UCGLeaderboardUserWidget::NativeOnInitialized()
 {
@@ -20,61 +14,48 @@ void UCGLeaderboardUserWidget::NativeOnInitialized()
     Setup();
 }
 
-inline const UCGLeaderboardSave* UCGLeaderboardUserWidget::GetLeaderboardSave() const
-{
-    const auto GameInstance = GetGameInstance<UCGGameInstance>();
-    return GameInstance ? GameInstance->GetLeaderboardSave() : nullptr;
-}
-
 void UCGLeaderboardUserWidget::Setup()
 {
+    check(NameButton);
+    check(ScoreButton);
+    check(DateButton);
+    check(BackButton);
+    check(LeaderboardVerticalBox);
+
+    NameButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedNameButton);
+    ScoreButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedScoreButton);
+    DateButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedDateButton);
+    BackButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedBackButton);
+
     if (const auto GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &UCGLeaderboardUserWidget::OnGameStateChanged);
+        GameMode->OnPressedEsc.AddUObject(this, &UCGLeaderboardUserWidget::OnPressedEsc);
     }
+}
 
-    if (NameButton)
-    {
-        NameButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedNameButton);
-    }
-
-    if (ScoreButton)
-    {
-        ScoreButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedScoreButton);
-    }
-
-    if (DateButton)
-    {
-        DateButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedDateButton);
-    }
-
-    if (BackButton)
-    {
-        BackButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedBackButton);
-    }
+void UCGLeaderboardUserWidget::ResetWidget()
+{
+    BackButton->ResetButton();
 }
 
 void UCGLeaderboardUserWidget::UpdateLeaderboard()
 {
-    if (!LeaderboardVerticalBox)
+    auto GameInstnce = GetGameInstance<UCGGameInstance>();
+    if (!GameInstnce)
         return;
 
     LeaderboardVerticalBox->ClearChildren();
-
-    auto LeaderboardSave = GetLeaderboardSave();
-    if (!LeaderboardSave)
-        return;
-
-    for (const auto& PlayerRecord : LeaderboardSave->GetLeaderboard())
+    for (const auto& PlayerRecord : GameInstnce->GetLeaderboard())
     {
         const auto PlayerRecordRowWidget = CreateWidget<UCGPlayerRecordRowUserWidget>(GetWorld(), PlayerRecordRowWidgetClass);
         if (!PlayerRecordRowWidget)
             continue;
 
-        LeaderboardVerticalBox->AddChild(PlayerRecordRowWidget);
         PlayerRecordRowWidget->SetNameText(PlayerRecord.Name);
         PlayerRecordRowWidget->SetScoreText(FText::AsNumber(PlayerRecord.Score));
         PlayerRecordRowWidget->SetDateText(FText::AsDate(PlayerRecord.DateTime));
+        LeaderboardVerticalBox->AddChild(PlayerRecordRowWidget);
     }
 }
 
@@ -83,7 +64,16 @@ void UCGLeaderboardUserWidget::OnGameStateChanged(EGameState NewGameState)
     if (NewGameState != EGameState::Leaderboard)
         return;
 
+    ResetWidget();
     UpdateLeaderboard();
+}
+
+void UCGLeaderboardUserWidget::OnPressedEsc()
+{
+    if (!IsVisible())
+        return;
+
+    OnClickedBackButton();
 }
 
 void UCGLeaderboardUserWidget::OnClickedNameButton()
@@ -91,7 +81,7 @@ void UCGLeaderboardUserWidget::OnClickedNameButton()
     if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [&](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
+            [=](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
             {
                 return bNameAscending ? Record1.Name.ToString() > Record2.Name.ToString() : Record1.Name.ToString() < Record2.Name.ToString();
             });
@@ -107,7 +97,7 @@ void UCGLeaderboardUserWidget::OnClickedScoreButton()
     if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [&](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
+            [=](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
             {
                 return bScoreAscending ? Record1.Score > Record2.Score : Record1.Score < Record2.Score;
             });
@@ -123,7 +113,7 @@ void UCGLeaderboardUserWidget::OnClickedDateButton()
     if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [&](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
+            [=](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
             {
                 return bDateAscending ? Record1.DateTime > Record2.DateTime : Record1.DateTime < Record2.DateTime;
             });
@@ -136,6 +126,9 @@ void UCGLeaderboardUserWidget::OnClickedDateButton()
 
 void UCGLeaderboardUserWidget::OnClickedBackButton()
 {
+    if (IsAnyAnimationPlaying())
+        return;
+
     ShowFadeoutAnimation();
 }
 
