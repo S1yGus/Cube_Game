@@ -96,13 +96,13 @@ struct FDifficulty
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     TMap<ECubeType, float> SpawnWeightMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "s"))
     int32 InitialTime = 10;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "cm"))
     float DistanceBetweenCubes = 200.0f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "cm/s"))
     FVector2D CubesSpeedRange{100.0f, 10000.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
@@ -131,9 +131,27 @@ struct FHintData
 };
 
 USTRUCT(BlueprintType)
+struct FAspectRatioData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    float AspectRatio = 1.7777777f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    float FOV = 90.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    FText DisplayName{FText::FromString("16:9")};
+};
+
+USTRUCT(BlueprintType)
 struct FVideoSettings
 {
     GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    FAspectRatioData AspectRatioData;
 };
 
 USTRUCT(BlueprintType)
@@ -159,24 +177,26 @@ struct FHintsStatus
 {
     GENERATED_USTRUCT_BODY()
 
+    // clang-format off
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<EHintType, bool> HintsMap = {
-        TPair<EHintType, bool>{EHintType::Startup, true},       //
-        TPair<EHintType, bool>{EHintType::Multiplier, true},    //
-        TPair<EHintType, bool>{EHintType::LowTime, true},       //
-        TPair<EHintType, bool>{EHintType::SpeedUp, true}        //
+        TPair<EHintType, bool>{EHintType::Startup,    true},
+        TPair<EHintType, bool>{EHintType::Multiplier, true},
+        TPair<EHintType, bool>{EHintType::LowTime,    true},
+        TPair<EHintType, bool>{EHintType::SpeedUp,    true}
     };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<ECubeType, bool> ReceivingHintsMap = {
-        TPair<ECubeType, bool>{ECubeType::GoodCube, true},       //
-        TPair<ECubeType, bool>{ECubeType::BadCube, true},        //
-        TPair<ECubeType, bool>{ECubeType::ScoreCube, true},      //
-        TPair<ECubeType, bool>{ECubeType::TimeCube, true},       //
-        TPair<ECubeType, bool>{ECubeType::BonusCube, true},      //
-        TPair<ECubeType, bool>{ECubeType::SpeedCube, true},      //
-        TPair<ECubeType, bool>{ECubeType::PowerUpCube, true},    //
-    };                                                           //
+        TPair<ECubeType, bool>{ECubeType::GoodCube,    true},
+        TPair<ECubeType, bool>{ECubeType::BadCube,     true},
+        TPair<ECubeType, bool>{ECubeType::ScoreCube,   true},
+        TPair<ECubeType, bool>{ECubeType::TimeCube,    true},
+        TPair<ECubeType, bool>{ECubeType::BonusCube,   true},
+        TPair<ECubeType, bool>{ECubeType::SpeedCube,   true},
+        TPair<ECubeType, bool>{ECubeType::PowerUpCube, true}
+    };
+    // clang-format on
 };
 
 USTRUCT(BlueprintType)
@@ -206,7 +226,6 @@ struct FPlayerRecord
     FDateTime DateTime;
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPowerupedSignature, EPowerupType);
@@ -220,5 +239,6 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnShowPopUpHintSignature, const FHintData&)
 DECLARE_MULTICAST_DELEGATE(FOnPressedEscSignature);
 DECLARE_MULTICAST_DELEGATE(FOnPressedEnterSignature);
 DECLARE_MULTICAST_DELEGATE(FOnResolutionChangedSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, const FAspectRatioData&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);

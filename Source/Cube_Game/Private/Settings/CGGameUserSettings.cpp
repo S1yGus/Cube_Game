@@ -28,11 +28,13 @@
         SettingsSave->SoundSettings.VolumeType = NewValue;                                                                                                               \
     }
 
+// clang-format off
 static const FString SettingsSaveSlotName = "SettingsSave";
-static const FString SCMasterName = "SC_Master";
-static const FString SCUIName = "SC_UI";
-static const FString SCFXName = "SC_FX";
-static const FString SCMusicName = "SC_Music";
+static const FString SCMasterName         = "SC_Master";
+static const FString SCUIName             = "SC_UI";
+static const FString SCFXName             = "SC_FX";
+static const FString SCMusicName          = "SC_Music";
+// clang-format on
 
 static bool operator==(const FText& Text1, const FText& Text2)
 {
@@ -59,6 +61,11 @@ EPopUpType UCGGameUserSettings::GetPopUpType() const
 const FHintsStatus& UCGGameUserSettings::GetHintsStatus() const
 {
     return SettingsSave->GameSettings.HintsStatus;
+}
+
+const FAspectRatioData& UCGGameUserSettings::GetAspectRatio() const
+{
+    return SettingsSave->VideoSettings.AspectRatioData;
 }
 
 void UCGGameUserSettings::SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap)
@@ -105,48 +112,15 @@ void UCGGameUserSettings::SaveSettings()
 
 void UCGGameUserSettings::InitVideoSettings()
 {
-    TArray<FText> FullscreenOptions    //
+    const TArray<FText> FullscreenOptions    //
         {
             LOCTEXT("Fullscreen_Loc", "Fullscreen"),            //
             LOCTEXT("WindowedFullscreen_Loc", "Borderless"),    //
             LOCTEXT("Windowed_Loc", "Windowed")                 //
         };
 
-    TArray<FText> VSyncOptions    //
-        {
-            LOCTEXT("VSyncDisabled_Loc", "Disabled"),    //
-            LOCTEXT("VSyncEnabled_Loc", "Enabled")       //
-        };
-
-    TArray<FText> FramerateOptions    //
-        {
-            LOCTEXT("FramerateUnlimited_Loc", "Unlimited"),    //
-            FText::FromString("30"),                           //
-            FText::FromString("60"),                           //
-            FText::FromString("120"),                          //
-            FText::FromString("144")                           //
-        };
-
-    TArray<FText> AspectRatioOptions    //
-        {
-            FText::FromString("16:9"),    //
-            FText::FromString("21:9")     //
-        };
-
-    TArray<FText> GraphicsQualityOptions    //
-        {
-            LOCTEXT("GraphicsQualityLow_Loc", "Low"),               //
-            LOCTEXT("GraphicsQualityMedium_Loc", "Medium"),         //
-            LOCTEXT("GraphicsQualityHigh_Loc", "High"),             //
-            LOCTEXT("GraphicsQualityEpic_Loc", "Epic"),             //
-            LOCTEXT("GraphicsQualityCinematic_Loc", "Cinematic")    //
-        };
-
     {
-        auto Setting = NewObject<UCGIntSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("ScreenMode_Loc", "Screen mode"));
-        Setting->SetOptions(FullscreenOptions);
+        auto Setting = CreateIntSetting(LOCTEXT("ScreenMode_Loc", "Screen mode"), FullscreenOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -159,14 +133,10 @@ void UCGGameUserSettings::InitVideoSettings()
                 ApplyResolutionSettings(false);
                 SetLowestResolution();
             });
-        VideoSettings.Add(Setting);
     }
 
     {
-        ResolutionSetting = NewObject<UCGIntSetting>();
-        check(ResolutionSetting);
-        ResolutionSetting->SetName(LOCTEXT("Resolution_Loc", "Resolution"));
-        ResolutionSetting->SetOptions(GetScreenResolutions());
+        ResolutionSetting = CreateIntSetting(LOCTEXT("Resolution_Loc", "Resolution"), GetScreenResolutions(), VideoSettings);
         ResolutionSetting->AddGetter(
             [&]() -> int32
             {
@@ -190,14 +160,16 @@ void UCGGameUserSettings::InitVideoSettings()
                     OnResolutionChanged.Broadcast();
                 }
             });
-        VideoSettings.Add(ResolutionSetting);
     }
 
+    const TArray<FText> VSyncOptions    //
+        {
+            LOCTEXT("VSyncDisabled_Loc", "Disabled"),    //
+            LOCTEXT("VSyncEnabled_Loc", "Enabled")       //
+        };
+
     {
-        auto Setting = NewObject<UCGIntSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("VSync_Loc", "V-Sync"));
-        Setting->SetOptions(VSyncOptions);
+        auto Setting = CreateIntSetting(LOCTEXT("VSync_Loc", "V-Sync"), VSyncOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -209,14 +181,19 @@ void UCGGameUserSettings::InitVideoSettings()
                 SetVSyncEnabled(static_cast<bool>(NewValue));
                 ApplyNonResolutionSettings();
             });
-        VideoSettings.Add(Setting);
     }
 
+    const TArray<FText> FramerateOptions    //
+        {
+            LOCTEXT("FramerateUnlimited_Loc", "Unlimited"),    //
+            FText::FromString("30"),                           //
+            FText::FromString("60"),                           //
+            FText::FromString("120"),                          //
+            FText::FromString("144")                           //
+        };
+
     {
-        auto Setting = NewObject<UCGIntSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("FramerateLimit_Loc", "Framerate limit"));
-        Setting->SetOptions(FramerateOptions);
+        auto Setting = CreateIntSetting(LOCTEXT("FramerateLimit_Loc", "Framerate limit"), FramerateOptions, VideoSettings);
         Setting->AddGetter(
             [&, FramerateOptions]()
             {
@@ -230,23 +207,47 @@ void UCGGameUserSettings::InitVideoSettings()
                                                 : FCString::Atof(*FramerateOptions[NewValue].ToString()));
                 ApplyNonResolutionSettings();
             });
-        VideoSettings.Add(Setting);
     }
 
-    // TODO:
-    /*{
-        auto Setting = NewObject<UCGIntSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("AspectRatio_Loc", "Aspect ratio"));
-        Setting->SetOptions(AspectRatioOptions);
-        VideoSettings.Add(Setting);
-    }*/
+    const TArray<FAspectRatioData> AspectRatioData =    //
+        {
+            {1.3333333f, 73.5f, FText::FromString("4:3")},     //
+            {1.7777777f, 90.0f, FText::FromString("16:9")},    //
+            {2.3333333f, 105.0f, FText::FromString("21:9")}    //
+        };
+
+    TArray<FText> AspectRatioOptions;
+    for (const auto& Data : AspectRatioData)
+    {
+        AspectRatioOptions.Add(Data.DisplayName);
+    }
 
     {
-        auto Setting = NewObject<UCGIntSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("GraphicsQuality_Loc", "Quality"));
-        Setting->SetOptions(GraphicsQualityOptions);
+        auto Setting = CreateIntSetting(LOCTEXT("AspectRatio_Loc", "Aspect ratio"), AspectRatioOptions, VideoSettings);
+        Setting->AddGetter(
+            [&, AspectRatioOptions]()
+            {
+                return AspectRatioOptions.IndexOfByKey(SettingsSave->VideoSettings.AspectRatioData.DisplayName);
+            });
+        Setting->AddSetter(
+            [&, AspectRatioData](int32 NewValue)
+            {
+                SettingsSave->VideoSettings.AspectRatioData = AspectRatioData[NewValue];
+                OnAspectRatioChanged.Broadcast(AspectRatioData[NewValue]);
+            });
+    }
+
+    const TArray<FText> GraphicsQualityOptions    //
+        {
+            LOCTEXT("GraphicsQualityLow_Loc", "Low"),               //
+            LOCTEXT("GraphicsQualityMedium_Loc", "Medium"),         //
+            LOCTEXT("GraphicsQualityHigh_Loc", "High"),             //
+            LOCTEXT("GraphicsQualityEpic_Loc", "Epic"),             //
+            LOCTEXT("GraphicsQualityCinematic_Loc", "Cinematic")    //
+        };
+
+    {
+        auto Setting = CreateIntSetting(LOCTEXT("GraphicsQuality_Loc", "Quality"), GraphicsQualityOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -258,52 +259,39 @@ void UCGGameUserSettings::InitVideoSettings()
                 SetAllVideoSettings(NewValue);
                 ApplyNonResolutionSettings();
             });
-        VideoSettings.Add(Setting);
     }
 }
 
 void UCGGameUserSettings::InitSoundSettings()
 {
     {
-        auto Setting = NewObject<UCGFloatSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("MasterVolume_Loc", "Master"));
+        auto Setting = CreateFloatSetting(LOCTEXT("MasterVolume_Loc", "Master"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MasterVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCMasterName, MasterVolume));
-        SoundSettings.Add(Setting);
     }
 
     {
-        auto Setting = NewObject<UCGFloatSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("UIVolume_Loc", "Interface"));
+        auto Setting = CreateFloatSetting(LOCTEXT("UIVolume_Loc", "Interface"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(UIVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCUIName, UIVolume));
-        SoundSettings.Add(Setting);
     }
 
     {
-        auto Setting = NewObject<UCGFloatSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("FXVolume_Loc", "Effects"));
+        auto Setting = CreateFloatSetting(LOCTEXT("FXVolume_Loc", "Effects"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(FXVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCFXName, FXVolume));
-        SoundSettings.Add(Setting);
     }
 
     {
-        auto Setting = NewObject<UCGFloatSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("MusicVolume_Loc", "Music"));
+        auto Setting = CreateFloatSetting(LOCTEXT("MusicVolume_Loc", "Music"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MusicVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCMusicName, MusicVolume));
-        SoundSettings.Add(Setting);
     }
 }
 
 void UCGGameUserSettings::InitGameSettings()
 {
-    TArray<FText> PopUpTypeOptions    //
+    const TArray<FText> PopUpTypeOptions    //
         {
             LOCTEXT("PopUpTypeOff_Loc", "Off"),                  //
             LOCTEXT("PopUpTypeMultiplier_Loc", "Multiplier"),    //
@@ -311,10 +299,7 @@ void UCGGameUserSettings::InitGameSettings()
         };
 
     {
-        auto Setting = NewObject<UCGIntSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("PopUpType_Loc", "Pop-up type"));
-        Setting->SetOptions(PopUpTypeOptions);
+        auto Setting = CreateIntSetting(LOCTEXT("PopUpType_Loc", "Pop-up type"), PopUpTypeOptions, GameSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -326,14 +311,10 @@ void UCGGameUserSettings::InitGameSettings()
                 SettingsSave->GameSettings.PopUpType = static_cast<EPopUpType>(NewValue);
                 OnPopUpTypeChanged.Broadcast(SettingsSave->GameSettings.PopUpType);
             });
-        GameSettings.Add(Setting);
     }
 
     {
-        auto Setting = NewObject<UCGActionSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("ResetHints_Loc", "Reset hints"));
-        Setting->SetActionName(LOCTEXT("ResetHintsButton_Loc", "RESET"));
+        auto Setting = CreateActionSetting(LOCTEXT("ResetHints_Loc", "Reset hints"), LOCTEXT("ResetHintsButton_Loc", "RESET"), GameSettings);
         Setting->AddActionFunc(
             [&]()
             {
@@ -373,14 +354,10 @@ void UCGGameUserSettings::InitGameSettings()
 
                 return bCanReset;
             });
-        GameSettings.Add(Setting);
     }
 
     {
-        auto Setting = NewObject<UCGActionSetting>();
-        check(Setting);
-        Setting->SetName(LOCTEXT("ClearLeaderboard_Loc", "Clear leaderboard"));
-        Setting->SetActionName(LOCTEXT("ClearLeaderboardButton_Loc", "CLEAR"));
+        auto Setting = CreateActionSetting(LOCTEXT("ClearLeaderboard_Loc", "Clear leaderboard"), LOCTEXT("ClearLeaderboardButton_Loc", "CLEAR"), GameSettings);
         Setting->AddActionFunc(
             []()
             {
@@ -408,7 +385,6 @@ void UCGGameUserSettings::InitGameSettings()
                 return !GameInstance->GetLeaderboard().IsEmpty();
                 return true;
             });
-        GameSettings.Add(Setting);
     }
 }
 
@@ -507,6 +483,29 @@ void UCGGameUserSettings::CheckSettingsSave()
     }
 
     check(SettingsSave);
+}
+
+UCGIntSetting* UCGGameUserSettings::CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<UCGSetting*>& AddTo)
+{
+    const auto Setting = CreateSetting<UCGIntSetting>(Name, AddTo);
+    Setting->SetOptions(Options);
+
+    return Setting;
+}
+
+UCGFloatSetting* UCGGameUserSettings::CreateFloatSetting(const FText& Name, TArray<UCGSetting*>& AddTo)
+{
+    const auto Setting = CreateSetting<UCGFloatSetting>(Name, AddTo);
+
+    return Setting;
+}
+
+UCGActionSetting* UCGGameUserSettings::CreateActionSetting(const FText& Name, const FText& ActionName, TArray<UCGSetting*>& AddTo)
+{
+    const auto Setting = CreateSetting<UCGActionSetting>(Name, AddTo);
+    Setting->SetActionName(ActionName);
+
+    return Setting;
 }
 
 #undef LOCTEXT_NAMESPACE

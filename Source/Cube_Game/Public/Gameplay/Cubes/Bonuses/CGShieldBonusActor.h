@@ -19,7 +19,7 @@ public:
     virtual void Teardown() override;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0", Units = "s"))
     float ShieldDuration = 7.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0"))

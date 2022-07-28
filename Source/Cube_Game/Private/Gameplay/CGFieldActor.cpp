@@ -16,12 +16,13 @@ ACGFieldActor::ACGFieldActor()
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->CastShadow = false;
-    SetRootComponent(StaticMeshComponent);
 
     WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
     WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     WidgetComponent->SetDrawAtDesiredSize(true);
     WidgetComponent->SetupAttachment(StaticMeshComponent);
+
+    SetRootComponent(StaticMeshComponent);
 }
 
 void ACGFieldActor::BeginPlay()

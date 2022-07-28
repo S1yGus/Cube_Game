@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "CGCoreTypes.h"
 #include "CGPlayerCamera.generated.h"
 
 class UCameraComponent;
@@ -23,5 +24,5 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    void OnAspectRatioChanged(float NewAspectRatio);
+    void OnAspectRatioChanged(const FAspectRatioData& NewAspectRatioData);
 };

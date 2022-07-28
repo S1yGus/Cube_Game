@@ -22,10 +22,12 @@ void ACGPlayerCamera::BeginPlay()
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->OnAspectRatioChanged.AddUObject(this, &ThisClass::OnAspectRatioChanged);
+        OnAspectRatioChanged(GameUserSettings->GetAspectRatio());    // Aspect ratio initialization.
     }
 }
 
-void ACGPlayerCamera::OnAspectRatioChanged(float NewAspectRatio)
+void ACGPlayerCamera::OnAspectRatioChanged(const FAspectRatioData& NewAspectRatioData)
 {
-    CameraComponent->SetAspectRatio(NewAspectRatio);
+    CameraComponent->SetAspectRatio(NewAspectRatioData.AspectRatio);
+    CameraComponent->SetFieldOfView(NewAspectRatioData.FOV);
 }

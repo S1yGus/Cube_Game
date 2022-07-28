@@ -9,6 +9,8 @@
 
 class UCGSetting;
 class UCGIntSetting;
+class UCGFloatSetting;
+class UCGActionSetting;
 class UCGSettingsSave;
 
 UCLASS()
@@ -25,11 +27,12 @@ public:
     UCGGameUserSettings();
 
     static UCGGameUserSettings* Get();
-    const TArray<UCGSetting*>& GetVideoSettings() const { return VideoSettings; }
-    const TArray<UCGSetting*>& GetSoundSettings() const { return SoundSettings; }
-    const TArray<UCGSetting*>& GetGameSettings() const { return GameSettings; }
+    inline const TArray<UCGSetting*>& GetVideoSettings() const { return VideoSettings; }
+    inline const TArray<UCGSetting*>& GetSoundSettings() const { return SoundSettings; }
+    inline const TArray<UCGSetting*>& GetGameSettings() const { return GameSettings; }
     EPopUpType GetPopUpType() const;
     const FHintsStatus& GetHintsStatus() const;
+    const FAspectRatioData& GetAspectRatio() const;
     void SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap);
     void SetReceivingHintsStatus(const TMap<ECubeType, bool>& NewHintsMap);
     void SetLastConfirmedResolutionSettings();
@@ -63,4 +66,19 @@ private:
     void SetSoundClassVolume(const FString& SoundClassName, float NewVolume);
 
     void CheckSettingsSave();
+
+    inline UCGIntSetting* CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<UCGSetting*>& AddTo);
+    inline UCGFloatSetting* CreateFloatSetting(const FText& Name, TArray<UCGSetting*>& AddTo);
+    inline UCGActionSetting* CreateActionSetting(const FText& Name, const FText& ActionName, TArray<UCGSetting*>& AddTo);
+
+    template <class T>
+    T* CreateSetting(const FText& Name, TArray<UCGSetting*>& AddTo)
+    {
+        T* Setting = NewObject<T>();
+        check(Setting);
+        Setting->SetName(Name);
+        AddTo.Add(Setting);
+
+        return Setting;
+    }
 };

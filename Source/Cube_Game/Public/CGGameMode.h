@@ -50,7 +50,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     FVector2D SpeedRange{1.0f, 999.0f};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0", Units = "s"))
     int32 LowTimeThreshold = 5;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
@@ -59,7 +59,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<ECubeType, FHintData> ReceivingHintsMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
     float StartupHintDelay = 2.0f;
 
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

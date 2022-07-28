@@ -14,8 +14,8 @@
 #include "Settings/CGActionSetting.h"
 #include "Interfaces/CGSettingWidgetInterface.h"
 
-#define UPDATE_SETTINGS_WIDGETS(Arr)                                                                                                                                     \
-    for (const auto& Widget : Arr->GetAllChildren())                                                                                                                     \
+#define UPDATE_SETTINGS_WIDGETS(ContainerWidget)                                                                                                                         \
+    for (const auto& Widget : ContainerWidget->GetAllChildren())                                                                                                         \
     {                                                                                                                                                                    \
         if (const auto SettingWidget = Cast<ICGSettingWidgetInterface>(Widget))                                                                                          \
         {                                                                                                                                                                \
@@ -23,11 +23,11 @@
         }                                                                                                                                                                \
     }
 
-#define CREATE_AND_ADD_SETTING_WIDGET(T, WidgetClass, Setting, ToVerticalBox)                                                                                            \
-    const auto SettingWidget = CreateWidget<T>(GetWorld(), WidgetClass);                                                                                                 \
+#define CREATE_AND_ADD_SETTING_WIDGET(T, WidgetClass, Setting, ToContainerWidget)                                                                                        \
+    T* SettingWidget = CreateWidget<T>(GetWorld(), WidgetClass);                                                                                                         \
     check(SettingWidget);                                                                                                                                                \
     SettingWidget->Init(Setting);                                                                                                                                        \
-    ToVerticalBox->AddChild(SettingWidget);
+    ToContainerWidget->AddChild(SettingWidget);
 
 void UCGOptionsUserWidget::NativeOnInitialized()
 {

@@ -43,16 +43,16 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0"))
     int32 SpawnPositionsAmount = 4;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0.0"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0.0", Units = "cm"))
     float SpawnStep = 200.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset", Meta = (Units = "cm"))
     float SpawnXOffset = 100.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset", Meta = (Units = "cm"))
     float SpawnYOffset = -1600.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn | Offset", Meta = (Units = "cm"))
     float SpawnZOffset = 65.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Indicators")
@@ -61,13 +61,13 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Indicators")
     TSubclassOf<ACGIndicatorBonusCubeActor> BonusIndicatorClass;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0.0"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0.0", Units = "cm"))
     float IndicatorsSpawnStep = 207.15f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators | Offset")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators | Offset", Meta = (Units = "cm"))
     float IndicatorsSpawnYOffset = -100.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators | Offset")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators | Offset", Meta = (Units = "cm"))
     float IndicatorsSpawnZOffset = 65.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0"))
