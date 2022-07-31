@@ -26,7 +26,7 @@ public:
     int32 GetSpeed() const { return Speed; }
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
-    const FDifficulty* GetDifficultyVlues() const;
+    const FDifficulty& GetDifficultyVlues() const;
     const TMap<ECubeType, FHintData>& GetReceivingHints() const { return ReceivingHintsMap; }
 
     void ChangeTime(ECubeType CubeType);

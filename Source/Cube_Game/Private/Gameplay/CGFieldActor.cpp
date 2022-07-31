@@ -38,22 +38,21 @@ void ACGFieldActor::BeginPlay()
 float ACGFieldActor::GetSpawnTimerRate() const
 {
     const auto GameMode = GetGameMode();
-    const auto DifficultyVlues = GetDifficultyVlues();
-    if (!GameMode || !DifficultyVlues)
+    if (!GameMode)
         return 0.0f;
 
-    return DifficultyVlues->DistanceBetweenCubes / GameMode->GetCubeSpeed();
+    return GetDifficultyVlues().DistanceBetweenCubes / GameMode->GetCubeSpeed();
 }
 
 ECubeType ACGFieldActor::GetRandomCubeType() const
 {
     const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues)
+    if (!DifficultyVlues.SpawnWeightMap.Num())
         return ECubeType::None;
 
     const auto RandNum = FMath::FRand();
     TArray<ECubeType> RandItems;
-    for (const auto& ItemPair : DifficultyVlues->SpawnWeightMap)
+    for (const auto& ItemPair : DifficultyVlues.SpawnWeightMap)
     {
         if (RandNum > ItemPair.Value)
             continue;
@@ -72,9 +71,9 @@ ACGGameMode* ACGFieldActor::GetGameMode() const
     return GetWorld()->GetAuthGameMode<ACGGameMode>();
 }
 
-const FDifficulty* ACGFieldActor::GetDifficultyVlues() const
+const FDifficulty& ACGFieldActor::GetDifficultyVlues() const
 {
-    return GetGameMode() ? GetGameMode()->GetDifficultyVlues() : nullptr;
+    return GetGameMode()->GetDifficultyVlues();
 }
 
 const APawn* ACGFieldActor::GetPlayerPawn() const
@@ -102,13 +101,13 @@ void ACGFieldActor::SetupField()
 
 void ACGFieldActor::OnSpawnCube()
 {
-    if (++CubesInLine <= GetDifficultyVlues()->MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
+    if (++CubesInLine <= GetDifficultyVlues().MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
     {
         const auto RandIndex = FMath::RandHelper(SpawnPositions.Num());
         SpawnCube(SpawnPositions[RandIndex]);
         SpawnPositions.RemoveAt(RandIndex);
 
-        if (UKismetMathLibrary::RandomBoolWithWeight(GetDifficultyVlues()->ChanceToAddCubeInLine))
+        if (UKismetMathLibrary::RandomBoolWithWeight(GetDifficultyVlues().ChanceToAddCubeInLine))
         {
             OnSpawnCube();
             return;

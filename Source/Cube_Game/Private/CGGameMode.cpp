@@ -19,40 +19,37 @@ ACGGameMode::ACGGameMode()
 
 int32 ACGGameMode::GetCubeSpeed() const
 {
-    const auto DifficultyVlues = GetDifficultyVlues();
-    const auto CubesSpeedRange = DifficultyVlues ? DifficultyVlues->CubesSpeedRange : FDifficulty{}.CubesSpeedRange;
-
-    return FMath::GetMappedRangeValueClamped(SpeedRange, CubesSpeedRange, static_cast<float>(Speed));
+    return FMath::GetMappedRangeValueClamped(SpeedRange, GetDifficultyVlues().CubesSpeedRange, static_cast<float>(Speed));
 }
 
-const FDifficulty* ACGGameMode::GetDifficultyVlues() const
+const FDifficulty& ACGGameMode::GetDifficultyVlues() const
 {
     const auto GameInstance = GetGameInstance<UCGGameInstance>();
-    if (!GameInstance)
-        return nullptr;
+    if (GameInstance && DifficultyMap.Contains(GameInstance->GetDifficulty()))
+    {
+        return DifficultyMap[GameInstance->GetDifficulty()];
+    }
 
-    if (!DifficultyMap.Contains(GameInstance->GetDifficulty()))
-        return nullptr;
-
-    return &DifficultyMap[GameInstance->GetDifficulty()];
+    static const auto Difficulty = FDifficulty{};
+    return Difficulty;
 }
 
 void ACGGameMode::ChangeTime(ECubeType CubeType)
 {
     const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues || !DifficultyVlues->TimeChangeMap.Contains(CubeType))
+    if (!DifficultyVlues.TimeChangeMap.Contains(CubeType))
         return;
 
-    AddTime(DifficultyVlues->TimeChangeMap[CubeType]);
+    AddTime(DifficultyVlues.TimeChangeMap[CubeType]);
 }
 
 void ACGGameMode::ChangeSpeed(ECubeType CubeType)
 {
     const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues || !DifficultyVlues->SpeedChangeMap.Contains(CubeType))
+    if (!DifficultyVlues.SpeedChangeMap.Contains(CubeType))
         return;
 
-    AddSpeed(DifficultyVlues->SpeedChangeMap[CubeType]);
+    AddSpeed(DifficultyVlues.SpeedChangeMap[CubeType]);
 }
 
 void ACGGameMode::ChangeScore(ECubeType CubeType)
@@ -60,13 +57,13 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
     ChangeMultiplier(CubeType);
 
     const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues || !DifficultyVlues->ScoreChangeMap.Contains(CubeType))
+    if (!DifficultyVlues.ScoreChangeMap.Contains(CubeType))
         return;
 
-    const auto ScoreRemains = Score % DifficultyVlues->ScoreToSpeedUp;
-    const auto ScoreToAdd = Multiplier * DifficultyVlues->ScoreChangeMap[CubeType];
-    const auto SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyVlues->ScoreToSpeedUp;
-    if (SpeedToAdd >= 1)
+    const auto ScoreRemains = Score % DifficultyVlues.ScoreToSpeedUp;
+    const auto ScoreToAdd = Multiplier * DifficultyVlues.ScoreChangeMap[CubeType];
+    const auto SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyVlues.ScoreToSpeedUp;
+    if (SpeedToAdd >= 1)    //
     {
         AddSpeed(static_cast<int32>(SpeedToAdd));
     }
@@ -136,17 +133,17 @@ void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ACGGameMode::SetupGameMode()
 {
-    const auto DifficultyVlues = GetDifficultyVlues();
-    Time = DifficultyVlues ? DifficultyVlues->InitialTime : FDifficulty{}.InitialTime;
+    Time = GetDifficultyVlues().InitialTime;
 
-    OnMultiplierChanged.AddUObject(this, &ACGGameMode::OnShowMultiplierHint);
-    OnLowTime.AddUObject(this, &ACGGameMode::OnShowLowTimeHint);
-    OnSpeedChanged.AddUObject(this, &ACGGameMode::OnShowSpeedUpHint);
+    OnMultiplierChanged.AddUObject(this, &ThisClass::OnShowMultiplierHint);
+    OnLowTime.AddUObject(this, &ThisClass::OnShowLowTimeHint);
+    OnSpeedChanged.AddUObject(this, &ThisClass::OnShowSpeedUpHint);
 
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
         HintsMap = GameUserSettings->GetHintsStatus().HintsMap;
+
+        GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
     }
 }
 
@@ -200,12 +197,9 @@ void ACGGameMode::FormatHints()
     // Format SpeedUp hint.
     if (GameplayHintsMap.Contains(EHintType::SpeedUp) && GameplayHintsMap[EHintType::SpeedUp].HintText.ToString().Contains("{0}"))
     {
-        if (const auto GetDifficulty = GetDifficultyVlues())
-        {
-            FStringFormatOrderedArguments SpeedUpHintArg;
-            SpeedUpHintArg.Add(GetDifficulty->ScoreToSpeedUp);
-            GameplayHintsMap[EHintType::SpeedUp].HintText = FText::FromString(FString::Format(*GameplayHintsMap[EHintType::SpeedUp].HintText.ToString(), SpeedUpHintArg));
-        }
+        FStringFormatOrderedArguments SpeedUpHintArg;
+        SpeedUpHintArg.Add(GetDifficultyVlues().ScoreToSpeedUp);
+        GameplayHintsMap[EHintType::SpeedUp].HintText = FText::FromString(FString::Format(*GameplayHintsMap[EHintType::SpeedUp].HintText.ToString(), SpeedUpHintArg));
     }
 }
 
@@ -255,10 +249,7 @@ void ACGGameMode::AddScore(int32 ScoreToAdd)
 void ACGGameMode::ChangeMultiplier(ECubeType CubeType)
 {
     const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues)
-        return;
-
-    if (DifficultyVlues->ScoreChangeMap.Contains(CubeType) && DifficultyVlues->ScoreChangeMap[CubeType] > 0 && CubeType == PreviousCubeType)
+    if (DifficultyVlues.ScoreChangeMap.Contains(CubeType) && DifficultyVlues.ScoreChangeMap[CubeType] > 0 && CubeType == PreviousCubeType)
     {
         if (Multiplier + 1 <= MaxMultiplier)
         {

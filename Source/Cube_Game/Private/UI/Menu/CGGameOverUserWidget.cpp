@@ -107,15 +107,15 @@ void UCGGameOverUserWidget::OnNameTextChanged(const FText& NewText)
 
 FText UCGGameOverUserWidget::FormatGameOverText(int32 Score)
 {
-    if (GameOverFormatStr.Contains("{0}"))
+    if (GameOverFormat.ToString().Contains("{0}"))
     {
         FStringFormatOrderedArguments GameOverArg;
         GameOverArg.Add(Score);
-        return FText::FromString(FString::Format(*GameOverFormatStr, GameOverArg));
+        return FText::FromString(FString::Format(*GameOverFormat.ToString(), GameOverArg));
     }
     else
     {
-        return FText::FromString(GameOverFormatStr);
+        return GameOverFormat;
     }
 }
 

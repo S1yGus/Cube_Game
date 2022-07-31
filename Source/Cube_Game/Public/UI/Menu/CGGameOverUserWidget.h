@@ -40,7 +40,7 @@ protected:
     UEditableText* NameEditableText;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text Format", Meta = (ToolTip = "To specify the number of score, use the argument {0}"))
-    FString GameOverFormatStr = "You have scored {0} points.";
+    FText GameOverFormat;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text Format")
     int32 PlayerNameMinLen = 3;

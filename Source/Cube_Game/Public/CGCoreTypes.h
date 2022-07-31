@@ -226,6 +226,18 @@ struct FPlayerRecord
     FDateTime DateTime;
 };
 
+USTRUCT(BlueprintType)
+struct FCultureData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Culture")
+    FString Culture;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Culture")
+    FText CultureName;
+};
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPowerupedSignature, EPowerupType);

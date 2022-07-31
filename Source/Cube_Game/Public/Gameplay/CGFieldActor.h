@@ -91,7 +91,7 @@ private:
     float GetSpawnTimerRate() const;
     ECubeType GetRandomCubeType() const;
     inline ACGGameMode* GetGameMode() const;
-    inline const FDifficulty* GetDifficultyVlues() const;
+    inline const FDifficulty& GetDifficultyVlues() const;
     inline const APawn* GetPlayerPawn() const;
 
     void SetupField();

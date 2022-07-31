@@ -75,7 +75,7 @@ private:
     T* CreateSetting(const FText& Name, TArray<UCGSetting*>& AddTo)
     {
         T* Setting = NewObject<T>();
-        check(Setting);
+        checkf(Setting->IsA(UCGSetting::StaticClass()), TEXT("T must be based on UCGSetting"));
         Setting->SetName(Name);
         AddTo.Add(Setting);
 
