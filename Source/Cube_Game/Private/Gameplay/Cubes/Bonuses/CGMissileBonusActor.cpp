@@ -1,26 +1,34 @@
 // Cube_Game, All rights reserved.
 
 #include "Gameplay/Cubes/Bonuses/CGMissileBonusActor.h"
+#include "Gameplay/Cubes/Components/CGMovementComponent.h"
+#include "NiagaraComponent.h"
 
-constexpr static float MissileSpeed = 1000.0f;
-constexpr static float LifeSpan = 3.0f;
+constexpr static float LifeSpan = 5.0f;
 
 ACGMissileBonusActor::ACGMissileBonusActor()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Niagara");
+    NiagaraComponent->SetupAttachment(StaticMeshComponent);
 
-    BonusType = EBonusType::Missile;
-    TargetScale = FVector{0.2};
+    MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
 }
 
-void ACGMissileBonusActor::Tick(float DeltaSeconds)
+void ACGMissileBonusActor::Teardown()
 {
-    Moving(DeltaSeconds);
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    StaticMeshComponent->SetVisibility(false);
+    NiagaraComponent->Deactivate();
+    MovementComponent->StopMoving();
+    SetLifeSpan(LifeSpan);
 }
 
 void ACGMissileBonusActor::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(NiagaraComponent);
+    check(MovementComponent);
 
     SetLifeSpan(LifeSpan);
 }
@@ -28,11 +36,4 @@ void ACGMissileBonusActor::BeginPlay()
 void ACGMissileBonusActor::OnOverlapFinished()
 {
     Teardown();
-}
-
-void ACGMissileBonusActor::Moving(float DeltaSeconds)
-{
-    auto NewLocation = GetActorLocation();
-    NewLocation.Y = NewLocation.Y - MissileSpeed * DeltaSeconds;
-    SetActorLocation(NewLocation);
 }

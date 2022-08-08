@@ -11,9 +11,6 @@ class CUBE_GAME_API ACGBombBonusActor : public ACGAttachedBonusActor
 {
     GENERATED_BODY()
 
-public:
-    ACGBombBonusActor();
-
 protected:
     virtual void OnScalingDone() override;
 };

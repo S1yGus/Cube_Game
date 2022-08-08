@@ -39,7 +39,7 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     UEditableText* NameEditableText;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text Format", Meta = (ToolTip = "To specify the number of score, use the argument {0}"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text Format", Meta = (ToolTip = "To specify the number of score, use the argument {0}."))
     FText GameOverFormat;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text Format")

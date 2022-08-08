@@ -20,42 +20,48 @@ public:
     UCGFXComponent();
 
     void OutOfPosition();
-    void PlayReceivingSound(ECubeType CubeType);
-    void SetReceivingMaterial(ECubeType CubeType);
+    void PlaySoundOfReceiving(ECubeType CubeType);
+    void SetColorOfReceiving(ECubeType CubeType);
     void MakeCameraShake(ECubeType CubeType);
     void MakeCameraShake(EBonusType BonusType);
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* OutOfPositionSounds;
+    USoundCue* OutOfPositionSound;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    TMap<ECubeType, USoundCue*> ReceivingSoundsMap;
+    TMap<ECubeType, USoundCue*> SoundsOfReceivingMap;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material", Meta = (ToolTip = "Use none type for default color data."))
+    TMap<ECubeType, FCubeColorData> ColorDataOfReceivingMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
-    UMaterialInstance* DefaultMaterial;
+    FName ColorParamName = "EmissiveColor";
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
-    TMap<ECubeType, UMaterialInstance*> ReceivingMaterialsMap;
+    FName EmissivePowerParamName = "EmissivePower";
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
-    TMap<ECubeType, TSubclassOf<UCameraShakeBase>> CubesCameraShakeMap;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
-    TMap<EBonusType, TSubclassOf<UCameraShakeBase>> BonusesCameraShakeMap;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
-    TSubclassOf<UCameraShakeBase> OutOfPositionCameraShake;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
+    FName MaskEnabledParamName = "MaskEnabled";
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material", Meta = (ClampMin = "0.0"))
     float TimeOfMaterialChanging = 0.25f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
+    TMap<ECubeType, TSubclassOf<UCameraShakeBase>> CameraShakeOfReceivingMap;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
+    TMap<EBonusType, TSubclassOf<UCameraShakeBase>> CameraShakeOfBonusesMap;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
+    TSubclassOf<UCameraShakeBase> OutOfPositionCameraShake;
 
 private:
     FTimerHandle MaterialTimerHandle;
 
     inline UStaticMeshComponent* GetOwnerMesh() const;
 
-    void OnReturnDefaultMaterial();
+    void OnReturnDefaultColor();
 
     void MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeClass, float Scale = 1.0f);
 };

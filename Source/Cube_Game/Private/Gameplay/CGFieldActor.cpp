@@ -3,10 +3,9 @@
 #include "Gameplay/CGFieldActor.h"
 #include "CGGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Gameplay/Cubes/CGBaseCubeActor.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "Player/Components/CGBonusComponent.h"
-#include "Gameplay/Cubes/Bonuses/CGIndicatorBonusCubeActor.h"
-#include "Gameplay/Cubes/CGIndicatorCubeActor.h"
 #include "Components/WidgetComponent.h"
 
 ACGFieldActor::ACGFieldActor()
@@ -73,7 +72,13 @@ ACGGameMode* ACGFieldActor::GetGameMode() const
 
 const FDifficulty& ACGFieldActor::GetDifficultyVlues() const
 {
-    return GetGameMode()->GetDifficultyVlues();
+    if (const auto GameMode = GetGameMode())
+    {
+        return GameMode->GetDifficultyVlues();
+    }
+
+    static const auto Difficulty = FDifficulty{};
+    return Difficulty;
 }
 
 const APawn* ACGFieldActor::GetPlayerPawn() const
@@ -97,6 +102,8 @@ void ACGFieldActor::SetupField()
             BonusComponent->OnBonusChanged.AddUObject(this, &ACGFieldActor::OnBonusChanged);
         }
     }
+
+    ChangeFieldColor(EBonusType::None);    // Set default field color.
 }
 
 void ACGFieldActor::OnSpawnCube()
@@ -114,7 +121,7 @@ void ACGFieldActor::OnSpawnCube()
         }
     }
 
-    if (bRestartSpawn)
+    if (bRestartSpawn)    // Spawn is restarting after speed have been changed.
     {
         GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, GetSpawnTimerRate(), true);
         bRestartSpawn = false;
@@ -125,14 +132,11 @@ void ACGFieldActor::OnSpawnCube()
 
 void ACGFieldActor::SpawnCube(int32 SpawnPosition)
 {
-    const FVector RelativeSpawnLocation{SpawnPosition * SpawnStep + SpawnXOffset, SpawnYOffset, SpawnZOffset};
-    const auto SpawnTransform = FTransform{RelativeSpawnLocation} * GetTransform();
-    const auto SpawnedCube = GetWorld()->SpawnActorDeferred<ACGCubeActor>(SpawningCubeClass, SpawnTransform);
-    if (!SpawnedCube)
-        return;
-
-    SpawnedCube->SetCubeType(GetRandomCubeType());
-    SpawnedCube->FinishSpawning(SpawnTransform);
+    const FVector RelativeLocation{SpawnPosition * SpawnStep + SpawnXOffset, SpawnYOffset, SpawnZOffset};
+    const auto CubeType = GetRandomCubeType();
+    const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
+    auto SpawnedCube = SpawnCubeActor<ACGCubeActor>(SpawningCubeClass, RelativeLocation, CubeColorData);
+    SpawnedCube->SetCubeType(CubeType);
 }
 
 void ACGFieldActor::OnSpeedChanged(int32 NewSpeed)
@@ -169,17 +173,12 @@ void ACGFieldActor::OnMultiplierChanged(ECubeType CubeType, int32 Multiplier)
 
 void ACGFieldActor::SpawnIndicator(ECubeType CubeType, int32 Multiplier)
 {
-    const FVector RelativeIndLocation{SpawnPositionsAmount * SpawnStep + SpawnXOffset,                     //
-                                      (Multiplier - 2) * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
-                                      IndicatorsSpawnZOffset};                                             //
     // (Multiplier - 2) because the first an indicator cube spawn when Multiplier be 2.
-    const auto IndicatorSpawnTransform = FTransform{RelativeIndLocation} * GetTransform();
-    const auto Indicator = GetWorld()->SpawnActorDeferred<ACGIndicatorCubeActor>(IndicatorClass, IndicatorSpawnTransform);
-    if (!Indicator)
-        return;
-
-    Indicator->SetCubeType(CubeType);
-    Indicator->FinishSpawning(IndicatorSpawnTransform);
+    const FVector RelativeLocation{SpawnPositionsAmount * SpawnStep + SpawnXOffset,                     //
+                                   (Multiplier - 2) * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
+                                   IndicatorsSpawnZOffset};                                             //
+    const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
+    const auto Indicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
     Indicators.Add(Indicator);
 }
 
@@ -201,32 +200,22 @@ void ACGFieldActor::OnBonusChanged(EBonusType BonusType)
 
 void ACGFieldActor::ChangeFieldColor(EBonusType BonusType)
 {
-    const auto FieldMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
-    if (!FieldMaterial)
-        return;
-
     if (!MaterialColorsMap.Contains(BonusType))
-    {
-        FieldMaterial->SetVectorParameterValue(ColorParamName, DefaultColor);
         return;
-    }
 
-    FieldMaterial->SetVectorParameterValue(ColorParamName, MaterialColorsMap[BonusType]);
+    const auto DynMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
+    check(DynMaterial);
+    DynMaterial->SetVectorParameterValue(ColorParamName, MaterialColorsMap[BonusType]);
 }
 
 void ACGFieldActor::SpawnBonusIndicator(EBonusType BonusType)
 {
-    const FVector RelativeIndLocation{SpawnPositionsAmount * SpawnStep + SpawnXOffset,                           //
-                                      BonusIndicatorPosition * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
-                                      IndicatorsSpawnZOffset};                                                   //
-    const auto IndicatorSpawnTransform = FTransform{RelativeIndLocation} * GetTransform();
-    BonusIndicator = GetWorld()->SpawnActorDeferred<ACGIndicatorBonusCubeActor>(BonusIndicatorClass, IndicatorSpawnTransform);
-    if (!BonusIndicator)
-        return;
-
-    BonusIndicator->SetBonusType(BonusType);
+    const FVector RelativeLocation{SpawnPositionsAmount * SpawnStep + SpawnXOffset,                           //
+                                   BonusIndicatorPosition * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
+                                   IndicatorsSpawnZOffset};                                                   //
+    const auto CubeColorData = BonusColorDataMap.Contains(BonusType) ? BonusColorDataMap[BonusType] : FCubeColorData{};
+    BonusIndicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
     BonusIndicator->OnDestroyed.AddDynamic(this, &ACGFieldActor::OnBonusIndicatorDestroyed);
-    BonusIndicator->FinishSpawning(IndicatorSpawnTransform);
 }
 
 void ACGFieldActor::OnBonusIndicatorDestroyed(AActor* DestroyedActor)

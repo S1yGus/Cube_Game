@@ -11,43 +11,48 @@ UCGFXComponent::UCGFXComponent()
 
 void UCGFXComponent::OutOfPosition()
 {
-    UGameplayStatics::PlaySound2D(GetWorld(), OutOfPositionSounds);
+    UGameplayStatics::PlaySound2D(GetWorld(), OutOfPositionSound);
 
     MakeCameraShake(OutOfPositionCameraShake);
 }
 
-void UCGFXComponent::PlayReceivingSound(ECubeType CubeType)
+void UCGFXComponent::PlaySoundOfReceiving(ECubeType CubeType)
 {
-    if (!ReceivingSoundsMap.Contains(CubeType))
+    if (!SoundsOfReceivingMap.Contains(CubeType))
         return;
 
-    UGameplayStatics::PlaySound2D(GetWorld(), ReceivingSoundsMap[CubeType]);
+    UGameplayStatics::PlaySound2D(GetWorld(), SoundsOfReceivingMap[CubeType]);
 }
 
-void UCGFXComponent::SetReceivingMaterial(ECubeType CubeType)
+void UCGFXComponent::SetColorOfReceiving(ECubeType CubeType)
 {
-    if (!ReceivingMaterialsMap.Contains(CubeType) || !GetOwnerMesh())
+    const auto OwnerMesh = GetOwnerMesh();
+    if (!ColorDataOfReceivingMap.Contains(CubeType) || !OwnerMesh)
         return;
 
-    GetOwnerMesh()->SetMaterial(0, ReceivingMaterialsMap[CubeType]);
+    const auto DynMaterial = OwnerMesh->CreateAndSetMaterialInstanceDynamic(0);
+    check(DynMaterial);
+    DynMaterial->SetVectorParameterValue(ColorParamName, ColorDataOfReceivingMap[CubeType].Color);
+    DynMaterial->SetScalarParameterValue(EmissivePowerParamName, ColorDataOfReceivingMap[CubeType].EmissivePower);
+    DynMaterial->SetScalarParameterValue(MaskEnabledParamName, ColorDataOfReceivingMap[CubeType].MaskEnabled);
 
-    GetWorld()->GetTimerManager().SetTimer(MaterialTimerHandle, this, &UCGFXComponent::OnReturnDefaultMaterial, TimeOfMaterialChanging);
+    GetWorld()->GetTimerManager().SetTimer(MaterialTimerHandle, this, &ThisClass::OnReturnDefaultColor, TimeOfMaterialChanging);
 }
 
 void UCGFXComponent::MakeCameraShake(ECubeType CubeType)
 {
-    if (!CubesCameraShakeMap.Contains(CubeType))
+    if (!CameraShakeOfReceivingMap.Contains(CubeType))
         return;
 
-    MakeCameraShake(CubesCameraShakeMap[CubeType]);
+    MakeCameraShake(CameraShakeOfReceivingMap[CubeType]);
 }
 
 void UCGFXComponent::MakeCameraShake(EBonusType BonusType)
 {
-    if (!BonusesCameraShakeMap.Contains(BonusType))
+    if (!CameraShakeOfBonusesMap.Contains(BonusType))
         return;
 
-    MakeCameraShake(BonusesCameraShakeMap[BonusType]);
+    MakeCameraShake(CameraShakeOfBonusesMap[BonusType]);
 }
 
 UStaticMeshComponent* UCGFXComponent::GetOwnerMesh() const
@@ -55,12 +60,9 @@ UStaticMeshComponent* UCGFXComponent::GetOwnerMesh() const
     return GetOwner() ? GetOwner()->FindComponentByClass<UStaticMeshComponent>() : nullptr;
 }
 
-void UCGFXComponent::OnReturnDefaultMaterial()
+void UCGFXComponent::OnReturnDefaultColor()
 {
-    if (!DefaultMaterial || !GetOwnerMesh())
-        return;
-
-    GetOwnerMesh()->SetMaterial(0, DefaultMaterial);
+    SetColorOfReceiving(ECubeType::None);    // None tepe contains default color data.
 }
 
 void UCGFXComponent::MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeClass, float Scale)

@@ -60,6 +60,7 @@ FVector ACGPlayer::GetCurrentPositionLocation() const
 
 void ACGPlayer::SetupPlayer()
 {
+    FXComponent->SetColorOfReceiving(ECubeType::None);    // Set default field color.
     CurrentPosition = FMath::RandHelper(PositionsAmount);
 
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
@@ -134,8 +135,8 @@ void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent
 
 void ACGPlayer::ReceiveCube(ECubeType CubeType)
 {
-    FXComponent->PlayReceivingSound(CubeType);
-    FXComponent->SetReceivingMaterial(CubeType);
+    FXComponent->PlaySoundOfReceiving(CubeType);
+    FXComponent->SetColorOfReceiving(CubeType);
     FXComponent->MakeCameraShake(CubeType);
 
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
@@ -148,10 +149,6 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
     if (CubeType == ECubeType::BonusCube)
     {
         BonusComponent->SetRandomBonus();
-    }
-    else if (CubeType == ECubeType::PowerUpCube)
-    {
-        BonusComponent->UseRandomPowerup();
     }
 
     ShowPopUpHint(CubeType);

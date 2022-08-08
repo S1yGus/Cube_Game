@@ -1,28 +1,60 @@
 // Cube_Game, All rights reserved.
 
 #include "Gameplay/Cubes/CGCubeActor.h"
+#include "Gameplay/Cubes/Components/CGMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "CGGameMode.h"
 
-constexpr static int32 LifeDistance = 2500;
+constexpr static float LifeSpan = 2.0f;
+constexpr static float LifeDistance = 2500.0f;
+constexpr static float UpdatePositionTimerRate = 0.03f;
 
 ACGCubeActor::ACGCubeActor()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
+
+    NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Niagara");
+    NiagaraComponent->SetupAttachment(StaticMeshComponent);
+
+    MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
 
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
-void ACGCubeActor::Tick(float DeltaSeconds)
+void ACGCubeActor::Annihilat()
 {
-    Moving(DeltaSeconds);
+    EndPlayAction();
+
+    auto NiagaraFX = SpawnEndPlayNiagaraEffect(AnnihilationNiagaraSystem);
+    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{0.0f, static_cast<float>(MovementComponent->GetCubeSpeed()), 0.0f});
+}
+
+void ACGCubeActor::SetColor(const FCubeColorData& NewCubeColorData)
+{
+    Super::SetColor(NewCubeColorData);
+
+    NiagaraComponent->SetColorParameter("Color", NewCubeColorData.Color);
+}
+
+void ACGCubeActor::Teardown()
+{
+    EndPlayAction();
+
+    ReceivingNiagaraComponent = SpawnEndPlayNiagaraEffect(ReceivingNiagaraSystem);
+
+    GetWorldTimerManager().SetTimer(UpdatePositionTimerHandle, this, &ThisClass::OnUpdatePosition, UpdatePositionTimerRate, true);
 }
 
 void ACGCubeActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    SetLifeSpan(LifeDistance / GetCubeSpeed());
+    check(NiagaraComponent);
+    check(MovementComponent);
+
+    SetLifeSpan(LifeDistance / static_cast<float>(GetCubeSpeed()));
 }
 
 int32 ACGCubeActor::GetCubeSpeed() const
@@ -31,9 +63,28 @@ int32 ACGCubeActor::GetCubeSpeed() const
     return GameMode ? GameMode->GetCubeSpeed() : 0;
 }
 
-void ACGCubeActor::Moving(float DeltaSeconds)
+void ACGCubeActor::EndPlayAction()
 {
-    auto NewLocation = GetActorLocation();
-    NewLocation.Y = NewLocation.Y + GetCubeSpeed() * DeltaSeconds;
-    SetActorLocation(NewLocation);
+    StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    StaticMeshComponent->SetVisibility(false, true);
+    MovementComponent->StopMoving();
+    SetLifeSpan(LifeSpan);
+}
+
+UNiagaraComponent* ACGCubeActor::SpawnEndPlayNiagaraEffect(UNiagaraSystem* NiagaraSystem)
+{
+    const auto NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, NiagaraSystem, GetActorLocation());
+    check(NiagaraFX);
+    NiagaraFX->SetColorParameter(NiagaraColorParamName, CubeColorData.Color * CubeColorData.EmissivePower);
+
+    return NiagaraFX;
+}
+
+void ACGCubeActor::OnUpdatePosition()
+{
+    const auto PlayerMesh = GetPlayerMesh();
+    if (!PlayerMesh || !ReceivingNiagaraComponent)
+        return;
+
+    ReceivingNiagaraComponent->SetVectorParameter(NiagaraTargetPositionParamName, PlayerMesh->GetComponentLocation());
 }

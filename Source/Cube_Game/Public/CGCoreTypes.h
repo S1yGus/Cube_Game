@@ -39,7 +39,6 @@ enum class ECubeType : uint8
     TimeCube,
     BonusCube,
     SpeedCube,
-    PowerUpCube,
     Max
 };
 
@@ -50,13 +49,6 @@ enum class EBonusType : uint8
     Missile,
     Shield,
     Bomb,
-    Max
-};
-
-UENUM(BlueprintType)
-enum class EPowerupType : uint8
-{
-    Uber,
     Max
 };
 
@@ -193,8 +185,7 @@ struct FHintsStatus
         TPair<ECubeType, bool>{ECubeType::ScoreCube,   true},
         TPair<ECubeType, bool>{ECubeType::TimeCube,    true},
         TPair<ECubeType, bool>{ECubeType::BonusCube,   true},
-        TPair<ECubeType, bool>{ECubeType::SpeedCube,   true},
-        TPair<ECubeType, bool>{ECubeType::PowerUpCube, true}
+        TPair<ECubeType, bool>{ECubeType::SpeedCube,   true}
     };
     // clang-format on
 };
@@ -238,9 +229,24 @@ struct FCultureData
     FText CultureName;
 };
 
+USTRUCT(BlueprintType)
+struct FCubeColorData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color")
+    FLinearColor Color = FLinearColor::Black;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color", Meta = (ClampMin = "0.0"))
+    float EmissivePower = 1.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color",
+              Meta = (ClampMin = "0.0", ClampMax = "1.0", ToolTip = "Can be 1 for enabled condition or 0 for disabled."))
+    float MaskEnabled = 1.0f;
+};
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPowerupedSignature, EPowerupType);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnScoreChangedSignature, int32, int32, int32);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMultiplierChangedSignature, ECubeType, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, int32);

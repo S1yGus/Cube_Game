@@ -14,8 +14,6 @@ class CUBE_GAME_API ACGAttachedBonusActor : public ACGBaseBonusActor
 protected:
     virtual void BeginPlay() override;
 
-    UStaticMeshComponent* GetPlayerMesh() const;
-
 private:
     void AttachToPlayerMesh();
 };

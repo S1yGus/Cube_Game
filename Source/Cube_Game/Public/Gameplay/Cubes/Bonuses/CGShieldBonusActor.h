@@ -12,10 +12,6 @@ class CUBE_GAME_API ACGShieldBonusActor : public ACGAttachedBonusActor
     GENERATED_BODY()
 
 public:
-    ACGShieldBonusActor();
-
-    void SetDuration(float NewDuration) { ShieldDuration = NewDuration; }
-
     virtual void Teardown() override;
 
 protected:

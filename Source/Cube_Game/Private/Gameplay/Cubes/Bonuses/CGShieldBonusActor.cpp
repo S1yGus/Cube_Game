@@ -5,13 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
-ACGShieldBonusActor::ACGShieldBonusActor()
-{
-    BonusType = EBonusType::Shield;
-    ScaleInterpSpeed = 3.0f;
-    TargetScale = FVector{1.3f};
-}
-
 void ACGShieldBonusActor::Teardown()
 {
     Super::Teardown();
@@ -28,8 +21,6 @@ void ACGShieldBonusActor::BeginPlay()
 
 void ACGShieldBonusActor::OnScalin()
 {
-    Super::OnScalin();
-
     // To avoid situations when cubes are received by mistake.
     if (bCanOffPlayerCollision                          //
         && GetActorScale3D().X >= ActivationScale.X     //
@@ -37,7 +28,6 @@ void ACGShieldBonusActor::OnScalin()
         && GetActorScale3D().Z >= ActivationScale.Z)    //
     {
         SetPlayerMeshCollision(false);
-
         bCanOffPlayerCollision = false;
     }
     else if (!bCanOffPlayerCollision                        //
@@ -46,7 +36,6 @@ void ACGShieldBonusActor::OnScalin()
              && GetActorScale3D().Z < ActivationScale.Z)    //
     {
         SetPlayerMeshCollision(true);
-
         bCanOffPlayerCollision = true;
     }
 }

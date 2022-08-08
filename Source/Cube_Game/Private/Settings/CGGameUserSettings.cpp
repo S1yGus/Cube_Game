@@ -426,10 +426,8 @@ void UCGGameUserSettings::SetSoundClassVolume(const FString& SoundClassName, flo
             if (!ADevice)
                 return;
 
-            for (const auto& SoundClassPair : ADevice->GetSoundClassPropertyMap())
+            for (const auto& [SoundClass, SoundClassProperties] : ADevice->GetSoundClassPropertyMap())
             {
-                auto SoundClass = SoundClassPair.Key;
-
                 if (SoundClass && SoundClass->GetFullName().Find(SoundClassName) != INDEX_NONE)
                 {
                     SoundClass->Properties.Volume = NewVolume;

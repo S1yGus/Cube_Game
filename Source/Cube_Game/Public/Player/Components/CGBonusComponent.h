@@ -18,7 +18,6 @@ public:
     UCGBonusComponent();
 
     FOnBonusChangedSignature OnBonusChanged;
-    FOnPowerupedSignature OnPoweruped;
 
     void SetRandomBonus();
     void UseCurrentBonus();
@@ -28,21 +27,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bonus")
     TMap<EBonusType, TSubclassOf<ACGBaseBonusActor>> BonusClassesMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0", Units = "s"))
-    float UberDuration = 10.0f;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Powerup|Uber", Meta = (ClampMin = "0.0", Units = "Hz"))
-    float UberFireFrequency = 0.5f;
-
 private:
-    FTimerHandle UberTimerHandle;
-    float UberTime = 0;
-
     EBonusType Bonus = EBonusType::None;
 
     void SetBonus(EBonusType NewBonus);
     ACGBaseBonusActor* SpawnBonus(EBonusType BonusType);
-
-    void UseUberPowerup();
-    void OnUberPowerupFired();
 };

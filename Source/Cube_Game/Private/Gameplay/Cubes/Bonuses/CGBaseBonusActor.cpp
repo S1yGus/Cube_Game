@@ -4,6 +4,7 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
+#include "NiagaraComponent.h"
 
 ACGBaseBonusActor::ACGBaseBonusActor()
 {
@@ -36,6 +37,6 @@ void ACGBaseBonusActor::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedC
         return;
 
     UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
-    CubeActor->Teardown();
+    CubeActor->Annihilat();
     OnOverlapFinished();
 }

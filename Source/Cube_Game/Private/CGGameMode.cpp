@@ -63,7 +63,7 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
     const auto ScoreRemains = Score % DifficultyVlues.ScoreToSpeedUp;
     const auto ScoreToAdd = Multiplier * DifficultyVlues.ScoreChangeMap[CubeType];
     const auto SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyVlues.ScoreToSpeedUp;
-    if (SpeedToAdd >= 1)    //
+    if (SpeedToAdd >= 1)
     {
         AddSpeed(static_cast<int32>(SpeedToAdd));
     }

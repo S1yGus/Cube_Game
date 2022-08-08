@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/Cubes/Bonuses/CGIndicatorBonusCubeActor.h"
+#include "Gameplay/Cubes/CGBaseCubeActor.h"
 #include "CGBaseBonusActor.generated.h"
 
 class USoundCue;
+class UNiagaraComponent;
 
 UCLASS()
-class CUBE_GAME_API ACGBaseBonusActor : public ACGIndicatorBonusCubeActor
+class CUBE_GAME_API ACGBaseBonusActor : public ACGBaseCubeActor
 {
     GENERATED_BODY()
 

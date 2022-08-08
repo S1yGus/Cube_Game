@@ -6,6 +6,8 @@
 #include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "CGMissileBonusActor.generated.h"
 
+class UCGMovementComponent;
+
 UCLASS()
 class CUBE_GAME_API ACGMissileBonusActor : public ACGBaseBonusActor
 {
@@ -14,12 +16,15 @@ class CUBE_GAME_API ACGMissileBonusActor : public ACGBaseBonusActor
 public:
     ACGMissileBonusActor();
 
-    virtual void Tick(float DeltaSeconds) override;
+    virtual void Teardown() override;
 
 protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UNiagaraComponent* NiagaraComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UCGMovementComponent* MovementComponent;
+
     virtual void BeginPlay() override;
     virtual void OnOverlapFinished() override;
-
-private:
-    void Moving(float DeltaSeconds);
 };

@@ -17,6 +17,7 @@ class CUBE_GAME_API ACGBaseCubeActor : public AActor
 public:
     ACGBaseCubeActor();
 
+    virtual void SetColor(const FCubeColorData& NewCubeColorData);
     virtual void Teardown();
 
 protected:
@@ -29,7 +30,21 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scale")
     FVector TargetScale{1.0};
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
+    FName ColorParamName = "EmissiveColor";
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
+    FName EmissivePowerParamName = "EmissivePower";
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
+    FName MaskEnabledParamName = "MaskEnabled";
+
+    FCubeColorData CubeColorData;
+
+    UStaticMeshComponent* GetPlayerMesh() const;
+
     virtual void BeginPlay() override;
+    virtual void OnScalingZero();
     virtual void OnScalingDone();
     virtual void OnScalin();
 
