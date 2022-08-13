@@ -16,7 +16,7 @@ void ACGShieldBonusActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    GetWorldTimerManager().SetTimer(ShieldTimerHandle, this, &ACGShieldBonusActor::Teardown, ShieldDuration);
+    GetWorldTimerManager().SetTimer(ShieldTimerHandle, this, &ACGShieldBonusActor::Teardown, bCharged ? ChargedShieldDuration : ShieldDuration);
 }
 
 void ACGShieldBonusActor::OnScalin()
@@ -27,7 +27,7 @@ void ACGShieldBonusActor::OnScalin()
         && GetActorScale3D().Y >= ActivationScale.Y     //
         && GetActorScale3D().Z >= ActivationScale.Z)    //
     {
-        SetPlayerMeshCollision(false);
+        SetPlayerMeshCollisionEnabled(false);
         bCanOffPlayerCollision = false;
     }
     else if (!bCanOffPlayerCollision                        //
@@ -35,16 +35,16 @@ void ACGShieldBonusActor::OnScalin()
              && GetActorScale3D().Y < ActivationScale.Y     //
              && GetActorScale3D().Z < ActivationScale.Z)    //
     {
-        SetPlayerMeshCollision(true);
+        SetPlayerMeshCollisionEnabled(true);
         bCanOffPlayerCollision = true;
     }
 }
 
-void ACGShieldBonusActor::SetPlayerMeshCollision(bool CollisionEnabled)
+void ACGShieldBonusActor::SetPlayerMeshCollisionEnabled(bool IsEnabled)
 {
     const auto PlayerMesh = GetPlayerMesh();
     if (!PlayerMesh)
         return;
 
-    PlayerMesh->SetCollisionEnabled(CollisionEnabled ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+    PlayerMesh->SetCollisionEnabled(IsEnabled ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }

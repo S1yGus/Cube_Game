@@ -17,6 +17,10 @@ class CUBE_GAME_API ACGBaseBonusActor : public ACGBaseCubeActor
 public:
     ACGBaseBonusActor();
 
+    void SetBonusCharged(bool IsCharged) { bCharged = IsCharged; }
+
+    virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     USoundCue* InitialSound;
@@ -24,15 +28,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     USoundCue* HitSound;
 
+    bool bCharged = false;
+
     virtual void BeginPlay() override;
-    virtual void OnOverlapFinished();
 
 private:
-    UFUNCTION()
-    void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
-                                 AActor* OtherActor,                          //
-                                 UPrimitiveComponent* OtherComp,              //
-                                 int32 OtherBodyIndex,                        //
-                                 bool bFromSweep,                             //
-                                 const FHitResult& SweepResult);              //
+    bool IsCubeNegative(ECubeType CubeType);
 };

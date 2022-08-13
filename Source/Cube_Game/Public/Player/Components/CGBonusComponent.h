@@ -18,18 +18,21 @@ public:
     UCGBonusComponent();
 
     FOnBonusChangedSignature OnBonusChanged;
+    FOnBonusChargedSignature OnBonusCharged;
 
     void SetRandomBonus();
     void UseCurrentBonus();
-    void UseRandomPowerup();
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bonus")
     TMap<EBonusType, TSubclassOf<ACGBaseBonusActor>> BonusClassesMap;
 
 private:
-    EBonusType Bonus = EBonusType::None;
+    EBonusType CurrentBonus = EBonusType::None;
+    bool bBonusCharged = false;
 
     void SetBonus(EBonusType NewBonus);
-    ACGBaseBonusActor* SpawnBonus(EBonusType BonusType);
+    void SetBonusCharged(bool IsCharged);
+
+    void SpawnBonus(EBonusType BonusType);
 };

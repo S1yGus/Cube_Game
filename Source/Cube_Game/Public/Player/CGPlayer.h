@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Player/CGPlayerCamera.h"
 #include "CGCoreTypes.h"
+#include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "CGPlayer.generated.h"
 
 class UWidgetComponent;
@@ -70,4 +71,6 @@ private:
     void ReceiveCube(ECubeType CubeType);
     void ShowPopUpHint(ECubeType CubeType);
     void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
+
+    friend void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor);
 };

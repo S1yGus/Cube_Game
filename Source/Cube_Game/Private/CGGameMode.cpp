@@ -6,6 +6,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/CGHUDGame.h"
 #include "Settings/CGGameUserSettings.h"
+#include "Player/Components/CGBonusComponent.h"
 
 constexpr static int32 CountdownTimerRate = 1;
 constexpr static int32 MaxMultiplier = 8;
@@ -87,10 +88,11 @@ void ACGGameMode::StartPlay()
 {
     Super::StartPlay();
 
+    SetupGameMode();
+
     SetGameState(EGameState::Game);
     GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ACGGameMode::OnCountdown, CountdownTimerRate, true);
 
-    FormatHints();
     ShowGameplayHint(EHintType::Startup, StartupHintDelay);
 }
 
@@ -121,7 +123,7 @@ void ACGGameMode::PreInitializeComponents()
 {
     Super::PreInitializeComponents();
 
-    SetupGameMode();
+    Time = GetDifficultyVlues().InitialTime;
 }
 
 void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -133,7 +135,7 @@ void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ACGGameMode::SetupGameMode()
 {
-    Time = GetDifficultyVlues().InitialTime;
+    FormatHints();
 
     OnMultiplierChanged.AddUObject(this, &ThisClass::OnShowMultiplierHint);
     OnLowTime.AddUObject(this, &ThisClass::OnShowLowTimeHint);
@@ -142,8 +144,16 @@ void ACGGameMode::SetupGameMode()
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
         HintsMap = GameUserSettings->GetHintsStatus().HintsMap;
-
         GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
+    }
+
+    const auto PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
+    if (PlayerPawn)
+    {
+        if (const auto BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
+        {
+            BonusComponent->OnBonusCharged.AddUObject(this, &ThisClass::OnShowBonusChargedHint);
+        }
     }
 }
 
@@ -216,6 +226,11 @@ void ACGGameMode::OnShowLowTimeHint()
 void ACGGameMode::OnShowSpeedUpHint(int32 NewSpeed)
 {
     ShowGameplayHint(EHintType::SpeedUp, SpeedUpHintDelay);
+}
+
+void ACGGameMode::OnShowBonusChargedHint(bool IsCharged)
+{
+    ShowGameplayHint(EHintType::BonusCharged);
 }
 
 void ACGGameMode::OnHintsStatusChanged(const FHintsStatus& NewHintsStatus)

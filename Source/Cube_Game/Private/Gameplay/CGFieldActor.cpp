@@ -7,6 +7,8 @@
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Components/WidgetComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ACGFieldActor::ACGFieldActor()
 {
@@ -31,7 +33,7 @@ void ACGFieldActor::BeginPlay()
     SetupField();
 
     RestoreSpawnPositions();
-    GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, GetSpawnTimerRate(), true);
+    GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
 }
 
 float ACGFieldActor::GetSpawnTimerRate() const
@@ -91,15 +93,15 @@ void ACGFieldActor::SetupField()
 {
     if (const auto GameMode = GetGameMode())
     {
-        GameMode->OnSpeedChanged.AddUObject(this, &ACGFieldActor::OnSpeedChanged);
-        GameMode->OnMultiplierChanged.AddUObject(this, &ACGFieldActor::OnMultiplierChanged);
+        GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
+        GameMode->OnMultiplierChanged.AddUObject(this, &ThisClass::OnMultiplierChanged);
     }
 
     if (const auto PlayerPawn = GetPlayerPawn())
     {
         if (const auto BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
         {
-            BonusComponent->OnBonusChanged.AddUObject(this, &ACGFieldActor::OnBonusChanged);
+            BonusComponent->OnBonusChanged.AddUObject(this, &ThisClass::OnBonusChanged);
         }
     }
 
@@ -123,7 +125,7 @@ void ACGFieldActor::OnSpawnCube()
 
     if (bRestartSpawn)    // Spawn is restarting after speed have been changed.
     {
-        GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ACGFieldActor::OnSpawnCube, GetSpawnTimerRate(), true);
+        GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
         bRestartSpawn = false;
     }
 
@@ -215,7 +217,7 @@ void ACGFieldActor::SpawnBonusIndicator(EBonusType BonusType)
                                    IndicatorsSpawnZOffset};                                                   //
     const auto CubeColorData = BonusColorDataMap.Contains(BonusType) ? BonusColorDataMap[BonusType] : FCubeColorData{};
     BonusIndicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
-    BonusIndicator->OnDestroyed.AddDynamic(this, &ACGFieldActor::OnBonusIndicatorDestroyed);
+    BonusIndicator->OnDestroyed.AddDynamic(this, &ThisClass::OnBonusIndicatorDestroyed);
 }
 
 void ACGFieldActor::OnBonusIndicatorDestroyed(AActor* DestroyedActor)

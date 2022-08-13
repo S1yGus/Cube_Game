@@ -16,7 +16,10 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0", Units = "s"))
-    float ShieldDuration = 7.0f;
+    float ShieldDuration = 5.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0", Units = "s"))
+    float ChargedShieldDuration = 7.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0"))
     FVector ActivationScale = FVector{1.0f};
@@ -31,5 +34,5 @@ private:
     FTimerHandle ShieldTimerHandle;
     bool bCanOffPlayerCollision = true;
 
-    inline void SetPlayerMeshCollision(bool CollisionEnabled);
+    inline void SetPlayerMeshCollisionEnabled(bool IsEnabled);
 };

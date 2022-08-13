@@ -24,6 +24,14 @@
 				"Mac",
 				"Linux"
 			]
+		},
+		{
+			"Name": "Metasound",
+			"Enabled": true
+		},
+		{
+			"Name": "Synthesis",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [

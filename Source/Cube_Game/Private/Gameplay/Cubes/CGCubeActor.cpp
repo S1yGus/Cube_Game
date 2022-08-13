@@ -20,7 +20,6 @@ ACGCubeActor::ACGCubeActor()
     MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
 
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 }
 
 void ACGCubeActor::Annihilat()

@@ -10,6 +10,8 @@
 class USoundCue;
 class UMaterialInstance;
 class UCameraShakeBase;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CUBE_GAME_API UCGFXComponent : public UActorComponent
@@ -24,6 +26,8 @@ public:
     void SetColorOfReceiving(ECubeType CubeType);
     void MakeCameraShake(ECubeType CubeType);
     void MakeCameraShake(EBonusType BonusType);
+
+    virtual void BeginPlay() override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
@@ -56,12 +60,21 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
     TSubclassOf<UCameraShakeBase> OutOfPositionCameraShake;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Niagara")
+    UNiagaraSystem* BonusChargedNiagaraSystem;
+
 private:
     FTimerHandle MaterialTimerHandle;
 
+    UPROPERTY()
+    UNiagaraComponent* BonusChargedNiagaraComponent;
+
     inline UStaticMeshComponent* GetOwnerMesh() const;
 
+    void Setup();
+
     void OnReturnDefaultColor();
+    void OnBonusCharged(bool IsCharged);
 
     void MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeClass, float Scale = 1.0f);
 };

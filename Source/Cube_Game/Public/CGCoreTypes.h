@@ -68,6 +68,7 @@ enum class EHintType : uint8
     SpeedUp,
     Multiplier,
     LowTime,
+    BonusCharged,
     Max
 };
 
@@ -172,10 +173,11 @@ struct FHintsStatus
     // clang-format off
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<EHintType, bool> HintsMap = {
-        TPair<EHintType, bool>{EHintType::Startup,    true},
-        TPair<EHintType, bool>{EHintType::Multiplier, true},
-        TPair<EHintType, bool>{EHintType::LowTime,    true},
-        TPair<EHintType, bool>{EHintType::SpeedUp,    true}
+        TPair<EHintType, bool>{EHintType::Startup,      true},
+        TPair<EHintType, bool>{EHintType::Multiplier,   true},
+        TPair<EHintType, bool>{EHintType::LowTime,      true},
+        TPair<EHintType, bool>{EHintType::SpeedUp,      true},
+        TPair<EHintType, bool>{EHintType::BonusCharged, true}
     };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
@@ -247,6 +249,7 @@ struct FCubeColorData
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChangedSignature, EBonusType);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBonusChargedSignature, bool);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnScoreChangedSignature, int32, int32, int32);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMultiplierChangedSignature, ECubeType, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpeedChangedSignature, int32);

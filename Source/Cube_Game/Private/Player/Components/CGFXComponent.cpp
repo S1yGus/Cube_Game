@@ -3,6 +3,9 @@
 #include "Player/Components/CGFXComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Player/Components/CGBonusComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 UCGFXComponent::UCGFXComponent()
 {
@@ -55,14 +58,49 @@ void UCGFXComponent::MakeCameraShake(EBonusType BonusType)
     MakeCameraShake(CameraShakeOfBonusesMap[BonusType]);
 }
 
+void UCGFXComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    Setup();
+}
+
 UStaticMeshComponent* UCGFXComponent::GetOwnerMesh() const
 {
     return GetOwner() ? GetOwner()->FindComponentByClass<UStaticMeshComponent>() : nullptr;
 }
 
+void UCGFXComponent::Setup()
+{
+    const auto Owner = GetOwner<APawn>();
+    if (!Owner)
+        return;
+
+    if (const auto BonusComponwnt = Owner->FindComponentByClass<UCGBonusComponent>())
+    {
+        BonusComponwnt->OnBonusCharged.AddUObject(this, &ThisClass::OnBonusCharged);
+    }
+}
+
 void UCGFXComponent::OnReturnDefaultColor()
 {
     SetColorOfReceiving(ECubeType::None);    // None tepe contains default color data.
+}
+
+void UCGFXComponent::OnBonusCharged(bool IsCharged)
+{
+    if (!BonusChargedNiagaraComponent)
+    {
+        BonusChargedNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(BonusChargedNiagaraSystem,        //
+                                                                                    GetOwnerMesh(),                   //
+                                                                                    NAME_None,                        //
+                                                                                    FVector::ZeroVector,              //
+                                                                                    FRotator::ZeroRotator,            //
+                                                                                    EAttachLocation::SnapToTarget,    //
+                                                                                    false);
+    }
+
+    BonusChargedNiagaraComponent->SetVisibility(IsCharged);
 }
 
 void UCGFXComponent::MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeClass, float Scale)

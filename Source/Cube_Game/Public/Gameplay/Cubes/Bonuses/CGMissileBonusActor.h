@@ -16,6 +16,7 @@ class CUBE_GAME_API ACGMissileBonusActor : public ACGBaseBonusActor
 public:
     ACGMissileBonusActor();
 
+    virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
     virtual void Teardown() override;
 
 protected:
@@ -26,5 +27,4 @@ protected:
     UCGMovementComponent* MovementComponent;
 
     virtual void BeginPlay() override;
-    virtual void OnOverlapFinished() override;
 };

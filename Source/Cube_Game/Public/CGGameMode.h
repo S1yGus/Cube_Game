@@ -85,6 +85,7 @@ private:
     void OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultiplier);
     void OnShowLowTimeHint();
     void OnShowSpeedUpHint(int32 NewSpeed);
+    void OnShowBonusChargedHint(bool IsCharged);
     void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 
     void AddTime(int32 TimeToAdd);

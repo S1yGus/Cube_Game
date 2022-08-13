@@ -3,6 +3,7 @@
 #include "Gameplay/Cubes/Bonuses/CGMissileBonusActor.h"
 #include "Gameplay/Cubes/Components/CGMovementComponent.h"
 #include "NiagaraComponent.h"
+#include "Gameplay/Cubes/CGCubeActor.h"
 
 constexpr static float LifeSpan = 5.0f;
 
@@ -12,6 +13,16 @@ ACGMissileBonusActor::ACGMissileBonusActor()
     NiagaraComponent->SetupAttachment(StaticMeshComponent);
 
     MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
+}
+
+void ACGMissileBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+    Super::NotifyActorBeginOverlap(OtherActor);
+
+    if (Cast<ACGCubeActor>(OtherActor) && !bCharged)
+    {
+        Teardown();
+    }
 }
 
 void ACGMissileBonusActor::Teardown()
@@ -31,9 +42,4 @@ void ACGMissileBonusActor::BeginPlay()
     check(MovementComponent);
 
     SetLifeSpan(LifeSpan);
-}
-
-void ACGMissileBonusActor::OnOverlapFinished()
-{
-    Teardown();
 }

@@ -11,6 +11,8 @@ ACGBaseCubeActor::ACGBaseCubeActor()
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+    StaticMeshComponent->SetGenerateOverlapEvents(true);
     StaticMeshComponent->CastShadow = false;
     SetRootComponent(StaticMeshComponent);
 }

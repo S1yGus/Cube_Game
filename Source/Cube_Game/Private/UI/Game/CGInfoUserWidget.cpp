@@ -31,7 +31,7 @@ void UCGInfoUserWidget::Setup()
 
 void UCGInfoUserWidget::OnScoreChanged(int32 NewScore, int32 DeltaScore, int32 NewMultiplier)
 {
-    ScoreTextBlock->SetText(FText::AsNumber(NewScore));
+    ScoreTextBlock->SetText(FText::FromString(FString::FromInt(NewScore)));
 }
 
 void UCGInfoUserWidget::OnTimeChanged(int32 NewTime)
