@@ -23,6 +23,7 @@ public:
     FOnPopUpTypeChangedSignature OnPopUpTypeChanged;
     FOnHintsStatusChangedSignature OnHintsStatusChanged;
     FOnAspectRatioChangedSignature OnAspectRatioChanged;
+    FOnMusicTypeChangedSignature OnMusicTypeChanged;
 
     UCGGameUserSettings();
 
@@ -33,6 +34,7 @@ public:
     EPopUpType GetPopUpType() const;
     const FHintsStatus& GetHintsStatus() const;
     const FAspectRatioData& GetAspectRatio() const;
+    bool GetMusicType() const;
     void SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap);
     void SetReceivingHintsStatus(const TMap<ECubeType, bool>& NewHintsMap);
     void SetLastConfirmedResolutionSettings();

@@ -100,6 +100,11 @@ void UCGFXComponent::OnBonusCharged(bool IsCharged)
                                                                                     false);
     }
 
+    if (IsCharged)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), BonusChargedSound);
+    }
+
     BonusChargedNiagaraComponent->SetVisibility(IsCharged);
 }
 

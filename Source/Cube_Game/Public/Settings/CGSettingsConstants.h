@@ -63,6 +63,12 @@ const TArray<FText> PopUpTypeOptions    //
         LOCTEXT("PopUpTypeMultiplier_Loc", "Multiplier"),    //
         LOCTEXT("PopUpTypeAmount_Loc", "Amount")             //
     };
+
+const TArray<FText> MusicTypeOptions    //
+    {
+        LOCTEXT("DynamicMusic_Loc", "Dynamic"),    //
+        LOCTEXT("StaticMusic_Loc", "Static")       //
+    };
 }    // namespace SettingsConstants
 
 #undef LOCTEXT_NAMESPACE

@@ -67,6 +67,11 @@ const FAspectRatioData& UCGGameUserSettings::GetAspectRatio() const
     return SettingsSave->VideoSettings.AspectRatioData;
 }
 
+bool UCGGameUserSettings::GetMusicType() const
+{
+    return SettingsSave->SoundSettings.bStaticMusic;
+}
+
 void UCGGameUserSettings::SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap)
 {
     SettingsSave->GameSettings.HintsStatus.HintsMap = NewHintsMap;
@@ -247,6 +252,21 @@ void UCGGameUserSettings::InitSoundSettings()
         auto Setting = CreateFloatSetting(LOCTEXT("MusicVolume_Loc", "Music"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MusicVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SettingsConstants::SCMusicName, MusicVolume));
+    }
+
+    {
+        auto Setting = CreateIntSetting(LOCTEXT("MusicType_Loc", "Music type"), SettingsConstants::MusicTypeOptions, SoundSettings);
+        Setting->AddGetter(
+            [&]()
+            {
+                return static_cast<int32>(SettingsSave->SoundSettings.bStaticMusic);
+            });
+        Setting->AddSetter(
+            [&](int32 NewValue)
+            {
+                SettingsSave->SoundSettings.bStaticMusic = static_cast<bool>(NewValue);
+                OnMusicTypeChanged.Broadcast(SettingsSave->SoundSettings.bStaticMusic);
+            });
     }
 }
 

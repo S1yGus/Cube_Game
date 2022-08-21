@@ -11,6 +11,7 @@ class ACGGameMode;
 class ACGCubeActor;
 class ACGBaseCubeActor;
 class UWidgetComponent;
+class UCGMetaSoundMusicComponent;
 
 UCLASS()
 class CUBE_GAME_API ACGFieldActor : public AActor
@@ -26,6 +27,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UWidgetComponent* WidgetComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UCGMetaSoundMusicComponent* MetaSoundMusicComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Materials|Field", Meta = (ToolTip = "Use none type for default color."))
     TMap<EBonusType, FLinearColor> MaterialColorsMap;

@@ -163,6 +163,9 @@ struct FSoundSettings
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float MusicVolume = 0.5f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    bool bStaticMusic = false;
 };
 
 USTRUCT(BlueprintType)
@@ -263,3 +266,4 @@ DECLARE_MULTICAST_DELEGATE(FOnResolutionChangedSignature);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChangedSignature, const FAspectRatioData&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMusicTypeChangedSignature, bool);

@@ -31,6 +31,9 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* BonusChargedSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     USoundCue* OutOfPositionSound;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")

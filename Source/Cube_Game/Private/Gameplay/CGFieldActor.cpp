@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Gameplay/Components/CGMetaSoundMusicComponent.h"
 
 ACGFieldActor::ACGFieldActor()
 {
@@ -22,6 +23,8 @@ ACGFieldActor::ACGFieldActor()
     WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     WidgetComponent->SetDrawAtDesiredSize(true);
     WidgetComponent->SetupAttachment(StaticMeshComponent);
+
+    MetaSoundMusicComponent = CreateDefaultSubobject<UCGMetaSoundMusicComponent>("MetaSoundMusic");
 
     SetRootComponent(StaticMeshComponent);
 }
