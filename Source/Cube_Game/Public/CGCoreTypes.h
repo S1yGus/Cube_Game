@@ -165,7 +165,7 @@ struct FSoundSettings
     float MusicVolume = 0.5f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    bool bStaticMusic = false;
+    bool bStaticMusic = true;
 };
 
 USTRUCT(BlueprintType)

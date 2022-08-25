@@ -9,7 +9,7 @@
 class USoundCue;
 class UNiagaraComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class CUBE_GAME_API ACGBaseBonusActor : public ACGBaseCubeActor
 {
     GENERATED_BODY()

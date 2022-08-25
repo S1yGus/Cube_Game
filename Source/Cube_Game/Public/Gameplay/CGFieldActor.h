@@ -12,6 +12,7 @@ class ACGCubeActor;
 class ACGBaseCubeActor;
 class UWidgetComponent;
 class UCGMetaSoundMusicComponent;
+class USoundSubmix;
 
 UCLASS()
 class CUBE_GAME_API ACGFieldActor : public AActor
@@ -76,9 +77,14 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0"))
     int32 BonusIndicatorPosition = 7;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundSubmix* SoundSubmixToAnalysis;
+
     virtual void BeginPlay() override;
 
 private:
+    FOnSubmixSpectralAnalysisBP OnSubmixSpectralAnalysis;
+
     FTimerHandle SpawnTimerHandle;
     bool bRestartSpawn = false;
 
@@ -97,7 +103,7 @@ private:
     const FDifficulty& GetDifficultyVlues() const;
     inline const APawn* GetPlayerPawn() const;
 
-    void SetupField();
+    void Setup();
 
     void OnSpawnCube();
     void SpawnCube(int32 SpawnPosition);
@@ -112,6 +118,9 @@ private:
     void SpawnBonusIndicator(EBonusType BonusType);
     UFUNCTION()
     void OnBonusIndicatorDestroyed(AActor* DestroyedActor);
+
+    UFUNCTION()
+    void OnSpectralAnalysis(const TArray<float>& Magnitude);
 
     template <class T>
     T* SpawnCubeActor(UClass* CubeClass, const FVector& RelativeLocation, const FCubeColorData& CubeColorData)

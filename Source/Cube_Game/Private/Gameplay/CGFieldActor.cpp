@@ -10,6 +10,14 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Gameplay/Components/CGMetaSoundMusicComponent.h"
+#include "Sound/SoundSubmix.h"
+#include "AudioMixerBlueprintLibrary.h"
+
+constexpr static float MinFrequencyForAnalysis = 40.0f;
+constexpr static float MaxFrequencyForAnalysis = 4000.0f;
+constexpr static int32 BandsNum = 8;
+constexpr static float IndicatorAmplitudeMultiplier = 150.0f;
+constexpr static float SpectralAnalysisRate = 5.0f;
 
 ACGFieldActor::ACGFieldActor()
 {
@@ -33,7 +41,7 @@ void ACGFieldActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    SetupField();
+    Setup();
 
     RestoreSpawnPositions();
     GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
@@ -92,7 +100,7 @@ const APawn* ACGFieldActor::GetPlayerPawn() const
     return PlayerController ? PlayerController->GetPawn() : nullptr;
 }
 
-void ACGFieldActor::SetupField()
+void ACGFieldActor::Setup()
 {
     if (const auto GameMode = GetGameMode())
     {
@@ -107,6 +115,14 @@ void ACGFieldActor::SetupField()
             BonusComponent->OnBonusChanged.AddUObject(this, &ThisClass::OnBonusChanged);
         }
     }
+
+    OnSubmixSpectralAnalysis.BindDynamic(this, &ThisClass::OnSpectralAnalysis);
+    SoundSubmixToAnalysis->AddSpectralAnalysisDelegate(
+        this,                                                                                                                                     //
+        UAudioMixerBlueprintLibrary::MakeFullSpectrumSpectralAnalysisBandSettings(BandsNum, MinFrequencyForAnalysis, MaxFrequencyForAnalysis),    //
+        OnSubmixSpectralAnalysis,                                                                                                                 //
+        SpectralAnalysisRate);
+    SoundSubmixToAnalysis->StartSpectralAnalysis(this);
 
     ChangeFieldColor(EBonusType::None);    // Set default field color.
 }
@@ -229,4 +245,24 @@ void ACGFieldActor::OnBonusIndicatorDestroyed(AActor* DestroyedActor)
         return;
 
     SpawnBonusIndicator(NewBonusIndicatorType);
+}
+
+void ACGFieldActor::OnSpectralAnalysis(const TArray<float>& Magnitudes)
+{
+    for (int32 i = 0; i < Indicators.Num(); ++i)
+    {
+        if (!IsValid(Indicators[i]))
+            continue;
+
+        auto NewLocation = Indicators[i]->GetActorLocation();
+        NewLocation.Z = Magnitudes[i] * IndicatorAmplitudeMultiplier;
+        Indicators[i]->SetActorLocation(NewLocation);
+    }
+
+    if (IsValid(BonusIndicator))
+    {
+        auto NewLocation = BonusIndicator->GetActorLocation();
+        NewLocation.Z = Magnitudes[BonusIndicatorPosition] * IndicatorAmplitudeMultiplier;
+        BonusIndicator->SetActorLocation(NewLocation);
+    }
 }
