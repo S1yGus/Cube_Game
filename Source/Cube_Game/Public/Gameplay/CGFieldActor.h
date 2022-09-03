@@ -11,8 +11,7 @@ class ACGGameMode;
 class ACGCubeActor;
 class ACGBaseCubeActor;
 class UWidgetComponent;
-class UCGMetaSoundMusicComponent;
-class USoundSubmix;
+class UCGMusicComponent;
 
 UCLASS()
 class CUBE_GAME_API ACGFieldActor : public AActor
@@ -30,7 +29,7 @@ protected:
     UWidgetComponent* WidgetComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCGMetaSoundMusicComponent* MetaSoundMusicComponent;
+    UCGMusicComponent* MusicComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Materials|Field", Meta = (ToolTip = "Use none type for default color."))
     TMap<EBonusType, FLinearColor> MaterialColorsMap;
@@ -74,17 +73,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators|Offset", Meta = (Units = "cm"))
     float IndicatorsSpawnZOffset = 65.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0"))
-    int32 BonusIndicatorPosition = 7;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-    USoundSubmix* SoundSubmixToAnalysis;
-
     virtual void BeginPlay() override;
 
 private:
-    FOnSubmixSpectralAnalysisBP OnSubmixSpectralAnalysis;
-
     FTimerHandle SpawnTimerHandle;
     bool bRestartSpawn = false;
 
@@ -96,11 +87,12 @@ private:
     UPROPERTY()
     ACGBaseCubeActor* BonusIndicator;
     EBonusType NewBonusIndicatorType = EBonusType::None;
+    int32 BonusIndicatorPosition = 0;
 
-    float GetSpawnTimerRate() const;
-    ECubeType GetRandomCubeType() const;
+    inline float GetSpawnTimerRate() const;
+    inline ECubeType GetRandomCubeType() const;
     inline ACGGameMode* GetGameMode() const;
-    const FDifficulty& GetDifficultyVlues() const;
+    inline const FDifficulty& GetDifficultyVlues() const;
     inline const APawn* GetPlayerPawn() const;
 
     void Setup();
@@ -119,9 +111,6 @@ private:
     UFUNCTION()
     void OnBonusIndicatorDestroyed(AActor* DestroyedActor);
 
-    UFUNCTION()
-    void OnSpectralAnalysis(const TArray<float>& Magnitude);
-
     template <class T>
     T* SpawnCubeActor(UClass* CubeClass, const FVector& RelativeLocation, const FCubeColorData& CubeColorData)
     {
@@ -132,4 +121,6 @@ private:
 
         return SpawnedCube;
     }
+
+    friend class UCGMusicComponent;
 };

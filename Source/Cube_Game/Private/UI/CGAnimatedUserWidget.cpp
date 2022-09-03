@@ -8,7 +8,6 @@
 void UCGAnimatedUserWidget::ShowStartupAnimation()
 {
     PlayAnimation(StartupAnimation);
-    UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
 }
 
 void UCGAnimatedUserWidget::ShowFadeoutAnimation()
@@ -29,4 +28,14 @@ void UCGAnimatedUserWidget::SetGameState(EGameState NewGameState)
         return;
 
     GameMode->SetGameState(NewGameState);
+}
+
+void UCGAnimatedUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+{
+    Super::OnAnimationFinished_Implementation(Animation);
+
+    if (Animation != StartupAnimation)
+        return;
+
+    UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
 }

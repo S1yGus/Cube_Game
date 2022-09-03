@@ -9,8 +9,7 @@
 #include "Player/Components/CGBonusComponent.h"
 
 constexpr static int32 CountdownTimerRate = 1;
-constexpr static int32 MaxMultiplier = 8;
-constexpr static float SpeedUpHintDelay = 0.3f;
+constexpr static float GameplayHintsDelay = 0.2f;
 
 ACGGameMode::ACGGameMode()
 {
@@ -74,9 +73,9 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
 
 void ACGGameMode::ShowPopUpHint(const FHintData& HintData)
 {
+    bShowingHint = true;
     SetPause(EGameState::PopUpHint);
-
-    OnShowPopUpHintSignature.Broadcast(HintData);
+    OnShowPopUpHint.Broadcast(HintData);
 }
 
 void ACGGameMode::GameOver()
@@ -124,6 +123,13 @@ void ACGGameMode::PreInitializeComponents()
     Super::PreInitializeComponents();
 
     Time = GetDifficultyVlues().InitialTime;
+}
+
+void ACGGameMode::SetGameState(EGameState NewGameState)
+{
+    Super::SetGameState(NewGameState);
+
+    CheckFlags(NewGameState);
 }
 
 void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -180,6 +186,7 @@ void ACGGameMode::ShowGameplayHint(EHintType HintType, float Delay)
 
     if (Delay)
     {
+        bShowingHint = true;
         GetWorldTimerManager().SetTimer(    //
             DelayHintTimerHandle,           //
             [=]()
@@ -220,12 +227,12 @@ void ACGGameMode::OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultipli
 
 void ACGGameMode::OnShowLowTimeHint()
 {
-    ShowGameplayHint(EHintType::LowTime);
+    ShowGameplayHint(EHintType::LowTime, GameplayHintsDelay);
 }
 
 void ACGGameMode::OnShowSpeedUpHint(int32 NewSpeed)
 {
-    ShowGameplayHint(EHintType::SpeedUp, SpeedUpHintDelay);
+    ShowGameplayHint(EHintType::SpeedUp, GameplayHintsDelay);
 }
 
 void ACGGameMode::OnShowBonusChargedHint(bool IsCharged)
@@ -245,7 +252,14 @@ void ACGGameMode::AddTime(int32 TimeToAdd)
 
     if (Time == 0)
     {
-        GameOver();
+        if (bShowingHint)
+        {
+            bGameOver = true;
+        }
+        else
+        {
+            GameOver();
+        }
     }
 }
 
@@ -279,4 +293,18 @@ void ACGGameMode::ChangeMultiplier(ECubeType CubeType)
     }
 
     PreviousCubeType = CubeType;
+}
+
+void ACGGameMode::CheckFlags(EGameState NewGameState)
+{
+    // If timer active then the hint is already marked as shown and should really be shown.
+    if (NewGameState == EGameState::Game && !GetWorldTimerManager().IsTimerActive(DelayHintTimerHandle))
+    {
+        bShowingHint = false;
+    }
+
+    if (NewGameState == EGameState::Game && bGameOver && !bShowingHint)
+    {
+        GameOver();
+    }
 }

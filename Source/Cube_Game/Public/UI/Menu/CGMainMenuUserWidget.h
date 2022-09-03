@@ -22,6 +22,9 @@ protected:
     UCGButtonUserWidget* LeaderButton;
 
     UPROPERTY(Meta = (BindWidget))
+    UCGButtonUserWidget* HowButton;
+
+    UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* OptionsButton;
 
     UPROPERTY(Meta = (BindWidget))
@@ -38,10 +41,13 @@ private:
     void Setup();
     void ResetWidget();
 
+    inline void ChangeGameState(EGameState NewGameState);
+
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressedEsc();
     void OnClickedGameButton();
     void OnClickedLeaderButton();
+    void OnClickedHowButton();
     void OnClickedOptionsButton();
     void OnClickedQuitButton();
 

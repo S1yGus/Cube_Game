@@ -15,19 +15,21 @@
 #include "CGUtils.h"
 #include "Settings/CGSettingsConstants.h"
 
+using namespace SettingsConstants;
+
 #define LOCTEXT_NAMESPACE "GameUserSettings"
 
-#define BIND_SOUND_GETTER(VolumeType)                                                                                                                                    \
-    [&]()                                                                                                                                                                \
-    {                                                                                                                                                                    \
-        return SettingsSave->SoundSettings.VolumeType;                                                                                                                   \
+#define BIND_SOUND_GETTER(VolumeType)                  \
+    [&]()                                              \
+    {                                                  \
+        return SettingsSave->SoundSettings.VolumeType; \
     }
 
-#define BIND_SOUND_SETTER(SCName, VolumeType)                                                                                                                            \
-    [&](float NewValue)                                                                                                                                                  \
-    {                                                                                                                                                                    \
-        SetSoundClassVolume(SCName, NewValue);                                                                                                                           \
-        SettingsSave->SoundSettings.VolumeType = NewValue;                                                                                                               \
+#define BIND_SOUND_SETTER(SCName, VolumeType)              \
+    [&](float NewValue)                                    \
+    {                                                      \
+        SetSoundClassVolume(SCName, NewValue);             \
+        SettingsSave->SoundSettings.VolumeType = NewValue; \
     }
 
 static bool operator==(const FText& Text1, const FText& Text2)
@@ -35,9 +37,9 @@ static bool operator==(const FText& Text1, const FText& Text2)
     return Text1.ToString() == Text2.ToString();
 }
 
-static bool operator==(const FCultureData& CultureData, const FString& Str)
+static bool operator==(const FCultureData& Data, const FString& Str)
 {
-    return CultureData.Culture == Str;
+    return Data.Culture == Str;
 }
 
 UCGGameUserSettings::UCGGameUserSettings()
@@ -94,10 +96,10 @@ void UCGGameUserSettings::SetLastConfirmedResolutionSettings()
 
 void UCGGameUserSettings::InitSoundVolume()
 {
-    SetSoundClassVolume(SettingsConstants::SCMasterName, SettingsSave->SoundSettings.MasterVolume);
-    SetSoundClassVolume(SettingsConstants::SCUIName, SettingsSave->SoundSettings.UIVolume);
-    SetSoundClassVolume(SettingsConstants::SCFXName, SettingsSave->SoundSettings.FXVolume);
-    SetSoundClassVolume(SettingsConstants::SCMusicName, SettingsSave->SoundSettings.MusicVolume);
+    SetSoundClassVolume(SCMasterName, SettingsSave->SoundSettings.MasterVolume);
+    SetSoundClassVolume(SCUIName, SettingsSave->SoundSettings.UIVolume);
+    SetSoundClassVolume(SCFXName, SettingsSave->SoundSettings.FXVolume);
+    SetSoundClassVolume(SCMusicName, SettingsSave->SoundSettings.MusicVolume);
 }
 
 void UCGGameUserSettings::LoadSettings(bool bForceReload)
@@ -111,13 +113,13 @@ void UCGGameUserSettings::SaveSettings()
 {
     Super::SaveSettings();
 
-    UGameplayStatics::SaveGameToSlot(SettingsSave, SettingsConstants::SettingsSaveSlotName, 0);
+    UGameplayStatics::SaveGameToSlot(SettingsSave, SettingsSaveSlotName, 0);
 }
 
 void UCGGameUserSettings::InitVideoSettings()
 {
     {
-        auto Setting = CreateIntSetting(LOCTEXT("ScreenMode_Loc", "Screen mode"), SettingsConstants::FullscreenOptions, VideoSettings);
+        auto Setting = CreateIntSetting(LOCTEXT("ScreenMode_Loc", "Screen mode"), FullscreenOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -160,7 +162,7 @@ void UCGGameUserSettings::InitVideoSettings()
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("VSync_Loc", "V-Sync"), SettingsConstants::VSyncOptions, VideoSettings);
+        auto Setting = CreateIntSetting(LOCTEXT("VSync_Loc", "V-Sync"), VSyncOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -175,25 +177,25 @@ void UCGGameUserSettings::InitVideoSettings()
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("FramerateLimit_Loc", "Framerate limit"), SettingsConstants::FramerateOptions, VideoSettings);
+        auto Setting = CreateIntSetting(LOCTEXT("FramerateLimit_Loc", "Framerate limit"), FramerateOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
                 return GetFrameRateLimit() == 0.0f ? 0    //
-                                                   : SettingsConstants::FramerateOptions.IndexOfByKey(FText::AsNumber(static_cast<int32>(GetFrameRateLimit())));
+                                                   : FramerateOptions.IndexOfByKey(FText::AsNumber(static_cast<int32>(GetFrameRateLimit())));
             });
         Setting->AddSetter(
             [&](int32 NewValue)
             {
                 SetFrameRateLimit(NewValue == 0 ? 0.0f    //
-                                                : FCString::Atof(*SettingsConstants::FramerateOptions[NewValue].ToString()));
+                                                : FCString::Atof(*FramerateOptions[NewValue].ToString()));
                 ApplyNonResolutionSettings();
             });
     }
 
     {
         TArray<FText> AspectRatioOptions;
-        for (const auto& Data : SettingsConstants::AspectRatioData)
+        for (const auto& Data : AspectRatioData)
         {
             AspectRatioOptions.Add(Data.DisplayName);
         }
@@ -207,13 +209,13 @@ void UCGGameUserSettings::InitVideoSettings()
         Setting->AddSetter(
             [&](int32 NewValue)
             {
-                SettingsSave->VideoSettings.AspectRatioData = SettingsConstants::AspectRatioData[NewValue];
-                OnAspectRatioChanged.Broadcast(SettingsConstants::AspectRatioData[NewValue]);
+                SettingsSave->VideoSettings.AspectRatioData = AspectRatioData[NewValue];
+                OnAspectRatioChanged.Broadcast(AspectRatioData[NewValue]);
             });
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("GraphicsQuality_Loc", "Quality"), SettingsConstants::GraphicsQualityOptions, VideoSettings);
+        auto Setting = CreateIntSetting(LOCTEXT("GraphicsQuality_Loc", "Quality"), GraphicsQualityOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -233,29 +235,29 @@ void UCGGameUserSettings::InitSoundSettings()
     {
         auto Setting = CreateFloatSetting(LOCTEXT("MasterVolume_Loc", "Master"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MasterVolume));
-        Setting->AddSetter(BIND_SOUND_SETTER(SettingsConstants::SCMasterName, MasterVolume));
+        Setting->AddSetter(BIND_SOUND_SETTER(SCMasterName, MasterVolume));
     }
 
     {
         auto Setting = CreateFloatSetting(LOCTEXT("UIVolume_Loc", "Interface"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(UIVolume));
-        Setting->AddSetter(BIND_SOUND_SETTER(SettingsConstants::SCUIName, UIVolume));
+        Setting->AddSetter(BIND_SOUND_SETTER(SCUIName, UIVolume));
     }
 
     {
         auto Setting = CreateFloatSetting(LOCTEXT("FXVolume_Loc", "Effects"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(FXVolume));
-        Setting->AddSetter(BIND_SOUND_SETTER(SettingsConstants::SCFXName, FXVolume));
+        Setting->AddSetter(BIND_SOUND_SETTER(SCFXName, FXVolume));
     }
 
     {
         auto Setting = CreateFloatSetting(LOCTEXT("MusicVolume_Loc", "Music"), SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MusicVolume));
-        Setting->AddSetter(BIND_SOUND_SETTER(SettingsConstants::SCMusicName, MusicVolume));
+        Setting->AddSetter(BIND_SOUND_SETTER(SCMusicName, MusicVolume));
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("MusicType_Loc", "Music type"), SettingsConstants::MusicTypeOptions, SoundSettings);
+        auto Setting = CreateIntSetting(LOCTEXT("MusicType_Loc", "Music type"), MusicTypeOptions, SoundSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -274,7 +276,7 @@ void UCGGameUserSettings::InitGameSettings()
 {
     {
         TArray<FText> LanguageOptions;
-        for (const auto& Culture : SettingsConstants::CultureData)
+        for (const auto& Culture : CultureData)
         {
             LanguageOptions.Add(Culture.CultureName);
         }
@@ -283,17 +285,17 @@ void UCGGameUserSettings::InitGameSettings()
         Setting->AddGetter(
             []()
             {
-                return SettingsConstants::CultureData.IndexOfByKey(UKismetInternationalizationLibrary::GetCurrentCulture());
+                return CultureData.IndexOfByKey(UKismetInternationalizationLibrary::GetCurrentCulture());
             });
         Setting->AddSetter(
             [](int32 NewValue)
             {
-                UKismetInternationalizationLibrary::SetCurrentCulture(SettingsConstants::CultureData[NewValue].Culture, true);
+                UKismetInternationalizationLibrary::SetCurrentCulture(CultureData[NewValue].Culture, true);
             });
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("PopUpType_Loc", "Pop-up type"), SettingsConstants::PopUpTypeOptions, GameSettings);
+        auto Setting = CreateIntSetting(LOCTEXT("PopUpType_Loc", "Pop-up type"), PopUpTypeOptions, GameSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -461,9 +463,9 @@ void UCGGameUserSettings::CheckSettingsSave()
     if (SettingsSave)
         return;
 
-    if (UGameplayStatics::DoesSaveGameExist(SettingsConstants::SettingsSaveSlotName, 0))
+    if (UGameplayStatics::DoesSaveGameExist(SettingsSaveSlotName, 0))
     {
-        SettingsSave = Cast<UCGSettingsSave>(UGameplayStatics::LoadGameFromSlot(SettingsConstants::SettingsSaveSlotName, 0));
+        SettingsSave = Cast<UCGSettingsSave>(UGameplayStatics::LoadGameFromSlot(SettingsSaveSlotName, 0));
     }
     else
     {

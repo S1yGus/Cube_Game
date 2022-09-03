@@ -4,6 +4,15 @@
 #include "CGGameModeBase.h"
 #include "UI/CGAnimatedUserWidget.h"
 
+void ACGHUDMenu::BeginPlay()
+{
+    Super::BeginPlay();
+
+    check(MainMenuWidgetClass);
+    check(DifficultySelectionWidgetClass);
+    check(LeaderboardWidgetClass);
+}
+
 void ACGHUDMenu::BackToRootMenu()
 {
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>();
@@ -15,20 +24,9 @@ void ACGHUDMenu::BackToRootMenu()
 
 void ACGHUDMenu::SetupWidgets()
 {
-    if (MainMenuWidgetClass)
-    {
-        GameWidgets.Add(EGameState::MainMenu, CreateWidget<UUserWidget>(GetWorld(), MainMenuWidgetClass));
-    }
-
-    if (DifficultySelectionWidgetClass)
-    {
-        GameWidgets.Add(EGameState::DifficultySelection, CreateWidget<UUserWidget>(GetWorld(), DifficultySelectionWidgetClass));
-    }
-
-    if (LeaderboardWidgetClass)
-    {
-        GameWidgets.Add(EGameState::Leaderboard, CreateWidget<UUserWidget>(GetWorld(), LeaderboardWidgetClass));
-    }
+    GameWidgets.Add(EGameState::MainMenu, CreateWidget<UUserWidget>(GetWorld(), MainMenuWidgetClass));
+    GameWidgets.Add(EGameState::DifficultySelection, CreateWidget<UUserWidget>(GetWorld(), DifficultySelectionWidgetClass));
+    GameWidgets.Add(EGameState::Leaderboard, CreateWidget<UUserWidget>(GetWorld(), LeaderboardWidgetClass));
 
     Super::SetupWidgets();
 }

@@ -25,6 +25,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> OptionsWarningWidgetClass;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> HowToPlayWidgetClass;
+
     UPROPERTY()
     TMap<EGameState, UUserWidget*> GameWidgets;
 

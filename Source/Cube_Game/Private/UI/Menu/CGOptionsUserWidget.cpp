@@ -13,20 +13,21 @@
 #include "Settings/CGFloatSetting.h"
 #include "Settings/CGActionSetting.h"
 #include "Interfaces/CGSettingWidgetInterface.h"
+#include "Player/CGPlayerController.h"
 
-#define UPDATE_SETTINGS_WIDGETS(ContainerWidget)                                                                                                                         \
-    for (const auto& Widget : ContainerWidget->GetAllChildren())                                                                                                         \
-    {                                                                                                                                                                    \
-        if (const auto SettingWidget = Cast<ICGSettingWidgetInterface>(Widget))                                                                                          \
-        {                                                                                                                                                                \
-            SettingWidget->Update();                                                                                                                                     \
-        }                                                                                                                                                                \
+#define UPDATE_SETTINGS_WIDGETS(ContainerWidget)                                \
+    for (const auto& Widget : ContainerWidget->GetAllChildren())                \
+    {                                                                           \
+        if (const auto SettingWidget = Cast<ICGSettingWidgetInterface>(Widget)) \
+        {                                                                       \
+            SettingWidget->Update();                                            \
+        }                                                                       \
     }
 
-#define CREATE_AND_ADD_SETTING_WIDGET(T, WidgetClass, Setting, ToContainerWidget)                                                                                        \
-    T* SettingWidget = CreateWidget<T>(GetWorld(), WidgetClass);                                                                                                         \
-    check(SettingWidget);                                                                                                                                                \
-    SettingWidget->Init(Setting);                                                                                                                                        \
+#define CREATE_AND_ADD_SETTING_WIDGET(T, WidgetClass, Setting, ToContainerWidget) \
+    T* SettingWidget = CreateWidget<T>(GetWorld(), WidgetClass);                  \
+    check(SettingWidget);                                                         \
+    SettingWidget->Init(Setting);                                                 \
     ToContainerWidget->AddChild(SettingWidget);
 
 void UCGOptionsUserWidget::NativeOnInitialized()
@@ -78,7 +79,11 @@ void UCGOptionsUserWidget::Setup()
     if (const auto GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
-        GameMode->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+    }
+
+    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    {
+        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
 }
 
@@ -106,7 +111,7 @@ void UCGOptionsUserWidget::OnGameStateChanged(EGameState NewGameState)
 
 void UCGOptionsUserWidget::OnPressedEsc()
 {
-    if (!IsVisible())
+    if (!IsVisible() || IsAnyAnimationPlaying())
         return;
 
     OnClickedBackButton();
@@ -120,9 +125,6 @@ void UCGOptionsUserWidget::OnResolutionChanged()
 
 void UCGOptionsUserWidget::OnClickedBackButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->SaveSettings();

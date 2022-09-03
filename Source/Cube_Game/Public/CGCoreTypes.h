@@ -17,6 +17,7 @@ enum class EGameState : uint8
     Pause,
     GameOver,
     Leaderboard,
+    HowToPlay,
     Max
 };
 
@@ -39,6 +40,7 @@ enum class ECubeType : uint8
     TimeCube,
     BonusCube,
     SpeedCube,
+    VeryBadCube,
     Max
 };
 
@@ -190,7 +192,8 @@ struct FHintsStatus
         TPair<ECubeType, bool>{ECubeType::ScoreCube,   true},
         TPair<ECubeType, bool>{ECubeType::TimeCube,    true},
         TPair<ECubeType, bool>{ECubeType::BonusCube,   true},
-        TPair<ECubeType, bool>{ECubeType::SpeedCube,   true}
+        TPair<ECubeType, bool>{ECubeType::SpeedCube,   true},
+        TPair<ECubeType, bool>{ECubeType::VeryBadCube, true}
     };
     // clang-format on
 };

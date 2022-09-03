@@ -14,6 +14,10 @@ class CUBE_GAME_API ACGPlayerController : public APlayerController
 {
     GENERATED_BODY()
 
+public:
+    FOnPressedEnterSignature OnPressedEnt;
+    FOnPressedEscSignature OnPressedEsc;
+
 protected:
     virtual void SetupInputComponent() override;
     virtual void BeginPlay() override;
@@ -22,4 +26,6 @@ private:
     inline ACGGameModeBase* GetGameModeBase() const;
 
     void OnGameStateChanged(EGameState NewGameState);
+    void OnPressedEnter();
+    void OnPressedEscape();
 };

@@ -4,6 +4,7 @@
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "CGGameModeBase.h"
 #include "Settings/CGGameUserSettings.h"
+#include "Player/CGPlayerController.h"
 
 FText UCGOptionsWarningUserWidget::GetCountdownTime() const
 {
@@ -41,8 +42,12 @@ void UCGOptionsWarningUserWidget::Setup()
     if (const auto GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
-        GameMode->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
-        GameMode->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+    }
+
+    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    {
+        PC->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
+        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
 }
 
@@ -66,7 +71,7 @@ void UCGOptionsWarningUserWidget::OnGameStateChanged(EGameState NewGameState)
 
 void UCGOptionsWarningUserWidget::OnPressedEnter()
 {
-    if (!IsVisible())
+    if (!IsVisible() || IsAnyAnimationPlaying())
         return;
 
     OnSaveSettings();
@@ -74,7 +79,7 @@ void UCGOptionsWarningUserWidget::OnPressedEnter()
 
 void UCGOptionsWarningUserWidget::OnPressedEsc()
 {
-    if (!IsVisible())
+    if (!IsVisible() || IsAnyAnimationPlaying())
         return;
 
     OnCancelSettings();
@@ -82,9 +87,6 @@ void UCGOptionsWarningUserWidget::OnPressedEsc()
 
 void UCGOptionsWarningUserWidget::OnSaveSettings()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     const auto GameUserSettings = UCGGameUserSettings::Get();
     if (!GameUserSettings)
         return;
@@ -96,9 +98,6 @@ void UCGOptionsWarningUserWidget::OnSaveSettings()
 
 void UCGOptionsWarningUserWidget::OnCancelSettings()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     const auto GameUserSettings = UCGGameUserSettings::Get();
     if (!GameUserSettings)
         return;

@@ -3,6 +3,8 @@
 #include "UI/Menu/CGDifficultyUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "CGGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundMix.h"
 
 void UCGDifficultyUserWidget::NativeOnInitialized()
 {
@@ -12,45 +14,34 @@ void UCGDifficultyUserWidget::NativeOnInitialized()
     check(MediumButton);
     check(HardButton);
 
-    EasyButton->OnClickedButton.AddUObject(this, &UCGDifficultyUserWidget::OnClickedEasyButton);
-    MediumButton->OnClickedButton.AddUObject(this, &UCGDifficultyUserWidget::OnClickedMediumButton);
-    HardButton->OnClickedButton.AddUObject(this, &UCGDifficultyUserWidget::OnClickedHardButton);
+    EasyButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedEasyButton);
+    MediumButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedMediumButton);
+    HardButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedHardButton);
 }
 
 void UCGDifficultyUserWidget::SetDifficulty(EDifficulty NewDifficulty)
 {
-    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
-    if (!GameInstnce)
-        return;
-
-    GameInstnce->SetDifficulty(NewDifficulty);
+    if (const auto GameInstnce = GetGameInstance<UCGGameInstance>())
+    {
+        GameInstnce->SetDifficulty(NewDifficulty);
+        ShowFadeoutAnimation();
+        UGameplayStatics::PushSoundMixModifier(this, FadeOutSoundMix);    // Smoothly mutes all sounds.
+    }
 }
 
 void UCGDifficultyUserWidget::OnClickedEasyButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     SetDifficulty(EDifficulty::Easy);
-    ShowFadeoutAnimation();
 }
 
 void UCGDifficultyUserWidget::OnClickedMediumButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     SetDifficulty(EDifficulty::Medium);
-    ShowFadeoutAnimation();
 }
 
 void UCGDifficultyUserWidget::OnClickedHardButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     SetDifficulty(EDifficulty::Hard);
-    ShowFadeoutAnimation();
 }
 
 void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
@@ -65,4 +56,5 @@ void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAn
         return;
 
     GameInstnce->StartGame();
+    UGameplayStatics::PopSoundMixModifier(this, FadeOutSoundMix);    // Smoothly returns all sounds.
 }

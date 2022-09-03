@@ -23,6 +23,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> LeaderboardWidgetClass;
 
+    virtual void BeginPlay() override;
     virtual void BackToRootMenu() override;
 
 private:

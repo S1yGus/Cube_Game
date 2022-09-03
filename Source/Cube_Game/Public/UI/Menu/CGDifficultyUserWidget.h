@@ -8,6 +8,7 @@
 #include "CGDifficultyUserWidget.generated.h"
 
 class UCGButtonUserWidget;
+class USoundMix;
 
 UCLASS()
 class CUBE_GAME_API UCGDifficultyUserWidget : public UCGAnimatedUserWidget
@@ -24,10 +25,13 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* HardButton;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundMix* FadeOutSoundMix;
+
     virtual void NativeOnInitialized() override;
 
 private:
-    void SetDifficulty(EDifficulty NewDifficulty);
+    inline void SetDifficulty(EDifficulty NewDifficulty);
 
     void OnClickedEasyButton();
     void OnClickedMediumButton();

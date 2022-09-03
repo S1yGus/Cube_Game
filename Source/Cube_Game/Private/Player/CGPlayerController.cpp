@@ -2,8 +2,6 @@
 
 #include "Player/CGPlayerController.h"
 #include "CGGameMode.h"
-#include "UI/CGHUDBase.h"
-#include "Blueprint/UserWidget.h"
 
 void ACGPlayerController::SetupInputComponent()
 {
@@ -11,11 +9,8 @@ void ACGPlayerController::SetupInputComponent()
 
     check(InputComponent);
 
-    if (const auto GameModeBase = GetGameModeBase())
-    {
-        InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, GameModeBase, &ACGGameModeBase::OnPressedEnter).bExecuteWhenPaused = true;
-        InputComponent->BindAction("Esc", EInputEvent::IE_Pressed, GameModeBase, &ACGGameModeBase::OnPressedEscape).bExecuteWhenPaused = true;
-    }
+    InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &ThisClass::OnPressedEnter).bExecuteWhenPaused = true;
+    InputComponent->BindAction("Esc", EInputEvent::IE_Pressed, this, &ThisClass::OnPressedEscape).bExecuteWhenPaused = true;
 }
 
 void ACGPlayerController::BeginPlay()
@@ -45,4 +40,14 @@ void ACGPlayerController::OnGameStateChanged(EGameState NewGameState)
         SetInputMode(FInputModeGameAndUI().SetHideCursorDuringCapture(false));
         bShowMouseCursor = true;
     }
+}
+
+void ACGPlayerController::OnPressedEnter()
+{
+    OnPressedEnt.Broadcast();
+}
+
+void ACGPlayerController::OnPressedEscape()
+{
+    OnPressedEsc.Broadcast();
 }

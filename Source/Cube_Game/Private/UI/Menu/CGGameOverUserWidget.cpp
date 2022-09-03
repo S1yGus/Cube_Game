@@ -44,9 +44,6 @@ void UCGGameOverUserWidget::UpdateAddButton()
 
 void UCGGameOverUserWidget::OnClickedAddButton()
 {
-    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
-        return;
-
     PlayAnimation(AddAnimation);
 
     const auto GameInstnce = GetGameInstance<UCGGameInstance>();
@@ -60,27 +57,18 @@ void UCGGameOverUserWidget::OnClickedAddButton()
 
 void UCGGameOverUserWidget::OnClickedPlayAgainButton()
 {
-    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
-        return;
-
     GameStateToSet = EGameState::Game;
     ShowFadeoutAnimation();
 }
 
 void UCGGameOverUserWidget::OnClickedMenuButton()
 {
-    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
-        return;
-
     GameStateToSet = EGameState::MainMenu;
     ShowFadeoutAnimation();
 }
 
 void UCGGameOverUserWidget::OnClickedQuitButton()
 {
-    if (IsAnimationPlaying(StartupAnimation) || IsAnimationPlaying(FadeoutAnimation))
-        return;
-
     const auto GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;

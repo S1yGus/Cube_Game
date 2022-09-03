@@ -5,6 +5,7 @@
 #include "UI/CGTextUserWidget.h"
 #include "CGGameMode.h"
 #include "Components/TextBlock.h"
+#include "Player/CGPlayerController.h"
 
 void UCGPopUpHintUserWidget::NativeOnInitialized()
 {
@@ -19,14 +20,18 @@ void UCGPopUpHintUserWidget::Setup()
     check(TitleText);
     check(HintTextBlock);
 
-    ResumeButton->OnClickedButton.AddUObject(this, &UCGPopUpHintUserWidget::OnClickedResumeButton);
+    ResumeButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedResumeButton);
 
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
     {
-        GameMode->OnShowPopUpHintSignature.AddUObject(this, &UCGPopUpHintUserWidget::OnShowPopUpHint);
-        GameMode->OnGameStateChanged.AddUObject(this, &UCGPopUpHintUserWidget::OnGameStateChanged);
-        GameMode->OnPressedEnt.AddUObject(this, &UCGPopUpHintUserWidget::OnPressedEnter);
-        GameMode->OnPressedEsc.AddUObject(this, &UCGPopUpHintUserWidget::OnPressedEnter);
+        GameMode->OnShowPopUpHint.AddUObject(this, &ThisClass::OnShowPopUpHint);
+        GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
+    }
+
+    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    {
+        PC->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
+        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEnter);
     }
 }
 
@@ -45,7 +50,7 @@ void UCGPopUpHintUserWidget::OnGameStateChanged(EGameState NewGameState)
 
 void UCGPopUpHintUserWidget::OnPressedEnter()
 {
-    if (!IsVisible())
+    if (!IsVisible() || IsAnyAnimationPlaying())
         return;
 
     OnClickedResumeButton();
@@ -60,9 +65,6 @@ void UCGPopUpHintUserWidget::OnShowPopUpHint(const FHintData& HintData)
 
 void UCGPopUpHintUserWidget::OnClickedResumeButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     ShowFadeoutAnimation();
 }
 

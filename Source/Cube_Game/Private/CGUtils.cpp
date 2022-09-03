@@ -7,12 +7,9 @@ UWorld* CGUtils::GetCurrentWorld()
 
     for (const auto& Context : GEngine->GetWorldContexts())
     {
-        switch (Context.WorldType)
+        if ((Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::GamePreview) && Context.World() != nullptr)
         {
-            case EWorldType::PIE:
-                return Context.World();
-            case EWorldType::GamePreview:
-                return Context.World();
+            return Context.World();
         }
     }
 

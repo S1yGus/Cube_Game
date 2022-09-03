@@ -8,29 +8,26 @@ void ACGHUDBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    SetupWidgets();
-}
+    check(OptionsWidgetClass);
+    check(OptionsWarningWidgetClass);
+    check(HowToPlayWidgetClass);
 
-void ACGHUDBase::SetupWidgets()
-{
+    SetupWidgets();
+
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ACGHUDBase::OnGameStateChanged);
     }
+}
 
-    if (OptionsWidgetClass)
-    {
-        GameWidgets.Add(EGameState::Options, CreateWidget<UUserWidget>(GetWorld(), OptionsWidgetClass));
-    }
+void ACGHUDBase::SetupWidgets()
+{
+    GameWidgets.Add(EGameState::Options, CreateWidget<UUserWidget>(GetWorld(), OptionsWidgetClass));
+    GameWidgets.Add(EGameState::OptionsWarning, CreateWidget<UUserWidget>(GetWorld(), OptionsWarningWidgetClass));
+    GameWidgets.Add(EGameState::HowToPlay, CreateWidget<UUserWidget>(GetWorld(), HowToPlayWidgetClass));
 
-    if (OptionsWarningWidgetClass)
+    for (const auto& [GameState, GameWidget] : GameWidgets)
     {
-        GameWidgets.Add(EGameState::OptionsWarning, CreateWidget<UUserWidget>(GetWorld(), OptionsWarningWidgetClass));
-    }
-
-    for (const auto& GameWidgetPair : GameWidgets)
-    {
-        const auto GameWidget = GameWidgetPair.Value;
         if (!GameWidget)
             continue;
 

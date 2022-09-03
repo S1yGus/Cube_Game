@@ -17,6 +17,7 @@ class CUBE_GAME_API UCGGameInstance : public UGameInstance
 public:
     EDifficulty GetDifficulty() const { return CurrentDifficulty; }
     void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
+    const TArray<FHintData>& GetHints() const { return HowToPlayHints; }
 
     const TArray<FPlayerRecord>& GetLeaderboard() const;
     void AddToLeaderboard(const FPlayerRecord& PlayerRecord);
@@ -36,6 +37,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Leaderboard")
     FString LeaderboardSaveSlotName = "LeaderboardSave";
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
+    TArray<FHintData> HowToPlayHints;
 
     virtual void OnStart() override;
 

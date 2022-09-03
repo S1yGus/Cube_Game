@@ -35,4 +35,5 @@ protected:
     ACGGameModeBase* GetGameModeBase() const;
 
     virtual void SetGameState(EGameState NewGameState);
+    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
 };

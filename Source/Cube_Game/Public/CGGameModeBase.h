@@ -13,14 +13,10 @@ class CUBE_GAME_API ACGGameModeBase : public AGameModeBase
     GENERATED_BODY()
 public:
     FOnGameStateChangedSignature OnGameStateChanged;
-    FOnPressedEnterSignature OnPressedEnt;
-    FOnPressedEscSignature OnPressedEsc;
 
     ACGGameModeBase();
 
-    void SetGameState(EGameState NewGameState);
-    void OnPressedEnter();
-    void OnPressedEscape();
+    virtual void SetGameState(EGameState NewGameState);
 
 private:
     EGameState CurrentGameState = EGameState::WaitingToStart;

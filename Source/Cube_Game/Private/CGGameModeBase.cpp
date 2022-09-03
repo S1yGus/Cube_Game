@@ -16,13 +16,3 @@ void ACGGameModeBase::SetGameState(EGameState NewGameState)
     CurrentGameState = NewGameState;
     OnGameStateChanged.Broadcast(NewGameState);
 }
-
-void ACGGameModeBase::OnPressedEnter()
-{
-    OnPressedEnt.Broadcast();
-}
-
-void ACGGameModeBase::OnPressedEscape()
-{
-    OnPressedEsc.Broadcast();
-}

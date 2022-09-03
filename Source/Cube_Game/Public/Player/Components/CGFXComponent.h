@@ -52,7 +52,7 @@ protected:
     FName MaskEnabledParamName = "MaskEnabled";
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material", Meta = (ClampMin = "0.0"))
-    float TimeOfMaterialChanging = 0.25f;
+    float TimeOfMaterialChanging = 0.3f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "CameraShake")
     TMap<ECubeType, TSubclassOf<UCameraShakeBase>> CameraShakeOfReceivingMap;

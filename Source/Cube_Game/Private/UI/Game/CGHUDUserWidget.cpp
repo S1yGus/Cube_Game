@@ -4,6 +4,7 @@
 #include "CGGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Player/CGPlayerController.h"
 
 void UCGHUDUserWidget::NativeOnInitialized()
 {
@@ -11,8 +12,12 @@ void UCGHUDUserWidget::NativeOnInitialized()
 
     if (const auto GameMode = GetGameMode())
     {
-        GameMode->OnLowTime.AddUObject(this, &UCGHUDUserWidget::OnLowTime);
-        GameMode->OnPressedEsc.AddUObject(this, &UCGHUDUserWidget::OnPressedEsc);
+        GameMode->OnLowTime.AddUObject(this, &ThisClass::OnLowTime);
+    }
+
+    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    {
+        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
 }
 

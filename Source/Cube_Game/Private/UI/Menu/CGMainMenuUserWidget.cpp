@@ -4,6 +4,7 @@
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "CGGameInstance.h"
 #include "CGGameModeBase.h"
+#include "Player/CGPlayerController.h"
 
 void UCGMainMenuUserWidget::NativeOnInitialized()
 {
@@ -16,6 +17,7 @@ void UCGMainMenuUserWidget::Setup()
 {
     check(GameButton);
     check(LeaderButton);
+    check(HowButton);
     check(OptionsButton);
     check(QuitButton);
 
@@ -23,6 +25,8 @@ void UCGMainMenuUserWidget::Setup()
     WidgetButtons.Add(GameButton);
     LeaderButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedLeaderButton);
     WidgetButtons.Add(LeaderButton);
+    HowButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedHowButton);
+    WidgetButtons.Add(HowButton);
     OptionsButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedOptionsButton);
     WidgetButtons.Add(OptionsButton);
     QuitButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedQuitButton);
@@ -31,7 +35,11 @@ void UCGMainMenuUserWidget::Setup()
     if (const auto GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &UCGMainMenuUserWidget::OnGameStateChanged);
-        GameMode->OnPressedEsc.AddUObject(this, &UCGMainMenuUserWidget::OnPressedEsc);
+    }
+
+    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    {
+        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
 }
 
@@ -41,6 +49,12 @@ void UCGMainMenuUserWidget::ResetWidget()
     {
         Button->ResetButton();
     }
+}
+
+void UCGMainMenuUserWidget::ChangeGameState(EGameState NewGameState)
+{
+    GameStateToSet = NewGameState;
+    ShowFadeoutAnimation();
 }
 
 void UCGMainMenuUserWidget::OnGameStateChanged(EGameState NewGameState)
@@ -53,7 +67,7 @@ void UCGMainMenuUserWidget::OnGameStateChanged(EGameState NewGameState)
 
 void UCGMainMenuUserWidget::OnPressedEsc()
 {
-    if (!IsVisible())
+    if (!IsVisible() || IsAnyAnimationPlaying())
         return;
 
     OnClickedQuitButton();
@@ -61,36 +75,26 @@ void UCGMainMenuUserWidget::OnPressedEsc()
 
 void UCGMainMenuUserWidget::OnClickedGameButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
-    GameStateToSet = EGameState::DifficultySelection;
-    ShowFadeoutAnimation();
+    ChangeGameState(EGameState::DifficultySelection);
 }
 
 void UCGMainMenuUserWidget::OnClickedLeaderButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
+    ChangeGameState(EGameState::Leaderboard);
+}
 
-    GameStateToSet = EGameState::Leaderboard;
-    ShowFadeoutAnimation();
+void UCGMainMenuUserWidget::OnClickedHowButton()
+{
+    ChangeGameState(EGameState::HowToPlay);
 }
 
 void UCGMainMenuUserWidget::OnClickedOptionsButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
-    GameStateToSet = EGameState::Options;
-    ShowFadeoutAnimation();
+    ChangeGameState(EGameState::Options);
 }
 
 void UCGMainMenuUserWidget::OnClickedQuitButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;

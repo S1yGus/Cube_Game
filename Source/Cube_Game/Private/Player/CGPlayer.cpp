@@ -41,15 +41,15 @@ void ACGPlayer::BeginPlay()
     SetupPlayer();
     MoveToCurrentPosition();
 
-    StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ACGPlayer::OnComponentBeginOverlap);
+    StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnComponentBeginOverlap);
 }
 
 void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &ACGPlayer::MoveRight);
-    PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &ACGPlayer::MoveLeft);
+    PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &ThisClass::MoveRight);
+    PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &ThisClass::MoveLeft);
     PlayerInputComponent->BindAction("UseBonus", EInputEvent::IE_Pressed, BonusComponent, &UCGBonusComponent::UseCurrentBonus);
 }
 
@@ -60,7 +60,7 @@ FVector ACGPlayer::GetCurrentPositionLocation() const
 
 void ACGPlayer::SetupPlayer()
 {
-    FXComponent->SetColorOfReceiving(ECubeType::None);    // Set default field color.
+    FXComponent->SetColorOfReceiving(ECubeType::None);    // Set default player color.
     CurrentPosition = FMath::RandHelper(PositionsAmount);
 
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
@@ -102,7 +102,7 @@ void ACGPlayer::MoveLeft()
 
 void ACGPlayer::MoveToCurrentPosition()
 {
-    GetWorldTimerManager().SetTimer(MovementTimerHandle, this, &ACGPlayer::OnMoving, MovementTimerRate, true);
+    GetWorldTimerManager().SetTimer(MovementTimerHandle, this, &ThisClass::OnMoving, MovementTimerRate, true);
 }
 
 void ACGPlayer::OnMoving()
@@ -139,6 +139,8 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
     FXComponent->SetColorOfReceiving(CubeType);
     FXComponent->MakeCameraShake(CubeType);
 
+    ShowPopUpHint(CubeType);
+
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
     {
         GameMode->ChangeTime(CubeType);
@@ -150,8 +152,6 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
     {
         BonusComponent->SetRandomBonus();
     }
-
-    ShowPopUpHint(CubeType);
 }
 
 void ACGPlayer::ShowPopUpHint(ECubeType CubeType)

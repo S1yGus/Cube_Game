@@ -6,6 +6,7 @@
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "Components/VerticalBox.h"
 #include "UI/Menu/CGPlayerRecordRowUserWidget.h"
+#include "Player/CGPlayerController.h"
 
 void UCGLeaderboardUserWidget::NativeOnInitialized()
 {
@@ -22,15 +23,19 @@ void UCGLeaderboardUserWidget::Setup()
     check(BackButton);
     check(LeaderboardVerticalBox);
 
-    NameButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedNameButton);
-    ScoreButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedScoreButton);
-    DateButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedDateButton);
-    BackButton->OnClickedButton.AddUObject(this, &UCGLeaderboardUserWidget::OnClickedBackButton);
+    NameButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedNameButton);
+    ScoreButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedScoreButton);
+    DateButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedDateButton);
+    BackButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedBackButton);
 
     if (const auto GameMode = GetGameModeBase())
     {
-        GameMode->OnGameStateChanged.AddUObject(this, &UCGLeaderboardUserWidget::OnGameStateChanged);
-        GameMode->OnPressedEsc.AddUObject(this, &UCGLeaderboardUserWidget::OnPressedEsc);
+        GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
+    }
+
+    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    {
+        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
 }
 
@@ -53,7 +58,7 @@ void UCGLeaderboardUserWidget::UpdateLeaderboard()
             continue;
 
         PlayerRecordRowWidget->SetNameText(PlayerRecord.Name);
-        PlayerRecordRowWidget->SetScoreText(FText::AsNumber(PlayerRecord.Score));
+        PlayerRecordRowWidget->SetScoreText(FText::FromString(FString::FromInt(PlayerRecord.Score)));
         PlayerRecordRowWidget->SetDateText(FText::AsDate(PlayerRecord.DateTime));
         LeaderboardVerticalBox->AddChild(PlayerRecordRowWidget);
     }
@@ -70,7 +75,7 @@ void UCGLeaderboardUserWidget::OnGameStateChanged(EGameState NewGameState)
 
 void UCGLeaderboardUserWidget::OnPressedEsc()
 {
-    if (!IsVisible())
+    if (!IsVisible() || IsAnyAnimationPlaying())
         return;
 
     OnClickedBackButton();
@@ -126,9 +131,6 @@ void UCGLeaderboardUserWidget::OnClickedDateButton()
 
 void UCGLeaderboardUserWidget::OnClickedBackButton()
 {
-    if (IsAnyAnimationPlaying())
-        return;
-
     ShowFadeoutAnimation();
 }
 

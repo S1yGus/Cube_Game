@@ -4,6 +4,16 @@
 #include "CGGameModeBase.h"
 #include "UI/CGAnimatedUserWidget.h"
 
+void ACGHUDGame::BeginPlay()
+{
+    Super::BeginPlay();
+
+    check(HUDWidgetClass);
+    check(PopUpHintWidgetClass);
+    check(PauseWidgetClass);
+    check(GameOverWidgetClass);
+}
+
 void ACGHUDGame::BackToRootMenu()
 {
     const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>();
@@ -15,25 +25,10 @@ void ACGHUDGame::BackToRootMenu()
 
 void ACGHUDGame::SetupWidgets()
 {
-    if (HUDWidgetClass)
-    {
-        GameWidgets.Add(EGameState::Game, CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass));
-    }
-
-    if (PopUpHintWidgetClass)
-    {
-        GameWidgets.Add(EGameState::PopUpHint, CreateWidget<UUserWidget>(GetWorld(), PopUpHintWidgetClass));
-    }
-
-    if (PauseWidgetClass)
-    {
-        GameWidgets.Add(EGameState::Pause, CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass));
-    }
-
-    if (GameOverWidgetClass)
-    {
-        GameWidgets.Add(EGameState::GameOver, CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass));
-    }
+    GameWidgets.Add(EGameState::Game, CreateWidget<UUserWidget>(GetWorld(), HUDWidgetClass));
+    GameWidgets.Add(EGameState::PopUpHint, CreateWidget<UUserWidget>(GetWorld(), PopUpHintWidgetClass));
+    GameWidgets.Add(EGameState::Pause, CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass));
+    GameWidgets.Add(EGameState::GameOver, CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass));
 
     Super::SetupWidgets();
 }

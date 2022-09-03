@@ -19,6 +19,9 @@ protected:
     UCGButtonUserWidget* ResumeButton;
 
     UPROPERTY(Meta = (BindWidget))
+    UCGButtonUserWidget* HowButton;
+
+    UPROPERTY(Meta = (BindWidget))
     UCGButtonUserWidget* OptionsButton;
 
     UPROPERTY(Meta = (BindWidget))
@@ -39,9 +42,12 @@ private:
     void Setup();
     void ResetWidget();
 
+    void ChangeGameState(EGameState NewGameState);
+
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressedEsc();
     void OnClickedResumeButton();
+    void OnClickedHowButton();
     void OnClickedOptionsButton();
     void OnClickedMenuButton();
     void OnClickedQuitButton();

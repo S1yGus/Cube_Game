@@ -20,7 +20,7 @@ public:
     FOnSpeedChangedSignature OnSpeedChanged;
     FOnScoreChangedSignature OnScoreChanged;
     FOnMultiplierChangedSignature OnMultiplierChanged;
-    FOnShowPopUpHintSignature OnShowPopUpHintSignature;
+    FOnShowPopUpHintSignature OnShowPopUpHint;
 
     int32 GetTime() const { return Time; }
     int32 GetSpeed() const { return Speed; }
@@ -29,6 +29,7 @@ public:
     int32 GetScore() const { return Score; }
     const FDifficulty& GetDifficultyVlues() const;
     const TMap<ECubeType, FHintData>& GetReceivingHints() const { return ReceivingHintsMap; }
+    int32 GetMaxMultiplier() const { return MaxMultiplier; }
 
     void ChangeTime(ECubeType CubeType);
     void ChangeSpeed(ECubeType CubeType);
@@ -43,6 +44,7 @@ public:
     bool SetPause(EGameState NewGameState);
     virtual bool ClearPause() override;
     virtual void PreInitializeComponents() override;
+    virtual void SetGameState(EGameState NewGameState) override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
@@ -63,6 +65,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
     float StartupHintDelay = 2.0f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Multiplier", Meta = (ClampMin = "1"))
+    int32 MaxMultiplier = 8;
+
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
@@ -77,6 +82,9 @@ private:
     ECubeType PreviousCubeType = ECubeType::None;
 
     TMap<EHintType, bool> HintsMap;
+
+    bool bGameOver = false;
+    bool bShowingHint = false;
 
     void SetupGameMode();
     void OnCountdown();
@@ -93,4 +101,6 @@ private:
     void AddSpeed(int32 SpeedToAdd);
     void AddScore(int32 ScoreToAdd);
     void ChangeMultiplier(ECubeType CubeType);
+
+    void CheckFlags(EGameState NewGameState);
 };
