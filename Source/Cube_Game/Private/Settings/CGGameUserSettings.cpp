@@ -139,7 +139,7 @@ void UCGGameUserSettings::InitVideoSettings()
         ResolutionSetting->AddGetter(
             [&]() -> int32
             {
-                if (GetFullscreenMode() == EWindowMode::Type::WindowedFullscreen)
+                if (GetFullscreenMode() == EWindowMode::WindowedFullscreen)
                 {
                     return INDEX_NONE;
                 }
@@ -202,8 +202,12 @@ void UCGGameUserSettings::InitVideoSettings()
 
         auto Setting = CreateIntSetting(LOCTEXT("AspectRatio_Loc", "Aspect ratio"), AspectRatioOptions, VideoSettings);
         Setting->AddGetter(
-            [&, AspectRatioOptions]()
+            [&, AspectRatioOptions]() -> int32
             {
+                if (GetFullscreenMode() == EWindowMode::Windowed || GetFullscreenMode() == EWindowMode::WindowedFullscreen)
+                {
+                    return INDEX_NONE;
+                }
                 return AspectRatioOptions.IndexOfByKey(SettingsSave->VideoSettings.AspectRatioData.DisplayName);
             });
         Setting->AddSetter(
@@ -470,6 +474,8 @@ void UCGGameUserSettings::CheckSettingsSave()
     else
     {
         SettingsSave = Cast<UCGSettingsSave>(UGameplayStatics::CreateSaveGameObject(UCGSettingsSave::StaticClass()));
+        RunHardwareBenchmark();
+        ApplySettings(false);
     }
 
     check(SettingsSave);

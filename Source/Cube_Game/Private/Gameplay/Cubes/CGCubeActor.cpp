@@ -6,7 +6,7 @@
 #include "NiagaraComponent.h"
 #include "CGGameMode.h"
 
-static constexpr float LifeSpan = 2.0f;
+constexpr static float LifeSpan = 2.0f;
 constexpr static float LifeDistance = 2500.0f;
 constexpr static float UpdatePositionTimerRate = 0.03f;
 
