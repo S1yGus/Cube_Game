@@ -4,8 +4,6 @@
 #include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "Player/Components/CGFXComponent.h"
 
-constexpr static int32 MaxChargeLevel = 2;
-
 UCGBonusComponent::UCGBonusComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
