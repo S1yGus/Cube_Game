@@ -149,12 +149,11 @@ void ACGGameMode::SetupGameMode()
 
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
-        HintsMap = GameUserSettings->GetHintsStatus().HintsMap;
+        HintsStatusMap = GameUserSettings->GetHintsStatus().HintsMap;
         GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
     }
 
-    const auto PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
-    if (PlayerPawn)
+    if (const auto PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr)
     {
         if (const auto BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
         {
@@ -175,10 +174,10 @@ void ACGGameMode::OnCountdown()
 
 void ACGGameMode::ShowGameplayHint(EHintType HintType, float Delay)
 {
-    if (!HintsMap.Contains(HintType))
+    if (!HintsStatusMap.Contains(HintType))
         return;
 
-    if (!HintsMap[HintType])
+    if (!HintsStatusMap[HintType])
         return;
 
     if (!GameplayHintsMap.Contains(HintType))
@@ -191,7 +190,7 @@ void ACGGameMode::ShowGameplayHint(EHintType HintType, float Delay)
             DelayHintTimerHandle,           //
             [=]()
             {
-                this->ShowPopUpHint(GameplayHintsMap[HintType]);
+                ShowPopUpHint(GameplayHintsMap[HintType]);
             },
             Delay,     //
             false);    //
@@ -201,11 +200,11 @@ void ACGGameMode::ShowGameplayHint(EHintType HintType, float Delay)
         ShowPopUpHint(GameplayHintsMap[HintType]);
     }
 
-    HintsMap[HintType] = false;
+    HintsStatusMap[HintType] = false;
 
     if (const auto GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameUserSettings->SetGameplayHintsStatus(HintsMap);
+        GameUserSettings->SetGameplayHintsStatus(HintsStatusMap);
     }
 }
 
@@ -242,7 +241,7 @@ void ACGGameMode::OnShowBonusChargedHint(bool IsCharged)
 
 void ACGGameMode::OnHintsStatusChanged(const FHintsStatus& NewHintsStatus)
 {
-    HintsMap = NewHintsStatus.HintsMap;
+    HintsStatusMap = NewHintsStatus.HintsMap;
 }
 
 void ACGGameMode::AddTime(int32 TimeToAdd)

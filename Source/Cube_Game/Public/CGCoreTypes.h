@@ -97,7 +97,7 @@ struct FDifficulty
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "cm"))
     float DistanceBetweenCubes = 200.0f;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "cm/s"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "CentimetersPerSecond"))
     FVector2D CubesSpeedRange{100.0f, 10000.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))

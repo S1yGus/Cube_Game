@@ -21,7 +21,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
     bool bGetSpeedFromGameMode;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", Meta = (Units = "cm/s", EditCondition = "!bGetSpeedFromGameMode"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", Meta = (Units = "CentimetersPerSecond", EditCondition = "!bGetSpeedFromGameMode"))
     int32 Speed = 0;
 
     virtual void BeginPlay() override;

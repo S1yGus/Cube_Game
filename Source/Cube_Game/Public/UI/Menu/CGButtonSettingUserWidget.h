@@ -33,6 +33,5 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    UFUNCTION()
     void OnClickedButton();
 };

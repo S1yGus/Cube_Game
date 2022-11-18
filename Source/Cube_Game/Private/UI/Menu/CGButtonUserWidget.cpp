@@ -37,9 +37,9 @@ void UCGButtonUserWidget::Setup()
     check(Button);
     check(ButtonTextBlock);
 
-    Button->OnClicked.AddDynamic(this, &UCGButtonUserWidget::OnClicked);
-    Button->OnHovered.AddDynamic(this, &UCGButtonUserWidget::OnHovered);
-    Button->OnUnhovered.AddDynamic(this, &UCGButtonUserWidget::OnUnhovered);
+    Button->OnClicked.AddDynamic(this, &ThisClass::OnClicked);
+    Button->OnHovered.AddDynamic(this, &ThisClass::OnHovered);
+    Button->OnUnhovered.AddDynamic(this, &ThisClass::OnUnhovered);
 }
 
 void UCGButtonUserWidget::OnClicked()

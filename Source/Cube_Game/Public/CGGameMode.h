@@ -81,7 +81,7 @@ private:
 
     ECubeType PreviousCubeType = ECubeType::None;
 
-    TMap<EHintType, bool> HintsMap;
+    TMap<EHintType, bool> HintsStatusMap;
 
     bool bGameOver = false;
     bool bShowingHint = false;
@@ -89,7 +89,7 @@ private:
     void SetupGameMode();
     void OnCountdown();
 
-    void ShowGameplayHint(EHintType Hint, float Delay = 0.0f);
+    void ShowGameplayHint(EHintType HintType, float Delay = 0.0f);
     void FormatHints();
     void OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultiplier);
     void OnShowLowTimeHint();

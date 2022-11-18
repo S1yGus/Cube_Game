@@ -19,11 +19,11 @@ void ACGPlayerController::BeginPlay()
 
     if (const auto GameModeBase = GetGameModeBase())
     {
-        GameModeBase->OnGameStateChanged.AddUObject(this, &ACGPlayerController::OnGameStateChanged);
+        GameModeBase->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 }
 
-inline ACGGameModeBase* ACGPlayerController::GetGameModeBase() const
+ACGGameModeBase* ACGPlayerController::GetGameModeBase() const
 {
     return GetWorld()->GetAuthGameMode<ACGGameModeBase>();
 }

@@ -16,7 +16,7 @@ void ACGHUDBase::BeginPlay()
 
     if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>())
     {
-        GameMode->OnGameStateChanged.AddUObject(this, &ACGHUDBase::OnGameStateChanged);
+        GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 }
 
