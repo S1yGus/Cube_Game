@@ -44,7 +44,7 @@ void ACGBaseBonusActor::BeginPlay()
 
 bool ACGBaseBonusActor::IsCubeNegative(ECubeType CubeType)
 {
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameMode)
         return true;
 

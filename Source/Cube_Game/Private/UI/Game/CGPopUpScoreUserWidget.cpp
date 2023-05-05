@@ -11,7 +11,7 @@ void UCGPopUpScoreUserWidget::NativeOnInitialized()
 
     check(ScoreTextBlock);
 
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->OnScoreChanged.AddUObject(this, &UCGPopUpScoreUserWidget::OnScoreChanged);
     }

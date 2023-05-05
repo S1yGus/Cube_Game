@@ -29,7 +29,7 @@ void UCGMusicComponent::BeginPlay()
 
 void UCGMusicComponent::Setup()
 {
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         SpeedRange = GameMode->GetSpeedRange();
         GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
@@ -78,12 +78,12 @@ void UCGMusicComponent::OnSpeedChanged(int32 Speed)
     }
 }
 
-void UCGMusicComponent::OnMusicTypeChanged(bool NewMusicType)
+void UCGMusicComponent::OnMusicTypeChanged(bool bNewMusicType)
 {
-    bStaticMusic = NewMusicType;
+    bStaticMusic = bNewMusicType;
     SetSound(bStaticMusic ? StaticMusic : DynamicMusic);
 
-    if (!bStaticMusic)
+    if (!bStaticMusic && GetWorld())
     {
         if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
         {

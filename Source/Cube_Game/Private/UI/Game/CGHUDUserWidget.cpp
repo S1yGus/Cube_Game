@@ -21,9 +21,9 @@ void UCGHUDUserWidget::NativeOnInitialized()
     }
 }
 
-inline ACGGameMode* UCGHUDUserWidget::GetGameMode() const
+ACGGameMode* UCGHUDUserWidget::GetGameMode() const
 {
-    return GetWorld()->GetAuthGameMode<ACGGameMode>();
+    return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
 }
 
 void UCGHUDUserWidget::OnLowTime()

@@ -25,7 +25,7 @@ void ACGPlayerController::BeginPlay()
 
 ACGGameModeBase* ACGPlayerController::GetGameModeBase() const
 {
-    return GetWorld()->GetAuthGameMode<ACGGameModeBase>();
+    return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr;
 }
 
 void ACGPlayerController::OnGameStateChanged(EGameState NewGameState)

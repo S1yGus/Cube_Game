@@ -35,7 +35,7 @@ void ACGBaseCubeActor::Teardown()
 
 UStaticMeshComponent* ACGBaseCubeActor::GetPlayerMesh() const
 {
-    const auto PlayerController = GetWorld()->GetFirstPlayerController();
+    const auto PlayerController = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
     if (!PlayerController)
         return nullptr;
 

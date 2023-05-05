@@ -15,11 +15,10 @@ void ACGHUDMenu::BeginPlay()
 
 void ACGHUDMenu::BackToRootMenu()
 {
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameModeBase>();
-    if (!GameMode)
-        return;
-
-    GameMode->SetGameState(EGameState::MainMenu);
+    if (GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr)
+    {
+        GameMode->SetGameState(EGameState::MainMenu);
+    }
 }
 
 void ACGHUDMenu::SetupWidgets()

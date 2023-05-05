@@ -47,7 +47,7 @@ void UCGGameOverUserWidget::OnClickedAddButton()
     PlayAnimation(AddAnimation);
 
     const auto GameInstnce = GetGameInstance<UCGGameInstance>();
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameInstnce || !GameMode)
         return;
 
@@ -81,7 +81,7 @@ void UCGGameOverUserWidget::OnGameStateChanged(EGameState NewGameState)
     if (NewGameState != EGameState::GameOver)
         return;
 
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameMode)
         return;
 

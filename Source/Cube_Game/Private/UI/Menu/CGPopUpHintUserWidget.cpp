@@ -22,7 +22,7 @@ void UCGPopUpHintUserWidget::Setup()
 
     ResumeButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedResumeButton);
 
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->OnShowPopUpHint.AddUObject(this, &ThisClass::OnShowPopUpHint);
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);

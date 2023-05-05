@@ -58,7 +58,7 @@ void ACGCubeActor::BeginPlay()
 
 int32 ACGCubeActor::GetCubeSpeed() const
 {
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     return GameMode ? GameMode->GetCubeSpeed() : 0;
 }
 
