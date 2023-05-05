@@ -72,7 +72,7 @@ ECubeType ACGFieldActor::GetRandomCubeType() const
 
 ACGGameMode* ACGFieldActor::GetGameMode() const
 {
-    return GetWorld()->GetAuthGameMode<ACGGameMode>();
+    return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
 }
 
 const FDifficulty& ACGFieldActor::GetDifficultyVlues() const
@@ -88,8 +88,7 @@ const FDifficulty& ACGFieldActor::GetDifficultyVlues() const
 
 const APawn* ACGFieldActor::GetPlayerPawn() const
 {
-    const auto PlayerController = GetWorld()->GetFirstPlayerController();
-    return PlayerController ? PlayerController->GetPawn() : nullptr;
+    return (GetWorld() && GetWorld()->GetFirstPlayerController()) ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
 }
 
 void ACGFieldActor::Setup()

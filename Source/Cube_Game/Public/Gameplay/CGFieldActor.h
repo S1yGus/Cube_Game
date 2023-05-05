@@ -115,7 +115,7 @@ private:
     T* SpawnCubeActor(UClass* CubeClass, const FVector& RelativeLocation, const FCubeColorData& CubeColorData)
     {
         const auto SpawnTransform = FTransform{RelativeLocation} * GetTransform();
-        T* SpawnedCube = GetWorld()->SpawnActor<T>(CubeClass, SpawnTransform);
+        T* SpawnedCube = GetWorld() ? GetWorld()->SpawnActor<T>(CubeClass, SpawnTransform) : nullptr;
         check(SpawnedCube);
         SpawnedCube->SetColor(CubeColorData);
 

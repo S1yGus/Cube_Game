@@ -102,7 +102,7 @@ bool ACGGameMode::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate
 
 bool ACGGameMode::SetPause(EGameState NewGameState)
 {
-    if (!SetPause(GetWorld()->GetFirstPlayerController()))
+    if (!GetWorld() || !SetPause(GetWorld()->GetFirstPlayerController()))
         return false;
 
     SetGameState(NewGameState);
@@ -153,7 +153,7 @@ void ACGGameMode::SetupGameMode()
         GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
     }
 
-    if (const auto PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr)
+    if (const auto PlayerPawn = (GetWorld() && GetWorld()->GetFirstPlayerController()) ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr)
     {
         if (const auto BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
         {

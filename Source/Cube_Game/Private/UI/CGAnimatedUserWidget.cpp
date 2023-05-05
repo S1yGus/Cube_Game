@@ -18,7 +18,7 @@ void UCGAnimatedUserWidget::ShowFadeoutAnimation()
 
 ACGGameModeBase* UCGAnimatedUserWidget::GetGameModeBase() const
 {
-    return GetWorld()->GetAuthGameMode<ACGGameModeBase>();
+    return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr;
 }
 
 void UCGAnimatedUserWidget::SetGameState(EGameState NewGameState)

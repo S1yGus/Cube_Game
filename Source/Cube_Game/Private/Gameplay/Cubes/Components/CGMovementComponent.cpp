@@ -12,19 +12,25 @@ UCGMovementComponent::UCGMovementComponent()
 
 void UCGMovementComponent::StopMoving()
 {
-    GetWorld()->GetTimerManager().ClearTimer(MovementTimerHandle);
+    if (GetWorld())
+    {
+        GetWorld()->GetTimerManager().ClearTimer(MovementTimerHandle);
+    }
 }
 
 void UCGMovementComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, this, &ThisClass::OnMoving, MovingTeimerRate, true);
+    if (GetWorld())
+    {
+        GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, this, &ThisClass::OnMoving, MovingTeimerRate, true);
+    }
 }
 
 int32 UCGMovementComponent::GetCubeSpeed() const
 {
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameMode)
         return Speed;
 

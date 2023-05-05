@@ -39,7 +39,10 @@ void UCGFXComponent::SetColorOfReceiving(ECubeType CubeType)
     DynMaterial->SetScalarParameterValue(EmissivePowerParamName, ColorDataOfReceivingMap[CubeType].EmissivePower);
     DynMaterial->SetScalarParameterValue(MaskEnabledParamName, ColorDataOfReceivingMap[CubeType].MaskEnabled);
 
-    GetWorld()->GetTimerManager().SetTimer(MaterialTimerHandle, this, &ThisClass::OnReturnDefaultColor, TimeOfMaterialChanging);
+    if (GetWorld())
+    {
+        GetWorld()->GetTimerManager().SetTimer(MaterialTimerHandle, this, &ThisClass::OnReturnDefaultColor, TimeOfMaterialChanging);
+    }
 }
 
 void UCGFXComponent::MakeCameraShake(ECubeType CubeType)

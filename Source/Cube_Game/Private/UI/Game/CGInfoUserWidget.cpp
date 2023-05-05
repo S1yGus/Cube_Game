@@ -17,7 +17,7 @@ void UCGInfoUserWidget::Setup()
     check(TimeTextBlock);
     check(SpeedTextBlock);
 
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->OnScoreChanged.AddUObject(this, &UCGInfoUserWidget::OnScoreChanged);
         GameMode->OnTimeChanged.AddUObject(this, &UCGInfoUserWidget::OnTimeChanged);

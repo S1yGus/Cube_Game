@@ -56,7 +56,7 @@ private:
     void UpdateBPM(int32 Speed);
 
     void OnSpeedChanged(int32 Speed);
-    void OnMusicTypeChanged(bool NewMusicType);
+    void OnMusicTypeChanged(bool bNewMusicType);
     UFUNCTION()
     void OnSpectralAnalysis(const TArray<float>& Magnitudes);
 };

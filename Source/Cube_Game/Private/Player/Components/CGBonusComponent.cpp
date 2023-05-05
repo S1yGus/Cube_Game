@@ -53,7 +53,7 @@ void UCGBonusComponent::SetBonusCharged(bool IsCharged)
 
 void UCGBonusComponent::SpawnBonus(EBonusType BonusType)
 {
-    if (!BonusClassesMap.Contains(BonusType) || !GetOwner())
+    if (!GetWorld() || !GetOwner() || !BonusClassesMap.Contains(BonusType))
         return;
 
     const auto PlayrMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();

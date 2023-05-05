@@ -141,7 +141,7 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
 
     ShowPopUpHint(CubeType);
 
-    if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->ChangeTime(CubeType);
         GameMode->ChangeSpeed(CubeType);
@@ -162,7 +162,7 @@ void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
     if (!ReceivingHintsMap[CubeType])
         return;
 
-    const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameMode || !GameMode->GetReceivingHints().Contains(CubeType))
         return;
 

@@ -95,7 +95,7 @@ void UCGMainMenuUserWidget::OnClickedOptionsButton()
 
 void UCGMainMenuUserWidget::OnClickedQuitButton()
 {
-    const auto GameInstnce = GetWorld()->GetGameInstance<UCGGameInstance>();
+    const auto GameInstnce = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr;
     if (!GameInstnce)
         return;
 
