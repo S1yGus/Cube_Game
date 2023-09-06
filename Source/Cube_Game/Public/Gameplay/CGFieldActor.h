@@ -23,19 +23,19 @@ public:
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UStaticMeshComponent* StaticMeshComponent;
+    TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UWidgetComponent* WidgetComponent;
+    TObjectPtr<UWidgetComponent> WidgetComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCGMusicComponent* MusicComponent;
+    TObjectPtr<UCGMusicComponent> MusicComponent;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Materials|Field", Meta = (ToolTip = "Use none type for default color."))
-    TMap<EBonusType, FLinearColor> MaterialColorsMap;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Materials|Field", Meta = (ToolTip = "Use none type for the default color."))
+    TMap<EBonusType, FLinearColor> FieldMaterialColorsMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Materials|Field")
-    FName ColorParamName = "EmissiveColor";
+    FName FieldColorParamName{"EmissiveColor"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Materials|Cubes")
     TMap<ECubeType, FCubeColorData> CubeColorDataMap;
@@ -47,53 +47,53 @@ protected:
     TSubclassOf<ACGCubeActor> SpawningCubeClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0"))
-    int32 SpawnPositionsAmount = 4;
+    int32 SpawnPositionsAmount{4};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0.0", Units = "cm"))
-    float SpawnStep = 200.0f;
+    float SpawnStep{200.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn|Offset", Meta = (Units = "cm"))
-    float SpawnXOffset = 100.0f;
+    float SpawnXOffset{100.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn|Offset", Meta = (Units = "cm"))
-    float SpawnYOffset = -1600.0f;
+    float SpawnYOffset{-1600.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn|Offset", Meta = (Units = "cm"))
-    float SpawnZOffset = 65.0f;
+    float SpawnZOffset{65.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Indicators")
     TSubclassOf<ACGBaseCubeActor> IndicatorClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators", Meta = (ClampMin = "0.0", Units = "cm"))
-    float IndicatorsSpawnStep = 207.15f;
+    float IndicatorsSpawnStep{207.15f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators|Offset", Meta = (Units = "cm"))
-    float IndicatorsSpawnYOffset = -100.0f;
+    float IndicatorsSpawnYOffset{-100.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators|Offset", Meta = (Units = "cm"))
-    float IndicatorsSpawnZOffset = 65.0f;
+    float IndicatorsSpawnZOffset{65.0f};
 
     virtual void BeginPlay() override;
 
 private:
     FTimerHandle SpawnTimerHandle;
-    bool bRestartSpawn = false;
+    bool bRestartSpawnAfterSpeedChanged{false};
 
-    int32 CubesInLine = 0;
+    int32 CubesInLine{0};
     TArray<int32> SpawnPositions;
 
     UPROPERTY()
-    TArray<ACGBaseCubeActor*> Indicators;
+    TArray<TObjectPtr<ACGBaseCubeActor>> Indicators;
     UPROPERTY()
-    ACGBaseCubeActor* BonusIndicator;
-    EBonusType NewBonusIndicatorType = EBonusType::None;
-    int32 BonusIndicatorPosition = 0;
+    TObjectPtr<ACGBaseCubeActor> BonusIndicator;
+    EBonusType NewBonusIndicatorType{EBonusType::None};
+    int32 BonusIndicatorPosition{0};
 
-    inline float GetSpawnTimerRate() const;
-    inline ECubeType GetRandomCubeType() const;
-    inline ACGGameMode* GetGameMode() const;
-    inline const FDifficulty& GetDifficultyVlues() const;
-    inline const APawn* GetPlayerPawn() const;
+    FORCEINLINE float GetSpawnTimerRate() const;
+    FORCEINLINE ECubeType GetRandomCubeType() const;
+    FORCEINLINE ACGGameMode* GetGameMode() const;
+    FORCEINLINE const FDifficulty* GetDifficultyData() const;
+    FORCEINLINE const APawn* GetPlayerPawn() const;
 
     void Setup();
 
@@ -118,7 +118,6 @@ private:
         T* SpawnedCube = GetWorld() ? GetWorld()->SpawnActor<T>(CubeClass, SpawnTransform) : nullptr;
         check(SpawnedCube);
         SpawnedCube->SetColor(CubeColorData);
-
         return SpawnedCube;
     }
 

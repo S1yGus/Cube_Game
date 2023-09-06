@@ -17,7 +17,7 @@ class CUBE_GAME_API UCGGameInstance : public UGameInstance
 public:
     EDifficulty GetDifficulty() const { return CurrentDifficulty; }
     void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
-    const TArray<FHintData>& GetHints() const { return HowToPlayHints; }
+    const TArray<FHintData>& GetHowToPlayHints() const { return HowToPlayHints; }
 
     const TArray<FPlayerRecord>& GetLeaderboard() const;
     void AddToLeaderboard(const FPlayerRecord& PlayerRecord);
@@ -30,13 +30,13 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Game")
-    FName MenuLevelName = NAME_None;
+    FName MenuLevelName{NAME_None};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Game")
-    FName GameLevelName = NAME_None;
+    FName GameLevelName{NAME_None};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Leaderboard")
-    FString LeaderboardSaveSlotName = "LeaderboardSave";
+    FString LeaderboardSaveSlotName{"LeaderboardSave"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TArray<FHintData> HowToPlayHints;
@@ -44,10 +44,10 @@ protected:
     virtual void OnStart() override;
 
 private:
-    EDifficulty CurrentDifficulty = EDifficulty::Medium;
+    EDifficulty CurrentDifficulty{EDifficulty::Medium};
 
     UPROPERTY()
-    UCGLeaderboardSave* LeaderboardSave;
+    TObjectPtr<UCGLeaderboardSave> LeaderboardSave;
 
     void CheckLeaderboardSave();
 };

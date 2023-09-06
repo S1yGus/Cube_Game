@@ -20,13 +20,13 @@ public:
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* NameText;
+    TObjectPtr<UCGTextUserWidget> NameText;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* ScoreText;
+    TObjectPtr<UCGTextUserWidget> ScoreText;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* DateText;
+    TObjectPtr<UCGTextUserWidget> DateText;
 
     virtual void NativeOnInitialized() override;
 };

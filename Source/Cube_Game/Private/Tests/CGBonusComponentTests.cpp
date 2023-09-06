@@ -23,14 +23,14 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
     LevelScope("/Game/Maps/Test");
 
     {
-        const auto World = CGUtils::GetCurrentWorld();
-        const FString BlueprintName{"Blueprint'/Game/Player/BP_CGPlayer.BP_CGPlayer'"};
+        UWorld* World = CGUtils::GetCurrentWorld();
+        const FString PlayerBlueprintName{"Blueprint'/Game/Player/BP_CGPlayer.BP_CGPlayer'"};
         const FTransform SpawnTransform{FVector{1000.0f}};
-        const auto Playr = SpawnBlueprint<ACGPlayer>(World, BlueprintName, SpawnTransform);
+        const auto* Playr = SpawnBlueprint<ACGPlayer>(World, PlayerBlueprintName, SpawnTransform);
         if (!TestNotNull("Player must exists.", Playr))
             return false;
 
-        const auto BonusComponent = Playr->FindComponentByClass<UCGBonusComponent>();
+        auto* BonusComponent = Playr->FindComponentByClass<UCGBonusComponent>();
         if (!TestNotNull("BonusComponent must exists.", BonusComponent))
             return false;
 
@@ -43,22 +43,22 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
         BonusComponent->UseCurrentBonus();
         TArray<AActor*> FoundActors;
         UGameplayStatics::GetAllActorsOfClass(World, ACGBaseBonusActor::StaticClass(), FoundActors);
-        TestTrueExpr(FoundActors.Num() == 0);
+        TestTrueExpr(FoundActors.IsEmpty());
 
-        AddInfo("Bonus should be spawned after run SetRandomBonus().");
+        AddInfo("Bonus should be spawned after run CollectBonusCube().");
 
-        BonusComponent->SetRandomBonus();
+        BonusComponent->CollectBonusCube();
         BonusComponent->UseCurrentBonus();
         UGameplayStatics::GetAllActorsOfClass(World, ACGBaseBonusActor::StaticClass(), FoundActors);
         TestTrueExpr(FoundActors.Num() == 1);
     }
 
     {
-        auto BonusComponent = NewObject<UCGBonusComponent>();
+        auto* BonusComponent = NewObject<UCGBonusComponent>();
         if (!TestNotNull("BonusComponent must exists.", BonusComponent))
             return false;
 
-        AddInfo("Bonus should be changed after run SetRandomBonus().");
+        AddInfo("Bonus should be changed after run CollectBonusCube().");
 
         bool bBonusNotNone = false;
         BonusComponent->OnBonusChanged.AddLambda(
@@ -69,10 +69,10 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
                     bBonusNotNone = true;
                 }
             });
-        BonusComponent->SetRandomBonus();
+        BonusComponent->CollectBonusCube();
         TestTrueExpr(bBonusNotNone);
 
-        AddInfo("Bonus should be charged after run SetRandomBonus() the second time.");
+        AddInfo("Bonus should be charged after run CollectBonusCube() the second time.");
 
         bool bBonusCharged = false;
         BonusComponent->OnBonusCharged.AddLambda(
@@ -80,13 +80,13 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
             {
                 bBonusCharged = bCharged;
             });
-        BonusComponent->SetRandomBonus();
+        BonusComponent->CollectBonusCube();
         TestTrueExpr(bBonusCharged);
         TestTrueExpr(bBonusNotNone);
 
-        AddInfo("Bonus should be uncharged after run SetRandomBonus() the third time.");
+        AddInfo("Bonus should be uncharged after run CollectBonusCube() the third time.");
 
-        BonusComponent->SetRandomBonus();
+        BonusComponent->CollectBonusCube();
         TestTrueExpr(!bBonusCharged);
         TestTrueExpr(bBonusNotNone);
     }

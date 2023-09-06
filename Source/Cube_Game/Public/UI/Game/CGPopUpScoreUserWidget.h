@@ -17,10 +17,10 @@ class CUBE_GAME_API UCGPopUpScoreUserWidget : public UUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* ScoreTextBlock;
+    TObjectPtr<UTextBlock> ScoreTextBlock;
 
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* PopUpAnimation;
+    TObjectPtr<UWidgetAnimation> PopUpAnimation;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Colors")
     FLinearColor IncreaseScoreColor{FLinearColor::Green};
@@ -34,7 +34,7 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    EPopUpType PopUpType = EPopUpType::Multiplier;
+    EPopUpType PopUpType{EPopUpType::Multiplier};
 
     void OnScoreChanged(int32 NewScore, int32 DeltaScore, int32 NewMultiplier);
     void OnPopUpTypeChanged(EPopUpType NewPopUpType) { PopUpType = NewPopUpType; }

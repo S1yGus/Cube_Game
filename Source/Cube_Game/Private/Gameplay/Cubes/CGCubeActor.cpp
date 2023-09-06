@@ -6,16 +6,16 @@
 #include "NiagaraComponent.h"
 #include "CGGameMode.h"
 
-static constexpr float LifeSpan = 2.0f;
-constexpr static float LifeDistance = 2500.0f;
-constexpr static float UpdatePositionTimerRate = 0.03f;
+constexpr static float LifeSpan{2.0f};
+constexpr static float LifeDistance{2500.0f};
+constexpr static float UpdatePositionTimerRate{0.03f};
 
 ACGCubeActor::ACGCubeActor()
 {
     PrimaryActorTick.bCanEverTick = false;
 
-    NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Niagara");
-    NiagaraComponent->SetupAttachment(StaticMeshComponent);
+    TrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Trail");
+    TrailNiagaraComponent->SetupAttachment(StaticMeshComponent);
 
     MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
 
@@ -25,32 +25,29 @@ ACGCubeActor::ACGCubeActor()
 void ACGCubeActor::Annihilat()
 {
     EndPlayAction();
+    UNiagaraComponent* NiagaraFX = SpawnNiagaraEffect(AnnihilatNiagaraSystem);
+    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{0.0, static_cast<double>(MovementComponent->GetCubeSpeed()), 0.0});
+}
 
-    auto NiagaraFX = SpawnEndPlayNiagaraEffect(AnnihilationNiagaraSystem);
-    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{0.0f, static_cast<float>(MovementComponent->GetCubeSpeed()), 0.0f});
+void ACGCubeActor::Collect()
+{
+    EndPlayAction();
+    CollectNiagaraComponent = SpawnNiagaraEffect(CollectNiagaraSystem);
+    GetWorldTimerManager().SetTimer(UpdateNiagaraTargetPositionTimerHandle, this, &ThisClass::OnUpdateNiagaraTargetPosition, UpdatePositionTimerRate, true);
 }
 
 void ACGCubeActor::SetColor(const FCubeColorData& NewCubeColorData)
 {
     Super::SetColor(NewCubeColorData);
 
-    NiagaraComponent->SetColorParameter("Color", NewCubeColorData.Color);
-}
-
-void ACGCubeActor::Teardown()
-{
-    EndPlayAction();
-
-    ReceivingNiagaraComponent = SpawnEndPlayNiagaraEffect(ReceivingNiagaraSystem);
-
-    GetWorldTimerManager().SetTimer(UpdatePositionTimerHandle, this, &ThisClass::OnUpdatePosition, UpdatePositionTimerRate, true);
+    TrailNiagaraComponent->SetColorParameter(NiagaraColorParamName, NewCubeColorData.Color);
 }
 
 void ACGCubeActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(NiagaraComponent);
+    check(TrailNiagaraComponent);
     check(MovementComponent);
 
     SetLifeSpan(LifeDistance / static_cast<float>(GetCubeSpeed()));
@@ -58,8 +55,15 @@ void ACGCubeActor::BeginPlay()
 
 int32 ACGCubeActor::GetCubeSpeed() const
 {
-    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-    return GameMode ? GameMode->GetCubeSpeed() : 0;
+    if (GetWorld())
+    {
+        if (const auto* GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+        {
+            return GameMode->GetCubeSpeed();
+        }
+    }
+
+    return 0;
 }
 
 void ACGCubeActor::EndPlayAction()
@@ -70,20 +74,20 @@ void ACGCubeActor::EndPlayAction()
     SetLifeSpan(LifeSpan);
 }
 
-UNiagaraComponent* ACGCubeActor::SpawnEndPlayNiagaraEffect(UNiagaraSystem* NiagaraSystem)
+UNiagaraComponent* ACGCubeActor::SpawnNiagaraEffect(TObjectPtr<UNiagaraSystem> NiagaraSystem)
 {
-    const auto NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, NiagaraSystem, GetActorLocation());
+    UNiagaraComponent* NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, NiagaraSystem, GetActorLocation());
     check(NiagaraFX);
     NiagaraFX->SetColorParameter(NiagaraColorParamName, CubeColorData.Color * CubeColorData.EmissivePower);
 
     return NiagaraFX;
 }
 
-void ACGCubeActor::OnUpdatePosition()
+void ACGCubeActor::OnUpdateNiagaraTargetPosition()
 {
-    const auto PlayerMesh = GetPlayerMesh();
-    if (!PlayerMesh || !ReceivingNiagaraComponent)
+    const auto* PlayerMesh = GetPlayerMesh();
+    if (!PlayerMesh || !CollectNiagaraComponent)
         return;
 
-    ReceivingNiagaraComponent->SetVectorParameter(NiagaraTargetPositionParamName, PlayerMesh->GetComponentLocation());
+    CollectNiagaraComponent->SetVectorParameter(NiagaraTargetPositionParamName, PlayerMesh->GetComponentLocation());
 }

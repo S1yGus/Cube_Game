@@ -18,8 +18,8 @@ public:
     ACGPlayerCamera();
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCameraComponent* CameraComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UCameraComponent> CameraComponent;
 
     virtual void BeginPlay() override;
 

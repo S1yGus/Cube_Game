@@ -19,7 +19,7 @@ void ACGPlayerCamera::BeginPlay()
 
     check(CameraComponent);
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->OnAspectRatioChanged.AddUObject(this, &ThisClass::OnAspectRatioChanged);
         OnAspectRatioChanged(GameUserSettings->GetAspectRatio());    // Aspect ratio initialization.

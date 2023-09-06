@@ -17,15 +17,15 @@ void UCGInfoUserWidget::Setup()
     check(TimeTextBlock);
     check(SpeedTextBlock);
 
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
-        GameMode->OnScoreChanged.AddUObject(this, &UCGInfoUserWidget::OnScoreChanged);
-        GameMode->OnTimeChanged.AddUObject(this, &UCGInfoUserWidget::OnTimeChanged);
-        GameMode->OnSpeedChanged.AddUObject(this, &UCGInfoUserWidget::OnSpeedChanged);
+        GameMode->OnScoreChanged.AddUObject(this, &ThisClass::OnScoreChanged);
+        GameMode->OnTimeChanged.AddUObject(this, &ThisClass::OnTimeChanged);
+        GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
 
         OnScoreChanged(GameMode->GetScore());
-        OnTimeChanged(GameMode->GetTime());
-        OnSpeedChanged(GameMode->GetSpeed());
+        OnTimeChanged(GameMode->GetGameTime());
+        OnSpeedChanged(GameMode->GetGameSpeed());
     }
 }
 

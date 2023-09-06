@@ -6,6 +6,7 @@
 #include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "CGMissileBonusActor.generated.h"
 
+class UNiagaraComponent;
 class UCGMovementComponent;
 
 UCLASS()
@@ -20,11 +21,11 @@ public:
     virtual void Teardown() override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UNiagaraComponent* NiagaraComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UNiagaraComponent> NiagaraComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCGMovementComponent* MovementComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UCGMovementComponent> MovementComponent;
 
     virtual void BeginPlay() override;
 };

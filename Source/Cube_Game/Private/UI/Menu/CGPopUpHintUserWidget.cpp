@@ -22,13 +22,13 @@ void UCGPopUpHintUserWidget::Setup()
 
     ResumeButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedResumeButton);
 
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->OnShowPopUpHint.AddUObject(this, &ThisClass::OnShowPopUpHint);
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEnter);
@@ -75,7 +75,7 @@ void UCGPopUpHintUserWidget::OnAnimationFinished_Implementation(const UWidgetAni
     if (Animation != FadeoutAnimation)
         return;
 
-    const auto GameMode = GetGameModeBase();
+    ACGGameModeBase* GameMode = GetGameModeBase();
     if (!GameMode)
         return;
 

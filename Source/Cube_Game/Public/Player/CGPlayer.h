@@ -23,42 +23,43 @@ public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UStaticMeshComponent* StaticMeshComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UWidgetComponent* WidgetComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UWidgetComponent> WidgetComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCGBonusComponent* BonusComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UCGBonusComponent> BonusComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCGFXComponent* FXComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UCGFXComponent> FXComponent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0"))
-    int32 PositionsAmount = 4;
+    int32 PositionsAmount{4};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0", Units = "cm"))
-    float MovementStep = 200.0f;
+    float MovementStep{200.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0", Units = "cm"))
-    float PositionZOffset = 65.0f;
+    float PositionZOffset{65.0f};
 
     virtual void BeginPlay() override;
 
 private:
     FTimerHandle MovementTimerHandle;
-    int32 CurrentPosition = 0;
-    TMap<ECubeType, bool> ReceivingHintsMap;
+    int32 CurrentPosition{0};
+    TMap<ECubeType, bool> CachedCollectHintsMap;
 
-    inline FVector GetCurrentPositionLocation() const;
+    FORCEINLINE FVector GetCurrentPositionLocation() const;
 
     void SetupPlayer();
 
     void MoveRight();
     void MoveLeft();
-    void MoveToCurrentPosition();
+    FORCEINLINE void MoveToCurrentPosition();
     void OnMoving();
+    void UseCurrentBonus();
 
     UFUNCTION()
     void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
@@ -68,7 +69,7 @@ private:
                                  bool bFromSweep,                             //
                                  const FHitResult& SweepResult);              //
 
-    void ReceiveCube(ECubeType CubeType);
+    void CollectCube(ECubeType CubeType);
     void ShowPopUpHint(ECubeType CubeType);
     void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 

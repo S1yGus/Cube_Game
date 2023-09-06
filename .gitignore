@@ -16,3 +16,4 @@ Devops/
 *.xcodeproj
 *.xcworkspace
 *.log
+.vsconfig

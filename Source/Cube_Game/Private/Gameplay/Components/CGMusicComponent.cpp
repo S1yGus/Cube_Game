@@ -2,18 +2,16 @@
 
 #include "Gameplay/Components/CGMusicComponent.h"
 #include "CGGameMode.h"
-#include "Sound/SoundCue.h"
 #include "Settings/CGGameUserSettings.h"
-#include "Sound/SoundSubmix.h"
 #include "AudioMixerBlueprintLibrary.h"
 #include "Gameplay/CGFieldActor.h"
 #include "Gameplay/Cubes/CGBaseCubeActor.h"
 
-constexpr static float MinFrequencyForAnalysis = 40.0f;
-constexpr static float MaxFrequencyForAnalysis = 4000.0f;
-constexpr static float IndicatorAmplitudeMultiplier = 150.0f;
-constexpr static float SpectralAnalysisRate = 4.0f;
-constexpr static int32 RandHelperRange = 9999;
+constexpr static float MinFrequencyForAnalysis{40.0f};
+constexpr static float MaxFrequencyForAnalysis{4000.0f};
+constexpr static float IndicatorAmplitudeMultiplier{150.0f};
+constexpr static float SpectralAnalysisRate{4.0f};
+constexpr static int32 RandHelperRange{9999};
 
 UCGMusicComponent::UCGMusicComponent()
 {
@@ -29,7 +27,7 @@ void UCGMusicComponent::BeginPlay()
 
 void UCGMusicComponent::Setup()
 {
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         SpeedRange = GameMode->GetSpeedRange();
         GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
@@ -45,7 +43,7 @@ void UCGMusicComponent::Setup()
         SubmixToAnalysis->StartSpectralAnalysis(this);
     }
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         OnMusicTypeChanged(GameUserSettings->GetMusicType());
         GameUserSettings->OnMusicTypeChanged.AddUObject(this, &ThisClass::OnMusicTypeChanged);
@@ -54,7 +52,7 @@ void UCGMusicComponent::Setup()
 
 void UCGMusicComponent::UpdateBPM(int32 Speed)
 {
-    const auto CurrentBPM = FMath::GetMappedRangeValueClamped(SpeedRange, BPMRange, static_cast<float>(Speed));
+    const float CurrentBPM = FMath::GetMappedRangeValueClamped(SpeedRange, BPMRange, static_cast<float>(Speed));
     SetFloatParameter(BPMParamName, CurrentBPM);
 }
 
@@ -63,14 +61,14 @@ void UCGMusicComponent::OnSpeedChanged(int32 Speed)
     if (bStaticMusic)
         return;
 
-    const auto BPMSpeedOrder = Speed / SpeedLevelsNumToChangeBPM;
+    const int32 BPMSpeedOrder = Speed / SpeedLevelsNumToChangeBPM;
     if (PrevBPMSpeedOrder != BPMSpeedOrder)
     {
         UpdateBPM(Speed);
         PrevBPMSpeedOrder = BPMSpeedOrder;
     }
 
-    const auto SeedSpeedOrder = Speed / SpeedLevelsNumToChangeSeed;
+    const int32 SeedSpeedOrder = Speed / SpeedLevelsNumToChangeSeed;
     if (PrevSeedSpeedOrder != SeedSpeedOrder)
     {
         SetIntParameter(SeedParamName, FMath::RandHelper(RandHelperRange));
@@ -85,9 +83,9 @@ void UCGMusicComponent::OnMusicTypeChanged(bool bNewMusicType)
 
     if (!bStaticMusic && GetWorld())
     {
-        if (const auto GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
+        if (const auto* GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
         {
-            UpdateBPM(GameMode->GetSpeed());
+            UpdateBPM(GameMode->GetGameSpeed());
         }
         SetIntParameter(SeedParamName, FMath::RandHelper(RandHelperRange));
     }
@@ -95,24 +93,23 @@ void UCGMusicComponent::OnMusicTypeChanged(bool bNewMusicType)
 
 void UCGMusicComponent::OnSpectralAnalysis(const TArray<float>& Magnitudes)
 {
-    const auto Field = GetOwner<ACGFieldActor>();
-    if (!Field)
-        return;
-
-    for (int32 i = 0; i < Field->Indicators.Num(); ++i)
+    if (const auto* Field = GetOwner<ACGFieldActor>())
     {
-        if (!IsValid(Field->Indicators[i]))
-            continue;
+        for (int32 i = 0; i < Field->Indicators.Num(); ++i)
+        {
+            if (IsValid(Field->Indicators[i]))
+            {
+                FVector NewLocation = Field->Indicators[i]->GetActorLocation();
+                NewLocation.Z = Magnitudes[i] * IndicatorAmplitudeMultiplier;
+                Field->Indicators[i]->SetActorLocation(NewLocation);
+            }
+        }
 
-        auto NewLocation = Field->Indicators[i]->GetActorLocation();
-        NewLocation.Z = Magnitudes[i] * IndicatorAmplitudeMultiplier;
-        Field->Indicators[i]->SetActorLocation(NewLocation);
-    }
-
-    if (IsValid(Field->BonusIndicator))
-    {
-        auto NewLocation = Field->BonusIndicator->GetActorLocation();
-        NewLocation.Z = Magnitudes[Field->BonusIndicatorPosition] * IndicatorAmplitudeMultiplier;
-        Field->BonusIndicator->SetActorLocation(NewLocation);
+        if (IsValid(Field->BonusIndicator))
+        {
+            FVector NewLocation = Field->BonusIndicator->GetActorLocation();
+            NewLocation.Z = Magnitudes[Field->BonusIndicatorPosition] * IndicatorAmplitudeMultiplier;
+            Field->BonusIndicator->SetActorLocation(NewLocation);
+        }
     }
 }

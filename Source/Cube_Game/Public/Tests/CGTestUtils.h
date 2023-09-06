@@ -17,7 +17,7 @@ public:
 template <class T>
 T* SpawnBlueprint(UWorld* World, const FString& Name, const FTransform& Transform = FTransform::Identity)
 {
-    const auto Blueprint = LoadObject<UBlueprint>(nullptr, *Name);
+    auto* Blueprint = LoadObject<UBlueprint>(nullptr, *Name);
     return (World && Blueprint) ? World->SpawnActor<T>(Blueprint->GeneratedClass, Transform) : nullptr;
 }
 

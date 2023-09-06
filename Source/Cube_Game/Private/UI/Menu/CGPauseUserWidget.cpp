@@ -32,12 +32,12 @@ void UCGPauseUserWidget::Setup()
     QuitButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedQuitButton);
     WidgetButtons.Add(QuitButton);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
@@ -45,7 +45,7 @@ void UCGPauseUserWidget::Setup()
 
 void UCGPauseUserWidget::ResetWidget()
 {
-    for (const auto& Button : WidgetButtons)
+    for (auto& Button : WidgetButtons)
     {
         Button->ResetButton();
     }
@@ -97,16 +97,15 @@ void UCGPauseUserWidget::OnClickedMenuButton()
 
 void UCGPauseUserWidget::OnClickedQuitButton()
 {
-    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
-    if (!GameInstnce)
-        return;
-
-    GameInstnce->QuitGame(GetOwningPlayer());
+    if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+    {
+        GameInstnce->QuitGame(GetOwningPlayer());
+    }
 }
 
 void UCGPauseUserWidget::SetGameState(EGameState NewGameState)
 {
-    const auto GameModeBase = GetGameModeBase();
+    ACGGameModeBase* GameModeBase = GetGameModeBase();
     if (!GameModeBase)
         return;
 
@@ -127,7 +126,7 @@ void UCGPauseUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimati
 
     if (GameStateToSet == EGameState::MainMenu)
     {
-        if (const auto GameInstnce = GetGameInstance<UCGGameInstance>())
+        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
         {
             GameInstnce->OpenMainMenu();
         }

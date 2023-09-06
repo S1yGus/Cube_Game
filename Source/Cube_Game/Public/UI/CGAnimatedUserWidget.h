@@ -21,18 +21,18 @@ public:
 
 protected:
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* StartupAnimation;
+    TObjectPtr<UWidgetAnimation> StartupAnimation;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* StartupSound;
+    TObjectPtr<USoundCue> StartupSound;
 
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* FadeoutAnimation;
+    TObjectPtr<UWidgetAnimation> FadeoutAnimation;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* FadeoutSound;
+    TObjectPtr<USoundCue> FadeoutSound;
 
-    ACGGameModeBase* GetGameModeBase() const;
+    TObjectPtr<ACGGameModeBase> GetGameModeBase() const;
 
     virtual void SetGameState(EGameState NewGameState);
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;

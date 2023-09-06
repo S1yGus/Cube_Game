@@ -3,7 +3,7 @@
 #include "Gameplay/Cubes/CGBaseCubeActor.h"
 #include "Materials/MaterialInstance.h"
 
-constexpr static float ScalingTimerRate = 0.016f;
+constexpr static float ScalingTimerRate{0.016f};
 
 ACGBaseCubeActor::ACGBaseCubeActor()
 {
@@ -20,7 +20,7 @@ ACGBaseCubeActor::ACGBaseCubeActor()
 void ACGBaseCubeActor::SetColor(const FCubeColorData& NewCubeColorData)
 {
     CubeColorData = NewCubeColorData;
-    const auto DynMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
+    UMaterialInstanceDynamic* DynMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
     DynMaterial->SetVectorParameterValue(ColorParamName, CubeColorData.Color);
     DynMaterial->SetScalarParameterValue(EmissivePowerParamName, CubeColorData.EmissivePower);
     DynMaterial->SetScalarParameterValue(MaskEnabledParamName, CubeColorData.MaskEnabled);
@@ -30,20 +30,20 @@ void ACGBaseCubeActor::Teardown()
 {
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     TargetScale = FVector::ZeroVector;
-    GetWorldTimerManager().SetTimer(ScaleTimerHandle, this, &ThisClass::OnChangingScale, ScalingTimerRate, true);
+    GetWorldTimerManager().SetTimer(ScaleTimerHandle, this, &ThisClass::OnScaling, ScalingTimerRate, true);
 }
 
 UStaticMeshComponent* ACGBaseCubeActor::GetPlayerMesh() const
 {
-    const auto PlayerController = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
-    if (!PlayerController)
-        return nullptr;
+    if (const auto* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr)
+    {
+        if (const auto* Pawn = PC->GetPawn())
+        {
+            return Pawn->FindComponentByClass<UStaticMeshComponent>();
+        }
+    }
 
-    const auto PlayerPawn = PlayerController->GetPawn();
-    if (!PlayerPawn)
-        return nullptr;
-
-    return PlayerPawn->FindComponentByClass<UStaticMeshComponent>();
+    return nullptr;
 }
 
 void ACGBaseCubeActor::BeginPlay()
@@ -53,39 +53,29 @@ void ACGBaseCubeActor::BeginPlay()
     check(StaticMeshComponent);
 
     SetActorScale3D(FVector::ZeroVector);
-    GetWorldTimerManager().SetTimer(ScaleTimerHandle, this, &ThisClass::OnChangingScale, ScalingTimerRate, true);
+    GetWorldTimerManager().SetTimer(ScaleTimerHandle, this, &ThisClass::OnScaling, ScalingTimerRate, true);
 }
 
-void ACGBaseCubeActor::OnScalingZero()
+void ACGBaseCubeActor::OnScaling()
 {
-    Destroy();
+    SetActorScale3D(FMath::VInterpConstantTo(GetActorScale3D(), TargetScale, ScalingTimerRate, ScaleInterpSpeed));
+
+    if (GetActorScale3D().IsNearlyZero())
+    {
+        OnZeroScale();
+    }
+    else if (GetActorScale3D().Equals(TargetScale))
+    {
+        GetWorldTimerManager().ClearTimer(ScaleTimerHandle);
+        OnScalingDone();
+    }
 }
 
 void ACGBaseCubeActor::OnScalingDone()
 {
 }
 
-void ACGBaseCubeActor::OnScalin()
+void ACGBaseCubeActor::OnZeroScale()
 {
-}
-
-void ACGBaseCubeActor::OnChangingScale()
-{
-    SetActorScale3D(FMath::VInterpConstantTo(GetActorScale3D(), TargetScale, ScalingTimerRate, ScaleInterpSpeed));
-
-    if (FMath::IsNearlyZero(GetActorScale3D().X)        //
-        && FMath::IsNearlyZero(GetActorScale3D().Y)     //
-        && FMath::IsNearlyZero(GetActorScale3D().Z))    //
-    {
-        OnScalingZero();
-    }
-    else if (FMath::IsNearlyEqual(GetActorScale3D().X, TargetScale.X)        //
-             && FMath::IsNearlyEqual(GetActorScale3D().Y, TargetScale.Y)     //
-             && FMath::IsNearlyEqual(GetActorScale3D().Z, TargetScale.Z))    //
-    {
-        GetWorldTimerManager().ClearTimer(ScaleTimerHandle);
-        OnScalingDone();
-    }
-
-    OnScalin();
+    Destroy();
 }

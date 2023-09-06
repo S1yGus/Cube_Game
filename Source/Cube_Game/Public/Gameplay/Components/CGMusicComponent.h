@@ -19,37 +19,37 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MetaSounds|BPM")
-    FName BPMParamName = "BPM";
+    FName BPMParamName{"BPM"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MetaSounds|BPM")
     FVector2D BPMRange{220.0f, 400.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MetaSounds|BPM")
-    int32 SpeedLevelsNumToChangeBPM = 10;
+    int32 SpeedLevelsNumToChangeBPM{10};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MetaSounds|Seed")
-    FName SeedParamName = "Seed";
+    FName SeedParamName{"Seed"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "MetaSounds|Seed")
-    int32 SpeedLevelsNumToChangeSeed = 30;
+    int32 SpeedLevelsNumToChangeSeed{30};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* StaticMusic;
+    TObjectPtr<USoundCue> StaticMusic;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundBase* DynamicMusic;
+    TObjectPtr<USoundBase> DynamicMusic;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundSubmix* SubmixToAnalysis;
+    TObjectPtr<USoundSubmix> SubmixToAnalysis;
 
     virtual void BeginPlay() override;
 
 private:
     FOnSubmixSpectralAnalysisBP OnSubmixSpectralAnalysis;
 
-    bool bStaticMusic = false;
-    int32 PrevBPMSpeedOrder = 0;
-    int32 PrevSeedSpeedOrder = 0;
+    bool bStaticMusic{false};
+    int32 PrevBPMSpeedOrder{0};
+    int32 PrevSeedSpeedOrder{0};
     FVector2D SpeedRange{1.0f, 999.0f};
 
     void Setup();

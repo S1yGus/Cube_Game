@@ -15,13 +15,13 @@ class CUBE_GAME_API UCGInfoUserWidget : public UUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* ScoreTextBlock;
+    TObjectPtr<UTextBlock> ScoreTextBlock;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* TimeTextBlock;
+    TObjectPtr<UTextBlock> TimeTextBlock;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* SpeedTextBlock;
+    TObjectPtr<UTextBlock> SpeedTextBlock;
 
     virtual void NativeOnInitialized() override;
 

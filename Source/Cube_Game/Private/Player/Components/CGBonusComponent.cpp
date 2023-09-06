@@ -2,24 +2,21 @@
 
 #include "Player/Components/CGBonusComponent.h"
 #include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
-#include "Player/Components/CGFXComponent.h"
 
 UCGBonusComponent::UCGBonusComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UCGBonusComponent::SetRandomBonus()
+void UCGBonusComponent::CollectBonusCube()
 {
     if (CurrentBonus != EBonusType::None && !bBonusCharged)
     {
-        SetBonusCharged(true);
+        ChargeBonus(true);
     }
     else
     {
-        const auto RandBonusNum = FMath::RandHelper(static_cast<int32>(EBonusType::Max) - 1) + 1;    // - 1 and + 1 to avoid EBonusType::None
-        SetBonus(static_cast<EBonusType>(RandBonusNum));
-        SetBonusCharged(false);
+        SetRandomBonus();
     }
 }
 
@@ -30,7 +27,14 @@ void UCGBonusComponent::UseCurrentBonus()
 
     SpawnBonus(CurrentBonus);
     SetBonus(EBonusType::None);
-    SetBonusCharged(false);
+    ChargeBonus(false);
+}
+
+void UCGBonusComponent::SetRandomBonus()
+{
+    const int32 RandBonusNum = FMath::RandHelper(static_cast<int32>(EBonusType::Max) - 1) + 1;    // - 1 and + 1 to avoid EBonusType::None
+    SetBonus(static_cast<EBonusType>(RandBonusNum));
+    ChargeBonus(false);
 }
 
 void UCGBonusComponent::SetBonus(EBonusType NewBonus)
@@ -42,12 +46,12 @@ void UCGBonusComponent::SetBonus(EBonusType NewBonus)
     OnBonusChanged.Broadcast(NewBonus);
 }
 
-void UCGBonusComponent::SetBonusCharged(bool IsCharged)
+void UCGBonusComponent::ChargeBonus(bool bCharged)
 {
-    if (bBonusCharged == IsCharged)
+    if (bBonusCharged == bCharged)
         return;
 
-    bBonusCharged = IsCharged;
+    bBonusCharged = bCharged;
     OnBonusCharged.Broadcast(bBonusCharged);
 }
 
@@ -56,19 +60,14 @@ void UCGBonusComponent::SpawnBonus(EBonusType BonusType)
     if (!GetWorld() || !GetOwner() || !BonusClassesMap.Contains(BonusType))
         return;
 
-    const auto PlayrMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+    const auto* PlayrMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
     if (!PlayrMesh)
         return;
 
     const auto SpawnTransform = PlayrMesh->GetComponentTransform();
-    const auto BonusActor = GetWorld()->SpawnActorDeferred<ACGBaseBonusActor>(BonusClassesMap[BonusType], SpawnTransform);
+    auto* BonusActor = GetWorld()->SpawnActorDeferred<ACGBaseBonusActor>(BonusClassesMap[BonusType], SpawnTransform);
     check(BonusActor);
     BonusActor->SetBonusCharged(bBonusCharged);
     BonusActor->SetOwner(GetOwner());
     BonusActor->FinishSpawning(SpawnTransform);
-
-    if (const auto FXComponent = GetOwner()->FindComponentByClass<UCGFXComponent>())
-    {
-        FXComponent->MakeCameraShake(BonusType);
-    }
 }

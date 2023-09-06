@@ -14,7 +14,7 @@ void ACGHUDBase::BeginPlay()
 
     SetupWidgets();
 
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr)
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
@@ -28,11 +28,11 @@ void ACGHUDBase::SetupWidgets()
 
     for (const auto& [GameState, GameWidget] : GameWidgets)
     {
-        if (!GameWidget)
-            continue;
-
-        GameWidget->AddToViewport();
-        GameWidget->SetVisibility(ESlateVisibility::Collapsed);
+        if (GameWidget)
+        {
+            GameWidget->AddToViewport();
+            GameWidget->SetVisibility(ESlateVisibility::Collapsed);
+        }
     }
 }
 
@@ -52,7 +52,7 @@ void ACGHUDBase::OnGameStateChanged(EGameState GameState)
     {
         CurrentWidget->SetVisibility(ESlateVisibility::Visible);
 
-        if (const auto AnimatedWidget = Cast<UCGAnimatedUserWidget>(CurrentWidget))
+        if (auto* AnimatedWidget = Cast<UCGAnimatedUserWidget>(CurrentWidget))
         {
             AnimatedWidget->ShowStartupAnimation();
         }

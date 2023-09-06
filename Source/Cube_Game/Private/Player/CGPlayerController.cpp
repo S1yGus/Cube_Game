@@ -8,7 +8,6 @@ void ACGPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
 
     check(InputComponent);
-
     InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &ThisClass::OnPressedEnter).bExecuteWhenPaused = true;
     InputComponent->BindAction("Esc", EInputEvent::IE_Pressed, this, &ThisClass::OnPressedEscape).bExecuteWhenPaused = true;
 }
@@ -23,7 +22,7 @@ void ACGPlayerController::BeginPlay()
     }
 }
 
-ACGGameModeBase* ACGPlayerController::GetGameModeBase() const
+TObjectPtr<ACGGameModeBase> ACGPlayerController::GetGameModeBase() const
 {
     return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr;
 }

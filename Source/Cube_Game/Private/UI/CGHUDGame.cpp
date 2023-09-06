@@ -16,7 +16,7 @@ void ACGHUDGame::BeginPlay()
 
 void ACGHUDGame::BackToRootMenu()
 {
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr)
     {
         GameMode->SetGameState(EGameState::Pause);
     }

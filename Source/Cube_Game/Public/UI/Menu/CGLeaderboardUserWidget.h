@@ -9,7 +9,6 @@
 class UVerticalBox;
 class UCGButtonUserWidget;
 class UCGPlayerRecordRowUserWidget;
-class UCGLeaderboardSave;
 
 UCLASS()
 class CUBE_GAME_API UCGLeaderboardUserWidget : public UCGAnimatedUserWidget
@@ -18,19 +17,19 @@ class CUBE_GAME_API UCGLeaderboardUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UVerticalBox* LeaderboardVerticalBox;
+    TObjectPtr<UVerticalBox> LeaderboardVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* NameButton;
+    TObjectPtr<UCGButtonUserWidget> NameButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* ScoreButton;
+    TObjectPtr<UCGButtonUserWidget> ScoreButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* DateButton;
+    TObjectPtr<UCGButtonUserWidget> DateButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* BackButton;
+    TObjectPtr<UCGButtonUserWidget> BackButton;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCGPlayerRecordRowUserWidget> PlayerRecordRowWidgetClass;
@@ -38,9 +37,9 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    bool bNameAscending = true;
-    bool bScoreAscending = true;
-    bool bDateAscending = true;
+    bool bNameAscending{true};
+    bool bScoreAscending{true};
+    bool bDateAscending{true};
 
     void Setup();
     void ResetWidget();
@@ -53,5 +52,6 @@ private:
     void OnClickedScoreButton();
     void OnClickedDateButton();
     void OnClickedBackButton();
+
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
 };

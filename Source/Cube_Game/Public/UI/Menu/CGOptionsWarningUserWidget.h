@@ -20,22 +20,22 @@ public:
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* SaveButton;
+    TObjectPtr<UCGButtonUserWidget> SaveButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* CancelButton;
+    TObjectPtr<UCGButtonUserWidget> CancelButton;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    float CancelSettingsTime = 10.0f;
+    float CancelSettingsTime{10.0f};
 
     virtual void NativeOnInitialized() override;
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
     UPROPERTY()
-    TArray<UCGButtonUserWidget*> WidgetButtons;
+    TArray<TObjectPtr<UCGButtonUserWidget>> WidgetButtons;
 
-    float CountdownTime = 0.0f;
+    float CountdownTime{0.0f};
 
     void Setup();
     void ResetWidget();

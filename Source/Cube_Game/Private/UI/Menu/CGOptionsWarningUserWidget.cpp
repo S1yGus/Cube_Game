@@ -8,7 +8,7 @@
 
 FText UCGOptionsWarningUserWidget::GetCountdownTime() const
 {
-    return FText::AsNumber(static_cast<int32>(CountdownTime));
+    return FText::AsNumber(FMath::RoundToInt(CountdownTime));
 }
 
 void UCGOptionsWarningUserWidget::NativeOnInitialized()
@@ -39,12 +39,12 @@ void UCGOptionsWarningUserWidget::Setup()
     CancelButton->OnClickedButton.AddUObject(this, &ThisClass::OnCancelSettings);
     WidgetButtons.Add(CancelButton);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
@@ -53,7 +53,7 @@ void UCGOptionsWarningUserWidget::Setup()
 
 void UCGOptionsWarningUserWidget::ResetWidget()
 {
-    for (const auto& Button : WidgetButtons)
+    for (auto& Button : WidgetButtons)
     {
         Button->ResetButton();
     }
@@ -87,7 +87,7 @@ void UCGOptionsWarningUserWidget::OnPressedEsc()
 
 void UCGOptionsWarningUserWidget::OnSaveSettings()
 {
-    const auto GameUserSettings = UCGGameUserSettings::Get();
+    auto* GameUserSettings = UCGGameUserSettings::Get();
     if (!GameUserSettings)
         return;
 
@@ -98,7 +98,7 @@ void UCGOptionsWarningUserWidget::OnSaveSettings()
 
 void UCGOptionsWarningUserWidget::OnCancelSettings()
 {
-    const auto GameUserSettings = UCGGameUserSettings::Get();
+    auto* GameUserSettings = UCGGameUserSettings::Get();
     if (!GameUserSettings)
         return;
 

@@ -32,9 +32,9 @@ using namespace SettingsConstants;
         SettingsSave->SoundSettings.VolumeType = NewValue; \
     }
 
-static bool operator==(const FText& Text1, const FText& Text2)
+static bool operator==(const FText& Lhs, const FText& Rhs)
 {
-    return Text1.ToString() == Text2.ToString();
+    return Lhs.ToString() == Rhs.ToString();
 }
 
 static bool operator==(const FCultureData& Data, const FString& Str)
@@ -80,9 +80,9 @@ void UCGGameUserSettings::SetGameplayHintsStatus(const TMap<EHintType, bool>& Ne
     SaveSettings();
 }
 
-void UCGGameUserSettings::SetReceivingHintsStatus(const TMap<ECubeType, bool>& NewHintsMap)
+void UCGGameUserSettings::SetCollectHintsStatus(const TMap<ECubeType, bool>& NewHintsMap)
 {
-    SettingsSave->GameSettings.HintsStatus.ReceivingHintsMap = NewHintsMap;
+    SettingsSave->GameSettings.HintsStatus.CollectHintsMap = NewHintsMap;
     SaveSettings();
 }
 
@@ -143,17 +143,16 @@ void UCGGameUserSettings::InitVideoSettings()
                 {
                     return INDEX_NONE;
                 }
-                const auto CurrentResolution = GetScreenResolution();
+                const FIntPoint CurrentResolution = GetScreenResolution();
                 const auto Option = FText::FromString(FString::Printf(TEXT("%d x %d"), CurrentResolution.X, CurrentResolution.Y));
                 return ResolutionSetting->GetOptions().IndexOfByKey(Option);
             });
         ResolutionSetting->AddSetter(
             [&](int32 NewValue)
             {
-                FString LeftS, RightS;
-                if (ResolutionSetting->GetOptions()[NewValue].ToString().Split(" x ", &LeftS, &RightS))
+                if (FString LeftS, RightS; ResolutionSetting->GetOptions()[NewValue].ToString().Split(" x ", &LeftS, &RightS))
                 {
-                    FIntPoint NewResolution = FIntPoint(FCString::Atoi(*LeftS), FCString::Atoi(*RightS));
+                    const FIntPoint NewResolution = FIntPoint(FCString::Atoi(*LeftS), FCString::Atoi(*RightS));
                     SetScreenResolution(NewResolution);
                     ApplyResolutionSettings(false);
                     OnResolutionChanged.Broadcast();
@@ -182,7 +181,7 @@ void UCGGameUserSettings::InitVideoSettings()
             [&]()
             {
                 return GetFrameRateLimit() == 0.0f ? 0    //
-                                                   : FramerateOptions.IndexOfByKey(FText::AsNumber(static_cast<int32>(GetFrameRateLimit())));
+                                                   : FramerateOptions.IndexOfByKey(FText::AsNumber(FMath::RoundToInt(GetFrameRateLimit())));
             });
         Setting->AddSetter(
             [&](int32 NewValue)
@@ -323,7 +322,7 @@ void UCGGameUserSettings::InitGameSettings()
                     HintPair.Value = true;
                 }
 
-                for (auto& HintPair : SettingsSave->GameSettings.HintsStatus.ReceivingHintsMap)
+                for (auto& HintPair : SettingsSave->GameSettings.HintsStatus.CollectHintsMap)
                 {
                     HintPair.Value = true;
                 }
@@ -341,7 +340,7 @@ void UCGGameUserSettings::InitGameSettings()
                     }
                 }
 
-                for (const auto& HintPair : SettingsSave->GameSettings.HintsStatus.ReceivingHintsMap)
+                for (const auto& HintPair : SettingsSave->GameSettings.HintsStatus.CollectHintsMap)
                 {
                     if (!HintPair.Value)    // If hint already have been shown.
                     {
@@ -358,11 +357,11 @@ void UCGGameUserSettings::InitGameSettings()
         Setting->AddActionFunc(
             []()
             {
-                const auto World = CGUtils::GetCurrentWorld();
+                const auto* World = CGUtils::GetCurrentWorld();
                 if (!World)
                     return;
 
-                const auto GameInstance = World->GetGameInstance<UCGGameInstance>();
+                auto* GameInstance = World->GetGameInstance<UCGGameInstance>();
                 if (!GameInstance)
                     return;
 
@@ -371,11 +370,11 @@ void UCGGameUserSettings::InitGameSettings()
         Setting->AddStatusFunc(
             []()
             {
-                const auto World = CGUtils::GetCurrentWorld();
+                const auto* World = CGUtils::GetCurrentWorld();
                 if (!World)
                     return false;
 
-                const auto GameInstance = World->GetGameInstance<UCGGameInstance>();
+                const auto* GameInstance = World->GetGameInstance<UCGGameInstance>();
                 if (!GameInstance)
                     return false;
 
@@ -384,9 +383,9 @@ void UCGGameUserSettings::InitGameSettings()
     }
 }
 
-const TArray<FText> UCGGameUserSettings::GetScreenResolutions() const
+TArray<FText> UCGGameUserSettings::GetScreenResolutions() const
 {
-    const auto ScreenMode = GetFullscreenMode();
+    const EWindowMode::Type ScreenMode = GetFullscreenMode();
 
     TArray<FIntPoint> Resolutions;
     if (ScreenMode == EWindowMode::Windowed)
@@ -448,7 +447,7 @@ void UCGGameUserSettings::SetSoundClassVolume(const FString& SoundClassName, flo
             if (!GEngine)
                 return;
 
-            auto ADevice = GEngine->GetMainAudioDevice();
+            FAudioDeviceHandle ADevice = GEngine->GetMainAudioDevice();
             if (!ADevice)
                 return;
 
@@ -481,7 +480,7 @@ void UCGGameUserSettings::CheckSettingsSave()
     check(SettingsSave);
 }
 
-UCGIntSetting* UCGGameUserSettings::CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<UCGSetting*>& AddTo)
+TObjectPtr<UCGIntSetting> UCGGameUserSettings::CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
     const auto Setting = CreateSetting<UCGIntSetting>(Name, AddTo);
     Setting->SetOptions(Options);
@@ -489,14 +488,14 @@ UCGIntSetting* UCGGameUserSettings::CreateIntSetting(const FText& Name, const TA
     return Setting;
 }
 
-UCGFloatSetting* UCGGameUserSettings::CreateFloatSetting(const FText& Name, TArray<UCGSetting*>& AddTo)
+TObjectPtr<UCGFloatSetting> UCGGameUserSettings::CreateFloatSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
     const auto Setting = CreateSetting<UCGFloatSetting>(Name, AddTo);
 
     return Setting;
 }
 
-UCGActionSetting* UCGGameUserSettings::CreateActionSetting(const FText& Name, const FText& ActionName, TArray<UCGSetting*>& AddTo)
+TObjectPtr<UCGActionSetting> UCGGameUserSettings::CreateActionSetting(const FText& Name, const FText& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
     const auto Setting = CreateSetting<UCGActionSetting>(Name, AddTo);
     Setting->SetActionName(ActionName);

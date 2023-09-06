@@ -7,7 +7,6 @@
 #include "CGBaseBonusActor.generated.h"
 
 class USoundCue;
-class UNiagaraComponent;
 
 UCLASS(Abstract)
 class CUBE_GAME_API ACGBaseBonusActor : public ACGBaseCubeActor
@@ -23,12 +22,12 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* InitialSound;
+    TObjectPtr<USoundCue> InitialSound;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* HitSound;
+    TObjectPtr<USoundCue> HitSound;
 
-    bool bCharged = false;
+    bool bCharged{false};
 
     virtual void BeginPlay() override;
 
