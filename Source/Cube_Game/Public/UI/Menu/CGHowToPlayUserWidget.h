@@ -17,30 +17,30 @@ class CUBE_GAME_API UCGHowToPlayUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* FadeoutHintAnimation;
+    TObjectPtr<UWidgetAnimation> FadeoutHintAnimation;
 
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* FadeInHintAnimation;
+    TObjectPtr<UWidgetAnimation> FadeInHintAnimation;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* TitleText;
+    TObjectPtr<UCGTextUserWidget> TitleText;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* HintTextBlock;
+    TObjectPtr<UTextBlock> HintTextBlock;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* BackButton;
+    TObjectPtr<UCGButtonUserWidget> BackButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* NextButton;
+    TObjectPtr<UCGButtonUserWidget> NextButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* PrevButton;
+    TObjectPtr<UCGButtonUserWidget> PrevButton;
 
     virtual void NativeOnInitialized() override;
 
 private:
-    int32 CurrentHintIndex = 0;
+    int32 CurrentHintIndex{0};
 
     void Setup();
     void ResetWidget();

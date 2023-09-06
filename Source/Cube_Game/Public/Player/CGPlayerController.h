@@ -23,7 +23,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    inline ACGGameModeBase* GetGameModeBase() const;
+    FORCEINLINE TObjectPtr<ACGGameModeBase> GetGameModeBase() const;
 
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressedEnter();

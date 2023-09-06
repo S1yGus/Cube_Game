@@ -5,7 +5,7 @@
 #include "Components/Slider.h"
 #include "Settings/CGFloatSetting.h"
 
-void UCGSliderSettingUserWidget::Init(UCGFloatSetting* NewSetting)
+void UCGSliderSettingUserWidget::Init(TObjectPtr<UCGFloatSetting> NewSetting)
 {
     if (!NewSetting)
         return;
@@ -28,7 +28,6 @@ void UCGSliderSettingUserWidget::Update()
         return;
 
     SettingSlider->SetValue(Setting->GetCurrentValue());
-
     UpdatePercentText();
 }
 

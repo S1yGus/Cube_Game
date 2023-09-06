@@ -13,7 +13,6 @@ class CUBE_GAME_API UCGIntSetting : public UCGSetting
 
 public:
     const TArray<FText>& GetOptions() const { return Options; }
-
     int32 GetCurrentValue() const;
     void SetValue(int32 NewValue);
 

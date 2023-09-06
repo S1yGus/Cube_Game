@@ -54,7 +54,7 @@ void UCGGameInstance::OnStart()
 
     CheckLeaderboardSave();
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->InitSoundVolume();
     }

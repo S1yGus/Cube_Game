@@ -5,7 +5,7 @@
 #include "Components/ComboBoxString.h"
 #include "Settings/CGIntSetting.h"
 
-void UCGComboBoxSettingUserWidget::Init(UCGIntSetting* NewSetting)
+void UCGComboBoxSettingUserWidget::Init(TObjectPtr<UCGIntSetting> NewSetting)
 {
     if (!NewSetting)
         return;
@@ -22,12 +22,12 @@ void UCGComboBoxSettingUserWidget::Update()
         return;
 
     SettingComboBox->ClearOptions();
-    for (const auto& Option : Setting->GetOptions())
+    for (const FText& Option : Setting->GetOptions())
     {
         SettingComboBox->AddOption(Option.ToString());
     }
 
-    const auto CurrentValue = Setting->GetCurrentValue();
+    const int32 CurrentValue = Setting->GetCurrentValue();
     if (CurrentValue != INDEX_NONE)
     {
         SettingComboBox->SetSelectedIndex(CurrentValue);

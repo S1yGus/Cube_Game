@@ -16,26 +16,25 @@ void UCGAnimatedUserWidget::ShowFadeoutAnimation()
     UGameplayStatics::PlaySound2D(GetWorld(), FadeoutSound);
 }
 
-ACGGameModeBase* UCGAnimatedUserWidget::GetGameModeBase() const
+TObjectPtr<ACGGameModeBase> UCGAnimatedUserWidget::GetGameModeBase() const
 {
     return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr;
 }
 
 void UCGAnimatedUserWidget::SetGameState(EGameState NewGameState)
 {
-    const auto GameMode = GetGameModeBase();
-    if (!GameMode)
-        return;
-
-    GameMode->SetGameState(NewGameState);
+    if (TObjectPtr<ACGGameModeBase> GameMode = GetGameModeBase())
+    {
+        GameMode->SetGameState(NewGameState);
+    }
 }
 
 void UCGAnimatedUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != StartupAnimation)
-        return;
-
-    UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
+    if (Animation == StartupAnimation)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
+    }
 }

@@ -1,3 +1,5 @@
+// Cube_Game, All rights reserved.
+
 #pragma once
 
 #define LOCTEXT_NAMESPACE "SettingsConstants"

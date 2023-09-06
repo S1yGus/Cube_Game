@@ -6,7 +6,6 @@
 #include "CGGameInstance.h"
 #include "CGGameMode.h"
 #include "Components/EditableText.h"
-#include "Kismet/KismetMathLibrary.h"
 
 void UCGGameOverUserWidget::NativeOnInitialized()
 {
@@ -24,15 +23,15 @@ void UCGGameOverUserWidget::Setup()
     check(QuitButton);
     check(NameEditableText);
 
-    AddButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedAddButton);
-    PlayAgainButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedPlayAgainButton);
-    MenuButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedMenuButton);
-    QuitButton->OnClickedButton.AddUObject(this, &UCGGameOverUserWidget::OnClickedQuitButton);
-    NameEditableText->OnTextChanged.AddDynamic(this, &UCGGameOverUserWidget::OnNameTextChanged);
+    AddButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedAddButton);
+    PlayAgainButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedPlayAgainButton);
+    MenuButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedMenuButton);
+    QuitButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedQuitButton);
+    NameEditableText->OnTextChanged.AddDynamic(this, &ThisClass::OnNameTextChanged);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
-        GameMode->OnGameStateChanged.AddUObject(this, &UCGGameOverUserWidget::OnGameStateChanged);
+        GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 }
 
@@ -46,12 +45,12 @@ void UCGGameOverUserWidget::OnClickedAddButton()
 {
     PlayAnimation(AddAnimation);
 
-    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
-    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
+    auto* GameInstnce = GetGameInstance<UCGGameInstance>();
+    const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameInstnce || !GameMode)
         return;
 
-    FPlayerRecord PlayerRecord{NameEditableText->GetText(), GameMode->GetScore(), UKismetMathLibrary::Now()};
+    const FPlayerRecord PlayerRecord{NameEditableText->GetText(), GameMode->GetScore(), FDateTime::Now()};
     GameInstnce->AddToLeaderboard(PlayerRecord);
 }
 
@@ -69,11 +68,10 @@ void UCGGameOverUserWidget::OnClickedMenuButton()
 
 void UCGGameOverUserWidget::OnClickedQuitButton()
 {
-    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
-    if (!GameInstnce)
-        return;
-
-    GameInstnce->QuitGame(GetOwningPlayer());
+    if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+    {
+        GameInstnce->QuitGame(GetOwningPlayer());
+    }
 }
 
 void UCGGameOverUserWidget::OnGameStateChanged(EGameState NewGameState)
@@ -81,7 +79,7 @@ void UCGGameOverUserWidget::OnGameStateChanged(EGameState NewGameState)
     if (NewGameState != EGameState::GameOver)
         return;
 
-    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
+    const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
     if (!GameMode)
         return;
 
@@ -101,10 +99,8 @@ FText UCGGameOverUserWidget::FormatGameOverText(int32 Score)
         GameOverArg.Add(Score);
         return FText::FromString(FString::Format(*GameOverFormat.ToString(), GameOverArg));
     }
-    else
-    {
-        return GameOverFormat;
-    }
+
+    return GameOverFormat;
 }
 
 void UCGGameOverUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
@@ -114,7 +110,7 @@ void UCGGameOverUserWidget::OnAnimationFinished_Implementation(const UWidgetAnim
     if (Animation != FadeoutAnimation)
         return;
 
-    const auto GameInstnce = GetGameInstance<UCGGameInstance>();
+    auto* GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;
 

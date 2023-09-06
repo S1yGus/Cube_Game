@@ -5,7 +5,7 @@
 #include "NiagaraComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 
-constexpr static float LifeSpan = 5.0f;
+constexpr static float LifeSpan{5.0f};
 
 ACGMissileBonusActor::ACGMissileBonusActor()
 {

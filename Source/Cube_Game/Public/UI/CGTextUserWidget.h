@@ -19,7 +19,7 @@ public:
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* TextBlock;
+    TObjectPtr<UTextBlock> TextBlock;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     FText Text;

@@ -3,7 +3,7 @@
 #include "Gameplay/Cubes/Components/CGMovementComponent.h"
 #include "CGGameMode.h"
 
-constexpr static float MovingTeimerRate = 0.007f;
+constexpr static float MovingTeimerRate{0.007f};
 
 UCGMovementComponent::UCGMovementComponent()
 {
@@ -30,20 +30,20 @@ void UCGMovementComponent::BeginPlay()
 
 int32 UCGMovementComponent::GetCubeSpeed() const
 {
-    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-    if (!GameMode)
-        return Speed;
+    if (const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    {
+        return bOverrideGameModeSpeed ? Speed : GameMode->GetCubeSpeed();
+    }
 
-    return bGetSpeedFromGameMode ? GameMode->GetCubeSpeed() : Speed;
+    return Speed;
 }
 
 void UCGMovementComponent::OnMoving()
 {
-    const auto Owner = GetOwner();
-    if (!Owner)
-        return;
-
-    auto NewLocation = Owner->GetActorLocation();
-    NewLocation.Y = NewLocation.Y + GetCubeSpeed() * MovingTeimerRate;
-    Owner->SetActorLocation(NewLocation);
+    if (AActor* Owner = GetOwner())
+    {
+        FVector NewLocation = Owner->GetActorLocation();
+        NewLocation.Y = NewLocation.Y + GetCubeSpeed() * MovingTeimerRate;
+        Owner->SetActorLocation(NewLocation);
+    }
 }

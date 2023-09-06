@@ -21,23 +21,23 @@ void UCGMainMenuUserWidget::Setup()
     check(OptionsButton);
     check(QuitButton);
 
-    GameButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedGameButton);
+    GameButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedGameButton);
     WidgetButtons.Add(GameButton);
-    LeaderButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedLeaderButton);
+    LeaderButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedLeaderButton);
     WidgetButtons.Add(LeaderButton);
-    HowButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedHowButton);
+    HowButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedHowButton);
     WidgetButtons.Add(HowButton);
-    OptionsButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedOptionsButton);
+    OptionsButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedOptionsButton);
     WidgetButtons.Add(OptionsButton);
-    QuitButton->OnClickedButton.AddUObject(this, &UCGMainMenuUserWidget::OnClickedQuitButton);
+    QuitButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedQuitButton);
     WidgetButtons.Add(QuitButton);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
-        GameMode->OnGameStateChanged.AddUObject(this, &UCGMainMenuUserWidget::OnGameStateChanged);
+        GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
@@ -95,11 +95,10 @@ void UCGMainMenuUserWidget::OnClickedOptionsButton()
 
 void UCGMainMenuUserWidget::OnClickedQuitButton()
 {
-    const auto GameInstnce = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr;
-    if (!GameInstnce)
-        return;
-
-    GameInstnce->QuitGame(GetOwningPlayer());
+    if (auto* GameInstnce = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
+    {
+        GameInstnce->QuitGame(GetOwningPlayer());
+    }
 }
 
 void UCGMainMenuUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)

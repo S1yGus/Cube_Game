@@ -6,8 +6,6 @@
 #include "UI/CGHUDBase.h"
 #include "CGHUDMenu.generated.h"
 
-class UCGAnimatedUserWidget;
-
 UCLASS()
 class CUBE_GAME_API ACGHUDMenu : public ACGHUDBase
 {

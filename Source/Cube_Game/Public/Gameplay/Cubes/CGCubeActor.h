@@ -23,43 +23,43 @@ public:
     ECubeType GetCubeType() const { return CubeType; }
 
     void Annihilat();
+    void Collect();
 
     virtual void SetColor(const FCubeColorData& NewCubeColorData) override;
-    virtual void Teardown() override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UNiagaraComponent* NiagaraComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UNiagaraComponent> TrailNiagaraComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCGMovementComponent* MovementComponent;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    UNiagaraSystem* AnnihilationNiagaraSystem;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UCGMovementComponent> MovementComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    UNiagaraSystem* ReceivingNiagaraSystem;
+    TObjectPtr<UNiagaraSystem> AnnihilatNiagaraSystem;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    FName NiagaraTargetPositionParamName = "TargetPosition";
+    TObjectPtr<UNiagaraSystem> CollectNiagaraSystem;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    FName NiagaraVelocityParamName = "Velocity";
+    FName NiagaraTargetPositionParamName{"TargetPosition"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    FName NiagaraColorParamName = "Color";
+    FName NiagaraVelocityParamName{"Velocity"};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FName NiagaraColorParamName{"Color"};
 
     virtual void BeginPlay() override;
 
 private:
-    ECubeType CubeType = ECubeType::None;
-    FTimerHandle UpdatePositionTimerHandle;
+    ECubeType CubeType{ECubeType::None};
+    FTimerHandle UpdateNiagaraTargetPositionTimerHandle;
     UPROPERTY()
-    UNiagaraComponent* ReceivingNiagaraComponent;
+    TObjectPtr<UNiagaraComponent> CollectNiagaraComponent;
 
-    inline int32 GetCubeSpeed() const;
+    FORCEINLINE int32 GetCubeSpeed() const;
     void EndPlayAction();
-    UNiagaraComponent* SpawnEndPlayNiagaraEffect(UNiagaraSystem* NiagaraSystem);
+    UNiagaraComponent* SpawnNiagaraEffect(TObjectPtr<UNiagaraSystem> NiagaraSystem);
 
-    void OnUpdatePosition();
+    void OnUpdateNiagaraTargetPosition();
 };

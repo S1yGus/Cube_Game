@@ -17,22 +17,22 @@ class CUBE_GAME_API UCGSliderSettingUserWidget : public UUserWidget, public ICGS
     GENERATED_BODY()
 
 public:
-    void Init(UCGFloatSetting* NewSetting);
+    void Init(TObjectPtr<UCGFloatSetting> NewSetting);
     void UpdatePercentText();
     virtual void Update() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* SettingNameText;
+    TObjectPtr<UCGTextUserWidget> SettingNameText;
 
     UPROPERTY(Meta = (BindWidget))
-    USlider* SettingSlider;
+    TObjectPtr<USlider> SettingSlider;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* PercentText;
+    TObjectPtr<UCGTextUserWidget> PercentText;
 
     UPROPERTY()
-    UCGFloatSetting* Setting;
+    TObjectPtr<UCGFloatSetting> Setting;
 
     virtual void NativeOnInitialized() override;
 

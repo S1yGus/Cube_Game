@@ -7,15 +7,13 @@
 #include "CGCoreTypes.h"
 #include "CGHUDBase.generated.h"
 
-class UCGAnimatedUserWidget;
-
 UCLASS()
 class CUBE_GAME_API ACGHUDBase : public AHUD
 {
     GENERATED_BODY()
 
 public:
-    inline UUserWidget* GetCurretnWidget() { return CurrentWidget; }
+    TObjectPtr<UUserWidget> GetCurretnWidget() { return CurrentWidget; }
     virtual void BackToRootMenu(){};
 
 protected:
@@ -29,10 +27,10 @@ protected:
     TSubclassOf<UUserWidget> HowToPlayWidgetClass;
 
     UPROPERTY()
-    TMap<EGameState, UUserWidget*> GameWidgets;
+    TMap<EGameState, TObjectPtr<UUserWidget>> GameWidgets;
 
     UPROPERTY()
-    UUserWidget* CurrentWidget;
+    TObjectPtr<UUserWidget> CurrentWidget;
 
     virtual void BeginPlay() override;
     virtual void SetupWidgets();

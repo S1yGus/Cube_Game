@@ -17,18 +17,18 @@ class CUBE_GAME_API UCGButtonSettingUserWidget : public UUserWidget, public ICGS
     GENERATED_BODY()
 
 public:
-    void Init(UCGActionSetting* NewSetting);
+    void Init(TObjectPtr<UCGActionSetting> NewSetting);
     virtual void Update() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* SettingNameText;
+    TObjectPtr<UCGTextUserWidget> SettingNameText;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* ActionButton;
+    TObjectPtr<UCGButtonUserWidget> ActionButton;
 
     UPROPERTY()
-    UCGActionSetting* Setting;
+    TObjectPtr<UCGActionSetting> Setting;
 
     virtual void NativeOnInitialized() override;
 

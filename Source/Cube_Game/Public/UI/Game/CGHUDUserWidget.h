@@ -17,10 +17,10 @@ class CUBE_GAME_API UCGHUDUserWidget : public UUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* LowTimeAnimation;
+    TObjectPtr<UWidgetAnimation> LowTimeAnimation;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* LowTimeSound;
+    TObjectPtr<USoundCue> LowTimeSound;
 
     virtual void NativeOnInitialized() override;
 

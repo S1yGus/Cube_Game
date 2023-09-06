@@ -1,7 +1,6 @@
 // Cube_Game, All rights reserved.
 
 #include "Player/CGPlayer.h"
-#include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Player/Components/CGBonusComponent.h"
@@ -10,15 +9,15 @@
 #include "CGGameMode.h"
 #include "Settings/CGGameUserSettings.h"
 
-constexpr static float MovementTimerRate = 0.016f;
-constexpr static float MovementSpeed = 10.0f;
+constexpr static float MovementTimerRate{0.016f};
+constexpr static float MovementSpeed{10.0f};
 
 ACGPlayer::ACGPlayer()
 {
     PrimaryActorTick.bCanEverTick = false;
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
-    StaticMeshComponent->SetupAttachment(CameraComponent);
+    StaticMeshComponent->SetupAttachment(GetRootComponent());
 
     WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
     WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
@@ -40,8 +39,6 @@ void ACGPlayer::BeginPlay()
 
     SetupPlayer();
     MoveToCurrentPosition();
-
-    StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnComponentBeginOverlap);
 }
 
 void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -50,7 +47,7 @@ void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
     PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &ThisClass::MoveRight);
     PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &ThisClass::MoveLeft);
-    PlayerInputComponent->BindAction("UseBonus", EInputEvent::IE_Pressed, BonusComponent, &UCGBonusComponent::UseCurrentBonus);
+    PlayerInputComponent->BindAction("UseBonus", EInputEvent::IE_Pressed, this, &ThisClass::UseCurrentBonus);
 }
 
 FVector ACGPlayer::GetCurrentPositionLocation() const
@@ -60,13 +57,16 @@ FVector ACGPlayer::GetCurrentPositionLocation() const
 
 void ACGPlayer::SetupPlayer()
 {
-    FXComponent->SetColorOfReceiving(ECubeType::None);    // Set default player color.
+    FXComponent->SetCollectColor(ECubeType::None);    // Set default player color.
     CurrentPosition = FMath::RandHelper(PositionsAmount);
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnComponentBeginOverlap);
+    BonusComponent->OnBonusCharged.AddUObject(FXComponent, &UCGFXComponent::OnBonusCharged);
+
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
-        ReceivingHintsMap = GameUserSettings->GetHintsStatus().ReceivingHintsMap;
+        CachedCollectHintsMap = GameUserSettings->GetHintsStatus().CollectHintsMap;
     }
 }
 
@@ -107,15 +107,19 @@ void ACGPlayer::MoveToCurrentPosition()
 
 void ACGPlayer::OnMoving()
 {
-    const auto NewLocation = FMath::VInterpTo(StaticMeshComponent->GetComponentLocation(), GetCurrentPositionLocation(), MovementTimerRate, MovementSpeed);
+    const FVector NewLocation = FMath::VInterpTo(StaticMeshComponent->GetComponentLocation(), GetCurrentPositionLocation(), MovementTimerRate, MovementSpeed);
     StaticMeshComponent->SetWorldLocation(NewLocation);
 
-    if (FMath::IsNearlyEqual(StaticMeshComponent->GetComponentLocation().X, GetCurrentPositionLocation().X)        //
-        && FMath::IsNearlyEqual(StaticMeshComponent->GetComponentLocation().Y, GetCurrentPositionLocation().Y)     //
-        && FMath::IsNearlyEqual(StaticMeshComponent->GetComponentLocation().Z, GetCurrentPositionLocation().Z))    //
+    if (StaticMeshComponent->GetComponentLocation().Equals(GetCurrentPositionLocation()))
     {
         GetWorldTimerManager().ClearTimer(MovementTimerHandle);
     }
+}
+
+void ACGPlayer::UseCurrentBonus()
+{
+    FXComponent->MakeCameraShake(BonusComponent->GetCurrentBonusType());
+    BonusComponent->UseCurrentBonus();
 }
 
 void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
@@ -125,23 +129,22 @@ void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent
                                         bool bFromSweep,                             //
                                         const FHitResult& SweepResult)               //
 {
-    const auto OverlapedCube = Cast<ACGCubeActor>(OtherActor);
-    if (!OverlapedCube)
-        return;
-
-    ReceiveCube(OverlapedCube->GetCubeType());
-    OverlapedCube->Teardown();
+    if (auto* OverlapedCube = Cast<ACGCubeActor>(OtherActor))
+    {
+        OverlapedCube->Collect();
+        CollectCube(OverlapedCube->GetCubeType());
+    }
 }
 
-void ACGPlayer::ReceiveCube(ECubeType CubeType)
+void ACGPlayer::CollectCube(ECubeType CubeType)
 {
-    FXComponent->PlaySoundOfReceiving(CubeType);
-    FXComponent->SetColorOfReceiving(CubeType);
+    FXComponent->PlayCollectSound(CubeType);
+    FXComponent->SetCollectColor(CubeType);
     FXComponent->MakeCameraShake(CubeType);
 
     ShowPopUpHint(CubeType);
 
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->ChangeTime(CubeType);
         GameMode->ChangeSpeed(CubeType);
@@ -150,33 +153,33 @@ void ACGPlayer::ReceiveCube(ECubeType CubeType)
 
     if (CubeType == ECubeType::BonusCube)
     {
-        BonusComponent->SetRandomBonus();
+        BonusComponent->CollectBonusCube();
     }
 }
 
 void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
 {
-    if (!ReceivingHintsMap.Contains(CubeType))
+    if (!CachedCollectHintsMap.Contains(CubeType))
         return;
 
-    if (!ReceivingHintsMap[CubeType])
+    if (!CachedCollectHintsMap[CubeType])
         return;
 
-    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-    if (!GameMode || !GameMode->GetReceivingHints().Contains(CubeType))
+    auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
+    if (!GameMode || !GameMode->GetCollectHints().Contains(CubeType))
         return;
 
-    GameMode->ShowPopUpHint(GameMode->GetReceivingHints()[CubeType]);
+    GameMode->ShowPopUpHint(GameMode->GetCollectHints()[CubeType]);
 
-    ReceivingHintsMap[CubeType] = false;
+    CachedCollectHintsMap[CubeType] = false;
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameUserSettings->SetReceivingHintsStatus(ReceivingHintsMap);
+        GameUserSettings->SetCollectHintsStatus(CachedCollectHintsMap);
     }
 }
 
 void ACGPlayer::OnHintsStatusChanged(const FHintsStatus& NewHintsStatus)
 {
-    ReceivingHintsMap = NewHintsStatus.ReceivingHintsMap;
+    CachedCollectHintsMap = NewHintsStatus.CollectHintsMap;
 }

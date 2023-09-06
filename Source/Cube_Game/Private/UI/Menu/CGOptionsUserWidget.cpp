@@ -15,13 +15,13 @@
 #include "Interfaces/CGSettingWidgetInterface.h"
 #include "Player/CGPlayerController.h"
 
-#define UPDATE_SETTINGS_WIDGETS(ContainerWidget)                                \
-    for (const auto& Widget : ContainerWidget->GetAllChildren())                \
-    {                                                                           \
-        if (const auto SettingWidget = Cast<ICGSettingWidgetInterface>(Widget)) \
-        {                                                                       \
-            SettingWidget->Update();                                            \
-        }                                                                       \
+#define UPDATE_SETTINGS_WIDGETS(ContainerWidget)                           \
+    for (const auto& Widget : ContainerWidget->GetAllChildren())           \
+    {                                                                      \
+        if (auto* SettingWidget = Cast<ICGSettingWidgetInterface>(Widget)) \
+        {                                                                  \
+            SettingWidget->Update();                                       \
+        }                                                                  \
     }
 
 #define CREATE_AND_ADD_SETTING_WIDGET(T, WidgetClass, Setting, ToContainerWidget) \
@@ -41,17 +41,17 @@ void UCGOptionsUserWidget::InitSettingsWidgets(const TArray<UCGSetting*>& Settin
 {
     VerticalBox->ClearChildren();
 
-    for (const auto& Setting : SettingsArray)
+    for (auto& Setting : SettingsArray)
     {
-        if (const auto& IntSetting = Cast<UCGIntSetting>(Setting))
+        if (auto* IntSetting = Cast<UCGIntSetting>(Setting))
         {
             CREATE_AND_ADD_SETTING_WIDGET(UCGComboBoxSettingUserWidget, ComboBoxSettingWidgetClass, IntSetting, VerticalBox);
         }
-        else if (const auto& FloatSetting = Cast<UCGFloatSetting>(Setting))
+        else if (auto* FloatSetting = Cast<UCGFloatSetting>(Setting))
         {
             CREATE_AND_ADD_SETTING_WIDGET(UCGSliderSettingUserWidget, SliderSettingWidgetClass, FloatSetting, VerticalBox);
         }
-        else if (const auto& ActionSetting = Cast<UCGActionSetting>(Setting))
+        else if (auto* ActionSetting = Cast<UCGActionSetting>(Setting))
         {
             CREATE_AND_ADD_SETTING_WIDGET(UCGButtonSettingUserWidget, ButtonSettingWidgetClass, ActionSetting, VerticalBox);
         }
@@ -65,7 +65,7 @@ void UCGOptionsUserWidget::Setup()
     check(GameSettingsVerticalBox);
     check(BackButton);
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->OnResolutionChanged.AddUObject(this, &ThisClass::OnResolutionChanged);
 
@@ -76,12 +76,12 @@ void UCGOptionsUserWidget::Setup()
 
     BackButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedBackButton);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
@@ -125,7 +125,7 @@ void UCGOptionsUserWidget::OnResolutionChanged()
 
 void UCGOptionsUserWidget::OnClickedBackButton()
 {
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         GameUserSettings->SaveSettings();
     }
@@ -146,11 +146,11 @@ void UCGOptionsUserWidget::OnAnimationFinished_Implementation(const UWidgetAnima
     }
     else
     {
-        const auto OwnerController = GetOwningPlayer();
-        if (!OwnerController)
+        const APlayerController* PC = GetOwningPlayer();
+        if (!PC)
             return;
 
-        const auto HUD = OwnerController->GetHUD<ACGHUDBase>();
+        auto* HUD = PC->GetHUD<ACGHUDBase>();
         if (!HUD)
             return;
 

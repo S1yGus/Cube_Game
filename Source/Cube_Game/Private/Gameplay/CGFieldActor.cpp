@@ -7,8 +7,6 @@
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Components/WidgetComponent.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 #include "Gameplay/Components/CGMusicComponent.h"
 
 ACGFieldActor::ACGFieldActor()
@@ -41,33 +39,37 @@ void ACGFieldActor::BeginPlay()
 
 float ACGFieldActor::GetSpawnTimerRate() const
 {
-    const auto GameMode = GetGameMode();
-    if (!GameMode)
-        return 0.0f;
+    const auto* GameMode = GetGameMode();
+    const auto* DifficultyData = GetDifficultyData();
+    if (GameMode && DifficultyData)
+    {
+        return DifficultyData->DistanceBetweenCubes / GameMode->GetCubeSpeed();
+    }
 
-    return GetDifficultyVlues().DistanceBetweenCubes / GameMode->GetCubeSpeed();
+    return 0.0f;
 }
 
 ECubeType ACGFieldActor::GetRandomCubeType() const
 {
-    const auto DifficultyVlues = GetDifficultyVlues();
-    if (!DifficultyVlues.SpawnWeightMap.Num())
-        return ECubeType::None;
-
-    const auto RandNum = FMath::FRand();
-    TArray<ECubeType> RandItems;
-    for (const auto& ItemPair : DifficultyVlues.SpawnWeightMap)
+    if (const FDifficulty* DifficultyData = GetDifficultyData())
     {
-        if (RandNum > ItemPair.Value)
-            continue;
+        const float RandNum = FMath::FRand();
+        TArray<ECubeType> RandItems;
+        for (const auto& [Type, Probability] : DifficultyData->SpawnWeightMap)
+        {
+            if (RandNum < Probability)
+            {
+                RandItems.Add(Type);
+            }
+        }
 
-        RandItems.Add(ItemPair.Key);
+        if (!RandItems.IsEmpty())
+        {
+            return RandItems[FMath::RandHelper(RandItems.Num())];
+        }
     }
 
-    if (RandItems.Num() == 0)
-        return ECubeType::None;
-
-    return RandItems[FMath::RandHelper(RandItems.Num())];
+    return ECubeType::None;
 }
 
 ACGGameMode* ACGFieldActor::GetGameMode() const
@@ -75,34 +77,41 @@ ACGGameMode* ACGFieldActor::GetGameMode() const
     return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
 }
 
-const FDifficulty& ACGFieldActor::GetDifficultyVlues() const
+const FDifficulty* ACGFieldActor::GetDifficultyData() const
 {
-    if (const auto GameMode = GetGameMode())
+    if (const auto* GameMode = GetGameMode(); GameMode && GameMode->GetDifficultyData())
     {
-        return GameMode->GetDifficultyVlues();
+        return GameMode->GetDifficultyData();
     }
 
-    static const auto Difficulty = FDifficulty{};
-    return Difficulty;
+    return nullptr;
 }
 
 const APawn* ACGFieldActor::GetPlayerPawn() const
 {
-    return (GetWorld() && GetWorld()->GetFirstPlayerController()) ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr;
+    if (GetWorld())
+    {
+        if (const auto* PC = GetWorld()->GetFirstPlayerController())
+        {
+            return PC->GetPawn();
+        }
+    }
+
+    return nullptr;
 }
 
 void ACGFieldActor::Setup()
 {
-    if (const auto GameMode = GetGameMode())
+    if (auto* GameMode = GetGameMode())
     {
         GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
         GameMode->OnMultiplierChanged.AddUObject(this, &ThisClass::OnMultiplierChanged);
         BonusIndicatorPosition = GameMode->GetMaxMultiplier() - 1;
     }
 
-    if (const auto PlayerPawn = GetPlayerPawn())
+    if (const auto* PlayerPawn = GetPlayerPawn())
     {
-        if (const auto BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
+        if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
         {
             BonusComponent->OnBonusChanged.AddUObject(this, &ThisClass::OnBonusChanged);
         }
@@ -113,46 +122,48 @@ void ACGFieldActor::Setup()
 
 void ACGFieldActor::OnSpawnCube()
 {
-    if (++CubesInLine <= GetDifficultyVlues().MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
+    if (const FDifficulty* DifficultyData = GetDifficultyData())
     {
-        const auto RandIndex = FMath::RandHelper(SpawnPositions.Num());
-        SpawnCube(SpawnPositions[RandIndex]);
-        SpawnPositions.RemoveAt(RandIndex);
-
-        if (UKismetMathLibrary::RandomBoolWithWeight(GetDifficultyVlues().ChanceToAddCubeInLine))
+        if (++CubesInLine <= DifficultyData->MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
         {
-            OnSpawnCube();
-            return;
+            const int32 RandIndex = FMath::RandHelper(SpawnPositions.Num());
+            SpawnCube(SpawnPositions[RandIndex]);
+            SpawnPositions.RemoveAt(RandIndex);
+
+            if (UKismetMathLibrary::RandomBoolWithWeight(DifficultyData->ChanceToAddCubeInLine))
+            {
+                OnSpawnCube();
+                return;
+            }
         }
-    }
 
-    if (bRestartSpawn)    // Spawn is restarting after speed have been changed.
-    {
-        GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
-        bRestartSpawn = false;
-    }
+        if (bRestartSpawnAfterSpeedChanged)    // Spawn is restarting after speed have been changed.
+        {
+            GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
+            bRestartSpawnAfterSpeedChanged = false;
+        }
 
-    RestoreSpawnPositions();
+        RestoreSpawnPositions();
+    }
 }
 
 void ACGFieldActor::SpawnCube(int32 SpawnPosition)
 {
     const FVector RelativeLocation{SpawnPosition * SpawnStep + SpawnXOffset, SpawnYOffset, SpawnZOffset};
-    const auto CubeType = GetRandomCubeType();
+    const ECubeType CubeType = GetRandomCubeType();
     const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
-    auto SpawnedCube = SpawnCubeActor<ACGCubeActor>(SpawningCubeClass, RelativeLocation, CubeColorData);
+    auto* SpawnedCube = SpawnCubeActor<ACGCubeActor>(SpawningCubeClass, RelativeLocation, CubeColorData);
     SpawnedCube->SetCubeType(CubeType);
 }
 
 void ACGFieldActor::OnSpeedChanged(int32 NewSpeed)
 {
-    bRestartSpawn = true;
+    bRestartSpawnAfterSpeedChanged = true;
 }
 
 void ACGFieldActor::RestoreSpawnPositions()
 {
     CubesInLine = 0;
-
     SpawnPositions.Empty();
     for (int32 i = 0; i < SpawnPositionsAmount; ++i)
     {
@@ -162,7 +173,7 @@ void ACGFieldActor::RestoreSpawnPositions()
 
 void ACGFieldActor::OnMultiplierChanged(ECubeType CubeType, int32 Multiplier)
 {
-    if (Multiplier == 1 && Indicators.Num() != 0)
+    if (Multiplier == 1 && !Indicators.IsEmpty())
     {
         for (const auto& Indicator : Indicators)
         {
@@ -170,10 +181,11 @@ void ACGFieldActor::OnMultiplierChanged(ECubeType CubeType, int32 Multiplier)
         }
 
         Indicators.Empty();
-        return;
     }
-
-    SpawnIndicator(CubeType, Multiplier);
+    else
+    {
+        SpawnIndicator(CubeType, Multiplier);
+    }
 }
 
 void ACGFieldActor::SpawnIndicator(ECubeType CubeType, int32 Multiplier)
@@ -183,7 +195,7 @@ void ACGFieldActor::SpawnIndicator(ECubeType CubeType, int32 Multiplier)
                                    (Multiplier - 2) * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
                                    IndicatorsSpawnZOffset};                                             //
     const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
-    const auto Indicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
+    auto* Indicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
     Indicators.Add(Indicator);
 }
 
@@ -205,12 +217,13 @@ void ACGFieldActor::OnBonusChanged(EBonusType BonusType)
 
 void ACGFieldActor::ChangeFieldColor(EBonusType BonusType)
 {
-    if (!MaterialColorsMap.Contains(BonusType))
-        return;
-
-    const auto DynMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
-    check(DynMaterial);
-    DynMaterial->SetVectorParameterValue(ColorParamName, MaterialColorsMap[BonusType]);
+    if (FieldMaterialColorsMap.Contains(BonusType))
+    {
+        if (UMaterialInstanceDynamic* DynMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0))
+        {
+            DynMaterial->SetVectorParameterValue(FieldColorParamName, FieldMaterialColorsMap[BonusType]);
+        }
+    }
 }
 
 void ACGFieldActor::SpawnBonusIndicator(EBonusType BonusType)

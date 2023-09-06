@@ -7,8 +7,6 @@
 #include "CGCoreTypes.h"
 #include "CGBaseCubeActor.generated.h"
 
-class UMaterialInstance;
-
 UCLASS()
 class CUBE_GAME_API ACGBaseCubeActor : public AActor
 {
@@ -21,35 +19,34 @@ public:
     virtual void Teardown();
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UStaticMeshComponent* StaticMeshComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scale", Meta = (ClampMin = "0.0"))
-    float ScaleInterpSpeed = 9.0f;
+    float ScaleInterpSpeed{9.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scale")
     FVector TargetScale{1.0};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
-    FName ColorParamName = "EmissiveColor";
+    FName ColorParamName{"EmissiveColor"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
-    FName EmissivePowerParamName = "EmissivePower";
+    FName EmissivePowerParamName{"EmissivePower"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Material")
-    FName MaskEnabledParamName = "MaskEnabled";
+    FName MaskEnabledParamName{"MaskEnabled"};
 
     FCubeColorData CubeColorData;
 
-    UStaticMeshComponent* GetPlayerMesh() const;
+    FORCEINLINE UStaticMeshComponent* GetPlayerMesh() const;
 
     virtual void BeginPlay() override;
-    virtual void OnScalingZero();
+
+    virtual void OnScaling();
     virtual void OnScalingDone();
-    virtual void OnScalin();
+    virtual void OnZeroScale();
 
 private:
     FTimerHandle ScaleTimerHandle;
-
-    void OnChangingScale();
 };

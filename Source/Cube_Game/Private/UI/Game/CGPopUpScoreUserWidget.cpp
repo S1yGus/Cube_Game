@@ -11,14 +11,14 @@ void UCGPopUpScoreUserWidget::NativeOnInitialized()
 
     check(ScoreTextBlock);
 
-    if (const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
-        GameMode->OnScoreChanged.AddUObject(this, &UCGPopUpScoreUserWidget::OnScoreChanged);
+        GameMode->OnScoreChanged.AddUObject(this, &ThisClass::OnScoreChanged);
     }
 
-    if (const auto GameUserSettings = UCGGameUserSettings::Get())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameUserSettings->OnPopUpTypeChanged.AddUObject(this, &UCGPopUpScoreUserWidget::OnPopUpTypeChanged);
+        GameUserSettings->OnPopUpTypeChanged.AddUObject(this, &ThisClass::OnPopUpTypeChanged);
         PopUpType = GameUserSettings->GetPopUpType();
     }
 }

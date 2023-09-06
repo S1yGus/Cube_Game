@@ -17,18 +17,18 @@ class CUBE_GAME_API UCGComboBoxSettingUserWidget : public UUserWidget, public IC
     GENERATED_BODY()
 
 public:
-    void Init(UCGIntSetting* NewSetting);
+    void Init(TObjectPtr<UCGIntSetting> NewSetting);
     virtual void Update() override;
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* SettingNameText;
+    TObjectPtr<UCGTextUserWidget> SettingNameText;
 
     UPROPERTY(Meta = (BindWidget))
-    UComboBoxString* SettingComboBox;
+    TObjectPtr<UComboBoxString> SettingComboBox;
 
     UPROPERTY()
-    UCGIntSetting* Setting;
+    TObjectPtr<UCGIntSetting> Setting;
 
     virtual void NativeOnInitialized() override;
 

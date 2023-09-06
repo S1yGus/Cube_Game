@@ -10,12 +10,12 @@ void UCGHUDUserWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    if (const auto GameMode = GetGameMode())
+    if (ACGGameMode* GameMode = GetGameMode())
     {
         GameMode->OnLowTime.AddUObject(this, &ThisClass::OnLowTime);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
@@ -37,7 +37,7 @@ void UCGHUDUserWidget::OnPressedEsc()
     if (!IsVisible())
         return;
 
-    const auto GameMode = GetGameMode();
+    ACGGameMode* GameMode = GetGameMode();
     if (!GameMode)
         return;
 

@@ -5,7 +5,7 @@
 #include "UI/Menu/CGButtonUserWidget.h"
 #include "Settings/CGActionSetting.h"
 
-void UCGButtonSettingUserWidget::Init(UCGActionSetting* NewSetting)
+void UCGButtonSettingUserWidget::Init(TObjectPtr<UCGActionSetting> NewSetting)
 {
     if (!NewSetting)
         return;

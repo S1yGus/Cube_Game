@@ -80,34 +80,34 @@ struct FDifficulty
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    TMap<ECubeType, float> ScoreChangeMap;
+    TMap<ECubeType, int32> ScoreChangeMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    TMap<ECubeType, float> TimeChangeMap;
+    TMap<ECubeType, int32> TimeChangeMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    TMap<ECubeType, float> SpeedChangeMap;
+    TMap<ECubeType, int32> SpeedChangeMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     TMap<ECubeType, float> SpawnWeightMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "s"))
-    int32 InitialTime = 10;
+    int32 InitialTime;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "cm"))
-    float DistanceBetweenCubes = 200.0f;
+    float DistanceBetweenCubes;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "CentimetersPerSecond"))
-    FVector2D CubesSpeedRange{100.0f, 10000.0f};
+    FVector2D CubesSpeedRange;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
-    int32 ScoreToSpeedUp = 1000;
+    int32 ScoreToSpeedUp;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    int32 MaxNumOfCubesInLine = 4;
+    int32 MaxNumOfCubesInLine;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
-    float ChanceToAddCubeInLine = 0.4;
+    float ChanceToAddCubeInLine;
 };
 
 USTRUCT(BlueprintType)
@@ -131,10 +131,10 @@ struct FAspectRatioData
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    float AspectRatio = 1.7777777f;
+    float AspectRatio{1.7777777f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    float FOV = 90.0f;
+    float FOV{90.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     FText DisplayName{FText::FromString("16:9")};
@@ -155,19 +155,19 @@ struct FSoundSettings
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
-    float MasterVolume = 0.5f;
+    float MasterVolume{0.5f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
-    float UIVolume = 0.5f;
+    float UIVolume{0.5f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
-    float FXVolume = 0.5f;
+    float FXVolume{0.5f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
-    float MusicVolume = 0.5f;
+    float MusicVolume{0.5f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    bool bStaticMusic = true;
+    bool bStaticMusic{true};
 };
 
 USTRUCT(BlueprintType)
@@ -186,7 +186,7 @@ struct FHintsStatus
     };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<ECubeType, bool> ReceivingHintsMap = {
+    TMap<ECubeType, bool> CollectHintsMap = {
         TPair<ECubeType, bool>{ECubeType::GoodCube,    true},
         TPair<ECubeType, bool>{ECubeType::BadCube,     true},
         TPair<ECubeType, bool>{ECubeType::ScoreCube,   true},
@@ -204,7 +204,7 @@ struct FGameSettings
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    EPopUpType PopUpType = EPopUpType::Multiplier;
+    EPopUpType PopUpType{EPopUpType::Multiplier};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     FHintsStatus HintsStatus;
@@ -243,14 +243,14 @@ struct FCubeColorData
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color")
-    FLinearColor Color = FLinearColor::Black;
+    FLinearColor Color{FLinearColor::Black};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color", Meta = (ClampMin = "0.0"))
-    float EmissivePower = 1.0f;
+    float EmissivePower{1.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color",
               Meta = (ClampMin = "0.0", ClampMax = "1.0", ToolTip = "Can be 1 for enabled condition or 0 for disabled."))
-    float MaskEnabled = 1.0f;
+    float MaskEnabled{1.0f};
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameStateChangedSignature, EGameState);

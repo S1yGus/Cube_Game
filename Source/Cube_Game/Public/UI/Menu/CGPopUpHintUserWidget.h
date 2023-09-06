@@ -18,13 +18,13 @@ class CUBE_GAME_API UCGPopUpHintUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* TitleText;
+    TObjectPtr<UCGTextUserWidget> TitleText;
 
     UPROPERTY(Meta = (BindWidget))
-    UTextBlock* HintTextBlock;
+    TObjectPtr<UTextBlock> HintTextBlock;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* ResumeButton;
+    TObjectPtr<UCGButtonUserWidget> ResumeButton;
 
     virtual void NativeOnInitialized() override;
 

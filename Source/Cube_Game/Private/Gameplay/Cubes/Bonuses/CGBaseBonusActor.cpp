@@ -4,7 +4,6 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
-#include "NiagaraComponent.h"
 #include "CGGameMode.h"
 #include "Player/CGPlayer.h"
 
@@ -15,16 +14,16 @@ ACGBaseBonusActor::ACGBaseBonusActor()
 
 void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-    const auto CubeActor = Cast<ACGCubeActor>(OtherActor);
+    auto* CubeActor = Cast<ACGCubeActor>(OtherActor);
     if (!CubeActor)
         return;
 
-    const auto CubeType = CubeActor->GetCubeType();
+    const ECubeType CubeType = CubeActor->GetCubeType();
     if (bCharged && !IsCubeNegative(CubeType))
     {
-        if (const auto Player = GetOwner<ACGPlayer>())
+        if (auto* Player = GetOwner<ACGPlayer>())
         {
-            Player->ReceiveCube(CubeType);
+            Player->CollectCube(CubeType);
             CubeActor->Teardown();
         }
     }
@@ -44,32 +43,33 @@ void ACGBaseBonusActor::BeginPlay()
 
 bool ACGBaseBonusActor::IsCubeNegative(ECubeType CubeType)
 {
-    const auto GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-    if (!GameMode)
-        return true;
-
-    const auto DifficultyVlues = GameMode->GetDifficultyVlues();
-    if (DifficultyVlues.ScoreChangeMap.Contains(CubeType))
+    if (const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
-        if (DifficultyVlues.ScoreChangeMap[CubeType] < 0.0f)
+        if (const FDifficulty* DifficultyData = GameMode->GetDifficultyData())
         {
-            return true;
-        }
-    }
+            if (DifficultyData->ScoreChangeMap.Contains(CubeType))
+            {
+                if (DifficultyData->ScoreChangeMap[CubeType] < 0.0f)
+                {
+                    return true;
+                }
+            }
 
-    if (DifficultyVlues.TimeChangeMap.Contains(CubeType))
-    {
-        if (DifficultyVlues.TimeChangeMap[CubeType] < 0.0f)
-        {
-            return true;
-        }
-    }
+            if (DifficultyData->TimeChangeMap.Contains(CubeType))
+            {
+                if (DifficultyData->TimeChangeMap[CubeType] < 0.0f)
+                {
+                    return true;
+                }
+            }
 
-    if (DifficultyVlues.SpeedChangeMap.Contains(CubeType))
-    {
-        if (DifficultyVlues.SpeedChangeMap[CubeType] > 0.0f)
-        {
-            return true;
+            if (DifficultyData->SpeedChangeMap.Contains(CubeType))
+            {
+                if (DifficultyData->SpeedChangeMap[CubeType] > 0.0f)
+                {
+                    return true;
+                }
+            }
         }
     }
 

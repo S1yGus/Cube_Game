@@ -9,7 +9,6 @@
 
 class UCGButtonUserWidget;
 class UCGTextUserWidget;
-class ACGGameMode;
 class UEditableText;
 
 UCLASS()
@@ -19,25 +18,25 @@ class CUBE_GAME_API UCGGameOverUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidgetAnim), Transient)
-    UWidgetAnimation* AddAnimation;
+    TObjectPtr<UWidgetAnimation> AddAnimation;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGTextUserWidget* GameOverText;
+    TObjectPtr<UCGTextUserWidget> GameOverText;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* AddButton;
+    TObjectPtr<UCGButtonUserWidget> AddButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* PlayAgainButton;
+    TObjectPtr<UCGButtonUserWidget> PlayAgainButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* MenuButton;
+    TObjectPtr<UCGButtonUserWidget> MenuButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* QuitButton;
+    TObjectPtr<UCGButtonUserWidget> QuitButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UEditableText* NameEditableText;
+    TObjectPtr<UEditableText> NameEditableText;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Text Format", Meta = (ToolTip = "To specify the number of score, use the argument {0}."))
     FText GameOverFormat;

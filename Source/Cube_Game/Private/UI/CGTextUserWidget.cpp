@@ -19,6 +19,5 @@ void UCGTextUserWidget::NativePreConstruct()
     Super::NativePreConstruct();
 
     check(TextBlock);
-
     TextBlock->SetText(Text);
 }

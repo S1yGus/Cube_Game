@@ -21,16 +21,16 @@ class CUBE_GAME_API UCGOptionsUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UVerticalBox* VideoSettingsVerticalBox;
+    TObjectPtr<UVerticalBox> VideoSettingsVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    UVerticalBox* SoundSettingsVerticalBox;
+    TObjectPtr<UVerticalBox> SoundSettingsVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    UVerticalBox* GameSettingsVerticalBox;
+    TObjectPtr<UVerticalBox> GameSettingsVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* BackButton;
+    TObjectPtr<UCGButtonUserWidget> BackButton;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UCGComboBoxSettingUserWidget> ComboBoxSettingWidgetClass;
@@ -44,7 +44,7 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    EGameState GameStateToSet = EGameState::WaitingToStart;
+    EGameState GameStateToSet{EGameState::WaitingToStart};
 
     void InitSettingsWidgets(const TArray<UCGSetting*>& SettingsArray, UVerticalBox* VerticalBox);
 

@@ -1,7 +1,6 @@
 // Cube_Game, All rights reserved.
 
 #include "Gameplay/Cubes/Bonuses/CGShieldBonusActor.h"
-#include "Player/CGPlayer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
@@ -19,32 +18,29 @@ void ACGShieldBonusActor::BeginPlay()
     GetWorldTimerManager().SetTimer(ShieldTimerHandle, this, &ACGShieldBonusActor::Teardown, bCharged ? ChargedShieldDuration : ShieldDuration);
 }
 
-void ACGShieldBonusActor::OnScalin()
+void ACGShieldBonusActor::OnScaling()
 {
-    // To avoid situations when cubes are received by mistake.
-    if (bCanOffPlayerCollision                          //
-        && GetActorScale3D().X >= ActivationScale.X     //
+    Super::OnScaling();
+
+    // To avoid situations when cubes are collected by mistake.
+    if (GetActorScale3D().X >= ActivationScale.X        //
         && GetActorScale3D().Y >= ActivationScale.Y     //
         && GetActorScale3D().Z >= ActivationScale.Z)    //
     {
         SetPlayerMeshCollisionEnabled(false);
-        bCanOffPlayerCollision = false;
     }
-    else if (!bCanOffPlayerCollision                        //
-             && GetActorScale3D().X < ActivationScale.X     //
+    else if (GetActorScale3D().X < ActivationScale.X        //
              && GetActorScale3D().Y < ActivationScale.Y     //
              && GetActorScale3D().Z < ActivationScale.Z)    //
     {
         SetPlayerMeshCollisionEnabled(true);
-        bCanOffPlayerCollision = true;
     }
 }
 
-void ACGShieldBonusActor::SetPlayerMeshCollisionEnabled(bool IsEnabled)
+void ACGShieldBonusActor::SetPlayerMeshCollisionEnabled(bool bEnabled)
 {
-    const auto PlayerMesh = GetPlayerMesh();
-    if (!PlayerMesh)
-        return;
-
-    PlayerMesh->SetCollisionEnabled(IsEnabled ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+    if (UStaticMeshComponent* PlayerMesh = GetPlayerMesh())
+    {
+        PlayerMesh->SetCollisionEnabled(bEnabled ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+    }
 }

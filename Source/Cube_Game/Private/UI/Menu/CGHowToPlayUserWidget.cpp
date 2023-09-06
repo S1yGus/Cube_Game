@@ -14,7 +14,6 @@ void UCGHowToPlayUserWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     Setup();
-
     ShowHint(CurrentHintIndex);
 }
 
@@ -30,12 +29,12 @@ void UCGHowToPlayUserWidget::Setup()
     NextButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedNextButton);
     PrevButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedPrevButton);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
@@ -48,11 +47,11 @@ void UCGHowToPlayUserWidget::ResetWidget()
 
 void UCGHowToPlayUserWidget::ShowHint(int32 HintIndex)
 {
-    if (const auto GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
+    if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
-        TitleText->SetText(GameInstance->GetHints()[HintIndex].Title);
-        TitleText->SetColor(GameInstance->GetHints()[HintIndex].TitleColor);
-        HintTextBlock->SetText(GameInstance->GetHints()[HintIndex].HintText);
+        TitleText->SetText(GameInstance->GetHowToPlayHints()[HintIndex].Title);
+        TitleText->SetColor(GameInstance->GetHowToPlayHints()[HintIndex].TitleColor);
+        HintTextBlock->SetText(GameInstance->GetHowToPlayHints()[HintIndex].HintText);
     }
 }
 
@@ -74,9 +73,9 @@ void UCGHowToPlayUserWidget::OnClickedNextButton()
     if (IsAnyAnimationPlaying())
         return;
 
-    if (const auto GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
+    if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
-        CurrentHintIndex = (CurrentHintIndex + 1) % GameInstance->GetHints().Num();
+        CurrentHintIndex = (CurrentHintIndex + 1) % GameInstance->GetHowToPlayHints().Num();
     }
 
     PlayAnimation(FadeoutHintAnimation);
@@ -87,9 +86,9 @@ void UCGHowToPlayUserWidget::OnClickedPrevButton()
     if (IsAnyAnimationPlaying())
         return;
 
-    if (const auto GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
+    if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
-        CurrentHintIndex = CurrentHintIndex - 1 < 0 ? GameInstance->GetHints().Num() - 1 : CurrentHintIndex - 1;
+        CurrentHintIndex = CurrentHintIndex - 1 < 0 ? GameInstance->GetHowToPlayHints().Num() - 1 : CurrentHintIndex - 1;
     }
 
     PlayAnimation(FadeoutHintAnimation);
@@ -109,11 +108,11 @@ void UCGHowToPlayUserWidget::OnAnimationFinished_Implementation(const UWidgetAni
 
     if (Animation == FadeoutAnimation)
     {
-        const auto OwnerController = GetOwningPlayer();
-        if (!OwnerController)
+        const APlayerController* PC = GetOwningPlayer();
+        if (!PC)
             return;
 
-        const auto HUD = OwnerController->GetHUD<ACGHUDBase>();
+        auto* HUD = PC->GetHUD<ACGHUDBase>();
         if (!HUD)
             return;
 

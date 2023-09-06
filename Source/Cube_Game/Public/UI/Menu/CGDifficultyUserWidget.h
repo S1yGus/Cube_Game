@@ -17,16 +17,16 @@ class CUBE_GAME_API UCGDifficultyUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* EasyButton;
+    TObjectPtr<UCGButtonUserWidget> EasyButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* MediumButton;
+    TObjectPtr<UCGButtonUserWidget> MediumButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* HardButton;
+    TObjectPtr<UCGButtonUserWidget> HardButton;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundMix* FadeOutSoundMix;
+    TObjectPtr<USoundMix> FadeOutSoundMix;
 
     virtual void NativeOnInitialized() override;
 

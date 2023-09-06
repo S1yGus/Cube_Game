@@ -16,26 +16,26 @@ class CUBE_GAME_API UCGPauseUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* ResumeButton;
+    TObjectPtr<UCGButtonUserWidget> ResumeButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* HowButton;
+    TObjectPtr<UCGButtonUserWidget> HowButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* OptionsButton;
+    TObjectPtr<UCGButtonUserWidget> OptionsButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* MenuButton;
+    TObjectPtr<UCGButtonUserWidget> MenuButton;
 
     UPROPERTY(Meta = (BindWidget))
-    UCGButtonUserWidget* QuitButton;
+    TObjectPtr<UCGButtonUserWidget> QuitButton;
 
     virtual void NativeOnInitialized() override;
     virtual void SetGameState(EGameState NewGameState) override;
 
 private:
     UPROPERTY()
-    TArray<UCGButtonUserWidget*> WidgetButtons;
+    TArray<TObjectPtr<UCGButtonUserWidget>> WidgetButtons;
 
     EGameState GameStateToSet = EGameState::WaitingToStart;
 

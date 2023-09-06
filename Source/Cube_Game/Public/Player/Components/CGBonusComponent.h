@@ -20,19 +20,20 @@ public:
     FOnBonusChangedSignature OnBonusChanged;
     FOnBonusChargedSignature OnBonusCharged;
 
-    void SetRandomBonus();
+    void CollectBonusCube();
     void UseCurrentBonus();
+    EBonusType GetCurrentBonusType() const { return CurrentBonus; }
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bonus")
     TMap<EBonusType, TSubclassOf<ACGBaseBonusActor>> BonusClassesMap;
 
 private:
-    EBonusType CurrentBonus = EBonusType::None;
-    bool bBonusCharged = false;
+    EBonusType CurrentBonus{EBonusType::None};
+    bool bBonusCharged{false};
 
+    FORCEINLINE void SetRandomBonus();
     void SetBonus(EBonusType NewBonus);
-    void SetBonusCharged(bool IsCharged);
-
+    void ChargeBonus(bool bCharged);
     void SpawnBonus(EBonusType BonusType);
 };

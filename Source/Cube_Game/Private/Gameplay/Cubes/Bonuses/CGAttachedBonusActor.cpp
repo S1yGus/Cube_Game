@@ -11,9 +11,8 @@ void ACGAttachedBonusActor::BeginPlay()
 
 void ACGAttachedBonusActor::AttachToPlayerMesh()
 {
-    const auto PlayerMesh = GetPlayerMesh();
-    if (!PlayerMesh)
-        return;
-
-    AttachToComponent(PlayerMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    if (UStaticMeshComponent* PlayerMesh = GetPlayerMesh())
+    {
+        AttachToComponent(PlayerMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    }
 }

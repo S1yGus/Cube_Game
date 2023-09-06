@@ -3,7 +3,6 @@
 #include "Player/Components/CGFXComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
-#include "Player/Components/CGBonusComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
@@ -15,29 +14,28 @@ UCGFXComponent::UCGFXComponent()
 void UCGFXComponent::OutOfPosition()
 {
     UGameplayStatics::PlaySound2D(GetWorld(), OutOfPositionSound);
-
     MakeCameraShake(OutOfPositionCameraShake);
 }
 
-void UCGFXComponent::PlaySoundOfReceiving(ECubeType CubeType)
+void UCGFXComponent::PlayCollectSound(ECubeType CubeType)
 {
-    if (!SoundsOfReceivingMap.Contains(CubeType))
-        return;
-
-    UGameplayStatics::PlaySound2D(GetWorld(), SoundsOfReceivingMap[CubeType]);
+    if (CollectSoundsMap.Contains(CubeType))
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), CollectSoundsMap[CubeType]);
+    }
 }
 
-void UCGFXComponent::SetColorOfReceiving(ECubeType CubeType)
+void UCGFXComponent::SetCollectColor(ECubeType CubeType)
 {
-    const auto OwnerMesh = GetOwnerMesh();
-    if (!ColorDataOfReceivingMap.Contains(CubeType) || !OwnerMesh)
+    UStaticMeshComponent* OwnerMesh = GetOwnerMesh();
+    if (!OwnerMesh || !CollectColorDataMap.Contains(CubeType))
         return;
 
-    const auto DynMaterial = OwnerMesh->CreateAndSetMaterialInstanceDynamic(0);
+    UMaterialInstanceDynamic* DynMaterial = OwnerMesh->CreateAndSetMaterialInstanceDynamic(0);
     check(DynMaterial);
-    DynMaterial->SetVectorParameterValue(ColorParamName, ColorDataOfReceivingMap[CubeType].Color);
-    DynMaterial->SetScalarParameterValue(EmissivePowerParamName, ColorDataOfReceivingMap[CubeType].EmissivePower);
-    DynMaterial->SetScalarParameterValue(MaskEnabledParamName, ColorDataOfReceivingMap[CubeType].MaskEnabled);
+    DynMaterial->SetVectorParameterValue(ColorParamName, CollectColorDataMap[CubeType].Color);
+    DynMaterial->SetScalarParameterValue(EmissivePowerParamName, CollectColorDataMap[CubeType].EmissivePower);
+    DynMaterial->SetScalarParameterValue(MaskEnabledParamName, CollectColorDataMap[CubeType].MaskEnabled);
 
     if (GetWorld())
     {
@@ -47,25 +45,18 @@ void UCGFXComponent::SetColorOfReceiving(ECubeType CubeType)
 
 void UCGFXComponent::MakeCameraShake(ECubeType CubeType)
 {
-    if (!CameraShakeOfReceivingMap.Contains(CubeType))
+    if (!CollectCameraShakeMap.Contains(CubeType))
         return;
 
-    MakeCameraShake(CameraShakeOfReceivingMap[CubeType]);
+    MakeCameraShake(CollectCameraShakeMap[CubeType]);
 }
 
 void UCGFXComponent::MakeCameraShake(EBonusType BonusType)
 {
-    if (!CameraShakeOfBonusesMap.Contains(BonusType))
+    if (!BonusCameraShakeMap.Contains(BonusType))
         return;
 
-    MakeCameraShake(CameraShakeOfBonusesMap[BonusType]);
-}
-
-void UCGFXComponent::BeginPlay()
-{
-    Super::BeginPlay();
-
-    Setup();
+    MakeCameraShake(BonusCameraShakeMap[BonusType]);
 }
 
 UStaticMeshComponent* UCGFXComponent::GetOwnerMesh() const
@@ -73,24 +64,12 @@ UStaticMeshComponent* UCGFXComponent::GetOwnerMesh() const
     return GetOwner() ? GetOwner()->FindComponentByClass<UStaticMeshComponent>() : nullptr;
 }
 
-void UCGFXComponent::Setup()
-{
-    const auto Owner = GetOwner<APawn>();
-    if (!Owner)
-        return;
-
-    if (const auto BonusComponwnt = Owner->FindComponentByClass<UCGBonusComponent>())
-    {
-        BonusComponwnt->OnBonusCharged.AddUObject(this, &ThisClass::OnBonusCharged);
-    }
-}
-
 void UCGFXComponent::OnReturnDefaultColor()
 {
-    SetColorOfReceiving(ECubeType::None);    // None tepe contains default color data.
+    SetCollectColor(ECubeType::None);    // None tepe contains default color data.
 }
 
-void UCGFXComponent::OnBonusCharged(bool IsCharged)
+void UCGFXComponent::OnBonusCharged(bool bCharged)
 {
     if (!BonusChargedNiagaraComponent)
     {
@@ -103,12 +82,12 @@ void UCGFXComponent::OnBonusCharged(bool IsCharged)
                                                                                     false);
     }
 
-    if (IsCharged)
+    if (bCharged)
     {
         UGameplayStatics::PlaySound2D(GetWorld(), BonusChargedSound);
     }
 
-    BonusChargedNiagaraComponent->SetVisibility(IsCharged);
+    BonusChargedNiagaraComponent->SetVisibility(bCharged);
 }
 
 void UCGFXComponent::MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeClass, float Scale)
@@ -116,13 +95,13 @@ void UCGFXComponent::MakeCameraShake(TSubclassOf<UCameraShakeBase> CameraShakeCl
     if (!CameraShakeClass)
         return;
 
-    const auto OwnerPawn = GetOwner<APawn>();
+    const auto* OwnerPawn = GetOwner<APawn>();
     if (!OwnerPawn)
         return;
 
-    const auto PlayerController = OwnerPawn->GetController<APlayerController>();
-    if (!PlayerController || !PlayerController->PlayerCameraManager)
+    const auto* PC = OwnerPawn->GetController<APlayerController>();
+    if (!PC || !PC->PlayerCameraManager)
         return;
 
-    PlayerController->PlayerCameraManager->StartCameraShake(CameraShakeClass, Scale);
+    PC->PlayerCameraManager->StartCameraShake(CameraShakeClass, Scale);
 }

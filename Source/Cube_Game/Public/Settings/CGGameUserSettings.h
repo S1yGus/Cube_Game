@@ -28,15 +28,15 @@ public:
     UCGGameUserSettings();
 
     static UCGGameUserSettings* Get();
-    inline const TArray<UCGSetting*>& GetVideoSettings() const { return VideoSettings; }
-    inline const TArray<UCGSetting*>& GetSoundSettings() const { return SoundSettings; }
-    inline const TArray<UCGSetting*>& GetGameSettings() const { return GameSettings; }
+    const TArray<TObjectPtr<UCGSetting>>& GetVideoSettings() const { return VideoSettings; }
+    const TArray<TObjectPtr<UCGSetting>>& GetSoundSettings() const { return SoundSettings; }
+    const TArray<TObjectPtr<UCGSetting>>& GetGameSettings() const { return GameSettings; }
     EPopUpType GetPopUpType() const;
     const FHintsStatus& GetHintsStatus() const;
     const FAspectRatioData& GetAspectRatio() const;
     bool GetMusicType() const;
     void SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap);
-    void SetReceivingHintsStatus(const TMap<ECubeType, bool>& NewHintsMap);
+    void SetCollectHintsStatus(const TMap<ECubeType, bool>& NewHintsMap);
     void SetLastConfirmedResolutionSettings();
 
     void InitSoundVolume();
@@ -46,22 +46,22 @@ public:
 
 private:
     UPROPERTY()
-    TArray<UCGSetting*> VideoSettings;
+    TArray<TObjectPtr<UCGSetting>> VideoSettings;
     UPROPERTY()
-    UCGIntSetting* ResolutionSetting;
+    TObjectPtr<UCGIntSetting> ResolutionSetting;
     UPROPERTY()
-    TArray<UCGSetting*> SoundSettings;
+    TArray<TObjectPtr<UCGSetting>> SoundSettings;
     UPROPERTY()
-    TArray<UCGSetting*> GameSettings;
+    TArray<TObjectPtr<UCGSetting>> GameSettings;
 
     UPROPERTY()
-    UCGSettingsSave* SettingsSave;
+    TObjectPtr<UCGSettingsSave> SettingsSave;
 
     void InitVideoSettings();
     void InitSoundSettings();
     void InitGameSettings();
 
-    const TArray<FText> GetScreenResolutions() const;
+    TArray<FText> GetScreenResolutions() const;
     void UpdateResolutionSetting();
     void SetAllVideoSettings(int32 NewValue);
     void SetLowestResolution();
@@ -69,14 +69,14 @@ private:
 
     void CheckSettingsSave();
 
-    inline UCGIntSetting* CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<UCGSetting*>& AddTo);
-    inline UCGFloatSetting* CreateFloatSetting(const FText& Name, TArray<UCGSetting*>& AddTo);
-    inline UCGActionSetting* CreateActionSetting(const FText& Name, const FText& ActionName, TArray<UCGSetting*>& AddTo);
+    FORCEINLINE TObjectPtr<UCGIntSetting> CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE TObjectPtr<UCGFloatSetting> CreateFloatSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE TObjectPtr<UCGActionSetting> CreateActionSetting(const FText& Name, const FText& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo);
 
     template <class T>
-    T* CreateSetting(const FText& Name, TArray<UCGSetting*>& AddTo)
+    TObjectPtr<T> CreateSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
     {
-        T* Setting = NewObject<T>();
+        TObjectPtr<T> Setting = NewObject<T>();
         checkf(Setting->IsA(UCGSetting::StaticClass()), TEXT("T must be based on UCGSetting"));
         Setting->SetName(Name);
         AddTo.Add(Setting);

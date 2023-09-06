@@ -22,13 +22,13 @@ public:
     FOnMultiplierChangedSignature OnMultiplierChanged;
     FOnShowPopUpHintSignature OnShowPopUpHint;
 
-    int32 GetTime() const { return Time; }
-    int32 GetSpeed() const { return Speed; }
+    int32 GetGameTime() const { return GameTime; }
+    int32 GetGameSpeed() const { return GameSpeed; }
     const FVector2D& GetSpeedRange() const { return SpeedRange; }
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
-    const FDifficulty& GetDifficultyVlues() const;
-    const TMap<ECubeType, FHintData>& GetReceivingHints() const { return ReceivingHintsMap; }
+    const FDifficulty* GetDifficultyData() const;
+    const TMap<ECubeType, FHintData>& GetCollectHints() const { return CollectHintsMap; }
     int32 GetMaxMultiplier() const { return MaxMultiplier; }
 
     void ChangeTime(ECubeType CubeType);
@@ -54,19 +54,19 @@ protected:
     FVector2D SpeedRange{1.0f, 999.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0", Units = "s"))
-    int32 LowTimeThreshold = 5;
+    int32 LowTimeThreshold{5};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<EHintType, FHintData> GameplayHintsMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<ECubeType, FHintData> ReceivingHintsMap;
+    TMap<ECubeType, FHintData> CollectHintsMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
-    float StartupHintDelay = 2.0f;
+    float StartupHintDelay{2.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Multiplier", Meta = (ClampMin = "1"))
-    int32 MaxMultiplier = 8;
+    int32 MaxMultiplier{8};
 
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -74,33 +74,34 @@ private:
     FTimerHandle CountdownTimerHandle;
     FTimerHandle DelayHintTimerHandle;
 
-    int32 Time = 0;
-    int32 Speed = 1;
-    int32 Score = 0;
-    int32 Multiplier = 1;
+    int32 GameTime{0};
+    int32 GameSpeed{1};
+    int32 Score{0};
+    int32 Multiplier{1};
 
-    ECubeType PreviousCubeType = ECubeType::None;
+    ECubeType PreviousCubeType{ECubeType::None};
 
-    TMap<EHintType, bool> HintsStatusMap;
+    TMap<EHintType, bool> CachedHintsStatusMap;
 
-    bool bGameOver = false;
-    bool bShowingHint = false;
+    bool bGameOver{false};
+    bool bShowingHint{false};
 
     void SetupGameMode();
     void OnCountdown();
 
     void ShowGameplayHint(EHintType HintType, float Delay = 0.0f);
     void FormatHints();
+
     void OnShowMultiplierHint(ECubeType CubeType, int32 CurrentMultiplier);
     void OnShowLowTimeHint();
     void OnShowSpeedUpHint(int32 NewSpeed);
     void OnShowBonusChargedHint(bool IsCharged);
-    void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
+    FORCEINLINE void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 
-    void AddTime(int32 TimeToAdd);
-    void AddSpeed(int32 SpeedToAdd);
-    void AddScore(int32 ScoreToAdd);
+    FORCEINLINE void AddTime(int32 TimeToAdd);
+    FORCEINLINE void AddSpeed(int32 SpeedToAdd);
+    FORCEINLINE void AddScore(int32 ScoreToAdd);
     void ChangeMultiplier(ECubeType CubeType);
 
-    void CheckFlags(EGameState NewGameState);
+    FORCEINLINE void CheckFlags(EGameState NewGameState);
 };

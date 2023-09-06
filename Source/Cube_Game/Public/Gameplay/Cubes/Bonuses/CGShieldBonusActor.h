@@ -16,23 +16,22 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0", Units = "s"))
-    float ShieldDuration = 5.0f;
+    float ShieldDuration{5.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0", Units = "s"))
-    float ChargedShieldDuration = 7.0f;
+    float ChargedShieldDuration{7.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Shield", Meta = (ClampMin = "0.0"))
-    FVector ActivationScale = FVector{1.0f};
+    FVector ActivationScale{1.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
-    USoundCue* TeardownSound;
+    TObjectPtr<USoundCue> TeardownSound;
 
     virtual void BeginPlay() override;
-    virtual void OnScalin() override;
+    virtual void OnScaling() override;
 
 private:
     FTimerHandle ShieldTimerHandle;
-    bool bCanOffPlayerCollision = true;
 
-    inline void SetPlayerMeshCollisionEnabled(bool IsEnabled);
+    FORCEINLINE void SetPlayerMeshCollisionEnabled(bool bEnabled);
 };

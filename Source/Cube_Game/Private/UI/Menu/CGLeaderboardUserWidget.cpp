@@ -28,12 +28,12 @@ void UCGLeaderboardUserWidget::Setup()
     DateButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedDateButton);
     BackButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedBackButton);
 
-    if (const auto GameMode = GetGameModeBase())
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
         GameMode->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
 
-    if (const auto PC = GetOwningPlayer<ACGPlayerController>())
+    if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
         PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
     }
@@ -46,21 +46,20 @@ void UCGLeaderboardUserWidget::ResetWidget()
 
 void UCGLeaderboardUserWidget::UpdateLeaderboard()
 {
-    auto GameInstnce = GetGameInstance<UCGGameInstance>();
+    auto* GameInstnce = GetGameInstance<UCGGameInstance>();
     if (!GameInstnce)
         return;
 
     LeaderboardVerticalBox->ClearChildren();
     for (const auto& PlayerRecord : GameInstnce->GetLeaderboard())
     {
-        const auto PlayerRecordRowWidget = CreateWidget<UCGPlayerRecordRowUserWidget>(GetWorld(), PlayerRecordRowWidgetClass);
-        if (!PlayerRecordRowWidget)
-            continue;
-
-        PlayerRecordRowWidget->SetNameText(PlayerRecord.Name);
-        PlayerRecordRowWidget->SetScoreText(FText::FromString(FString::FromInt(PlayerRecord.Score)));
-        PlayerRecordRowWidget->SetDateText(FText::AsDate(PlayerRecord.DateTime));
-        LeaderboardVerticalBox->AddChild(PlayerRecordRowWidget);
+        if (auto* PlayerRecordRowWidget = CreateWidget<UCGPlayerRecordRowUserWidget>(GetWorld(), PlayerRecordRowWidgetClass))
+        {
+            PlayerRecordRowWidget->SetNameText(PlayerRecord.Name);
+            PlayerRecordRowWidget->SetScoreText(FText::FromString(FString::FromInt(PlayerRecord.Score)));
+            PlayerRecordRowWidget->SetDateText(FText::AsDate(PlayerRecord.DateTime));
+            LeaderboardVerticalBox->AddChild(PlayerRecordRowWidget);
+        }
     }
 }
 
@@ -83,12 +82,12 @@ void UCGLeaderboardUserWidget::OnPressedEsc()
 
 void UCGLeaderboardUserWidget::OnClickedNameButton()
 {
-    if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
+    if (auto* GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [=](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
+            [=](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
             {
-                return bNameAscending ? Record1.Name.ToString() > Record2.Name.ToString() : Record1.Name.ToString() < Record2.Name.ToString();
+                return bNameAscending ? Lhs.Name.ToString() > Rhs.Name.ToString() : Lhs.Name.ToString() < Rhs.Name.ToString();
             });
 
         bNameAscending = !bNameAscending;
@@ -99,12 +98,12 @@ void UCGLeaderboardUserWidget::OnClickedNameButton()
 
 void UCGLeaderboardUserWidget::OnClickedScoreButton()
 {
-    if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
+    if (auto* GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [=](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
+            [=](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
             {
-                return bScoreAscending ? Record1.Score > Record2.Score : Record1.Score < Record2.Score;
+                return bScoreAscending ? Lhs.Score > Rhs.Score : Lhs.Score < Rhs.Score;
             });
 
         bScoreAscending = !bScoreAscending;
@@ -115,12 +114,12 @@ void UCGLeaderboardUserWidget::OnClickedScoreButton()
 
 void UCGLeaderboardUserWidget::OnClickedDateButton()
 {
-    if (const auto GameInstance = GetGameInstance<UCGGameInstance>())
+    if (auto* GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [=](const FPlayerRecord& Record1, const FPlayerRecord& Record2)
+            [=](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
             {
-                return bDateAscending ? Record1.DateTime > Record2.DateTime : Record1.DateTime < Record2.DateTime;
+                return bDateAscending ? Lhs.DateTime > Rhs.DateTime : Lhs.DateTime < Rhs.DateTime;
             });
 
         bDateAscending = !bDateAscending;
@@ -139,9 +138,8 @@ void UCGLeaderboardUserWidget::OnAnimationFinished_Implementation(const UWidgetA
     if (Animation != FadeoutAnimation)
         return;
 
-    const auto GameMode = GetGameModeBase();
-    if (!GameMode)
-        return;
-
-    GameMode->SetGameState(EGameState::MainMenu);
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
+    {
+        GameMode->SetGameState(EGameState::MainMenu);
+    }
 }
