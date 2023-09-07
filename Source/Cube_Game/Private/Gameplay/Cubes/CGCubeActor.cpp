@@ -6,7 +6,7 @@
 #include "NiagaraComponent.h"
 #include "CGGameMode.h"
 
-constexpr static float LifeSpan{2.0f};
+constexpr static float CubeLifeSpan{2.0f};
 constexpr static float LifeDistance{2500.0f};
 constexpr static float UpdatePositionTimerRate{0.03f};
 
@@ -71,7 +71,7 @@ void ACGCubeActor::EndPlayAction()
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->SetVisibility(false, true);
     MovementComponent->StopMoving();
-    SetLifeSpan(LifeSpan);
+    SetLifeSpan(CubeLifeSpan);
 }
 
 UNiagaraComponent* ACGCubeActor::SpawnNiagaraEffect(TObjectPtr<UNiagaraSystem> NiagaraSystem)
