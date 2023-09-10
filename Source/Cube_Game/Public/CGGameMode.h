@@ -31,8 +31,8 @@ public:
     const TMap<ECubeType, FHintData>& GetCollectHints() const { return CollectHintsMap; }
     int32 GetMaxMultiplier() const { return MaxMultiplier; }
 
-    void ChangeTime(ECubeType CubeType);
-    void ChangeSpeed(ECubeType CubeType);
+    void ChangeGameTime(ECubeType CubeType);
+    void ChangeGameSpeed(ECubeType CubeType);
     void ChangeScore(ECubeType CubeType);
 
     void ShowPopUpHint(const FHintData& HintData);
@@ -99,7 +99,7 @@ private:
     FORCEINLINE void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 
     FORCEINLINE void AddTime(int32 TimeToAdd);
-    FORCEINLINE void AddSpeed(int32 SpeedToAdd);
+    FORCEINLINE void AddGameSpeed(int32 SpeedToAdd);
     FORCEINLINE void AddScore(int32 ScoreToAdd);
     void ChangeMultiplier(ECubeType CubeType);
 
