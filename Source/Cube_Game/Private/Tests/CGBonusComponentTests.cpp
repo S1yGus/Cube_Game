@@ -20,7 +20,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBonusComponentTests, "CubeGame.Components.Bonu
 
 bool FBonusComponentTests::RunTest(const FString& Parameters)
 {
-    LevelScope("/Game/Maps/Test");
+    LevelScope("/Game/Tests/TestLevel");
 
     {
         UWorld* World = CGUtils::GetCurrentWorld();

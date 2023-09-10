@@ -1,3 +1,5 @@
+// Cube_Game, All rights reserved.
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,6 +15,9 @@ public:
     LevelScope(const FString& LevelName) { AutomationOpenMap(LevelName); }
     ~LevelScope() { ADD_LATENT_AUTOMATION_COMMAND(FExitGameCommand); }
 };
+
+void SpecCloseLevel(const UWorld* World);
+void CallFuncByNameWithParams(UObject* Object, const FString& FuncName, const TArray<FString>& Params);
 
 template <class T>
 T* SpawnBlueprint(UWorld* World, const FString& Name, const FTransform& Transform = FTransform::Identity)

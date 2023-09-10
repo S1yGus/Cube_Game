@@ -37,7 +37,7 @@ const FDifficulty* ACGGameMode::GetDifficultyData() const
     return nullptr;
 }
 
-void ACGGameMode::ChangeTime(ECubeType CubeType)
+void ACGGameMode::ChangeGameTime(ECubeType CubeType)
 {
     if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->TimeChangeMap.Contains(CubeType))
     {
@@ -45,11 +45,11 @@ void ACGGameMode::ChangeTime(ECubeType CubeType)
     }
 }
 
-void ACGGameMode::ChangeSpeed(ECubeType CubeType)
+void ACGGameMode::ChangeGameSpeed(ECubeType CubeType)
 {
     if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->SpeedChangeMap.Contains(CubeType))
     {
-        AddSpeed(DifficultyData->SpeedChangeMap[CubeType]);
+        AddGameSpeed(DifficultyData->SpeedChangeMap[CubeType]);
     }
 }
 
@@ -59,11 +59,14 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
 
     if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->ScoreChangeMap.Contains(CubeType))
     {
-        const uint32 ScoreRemains = Score % DifficultyData->ScoreToSpeedUp;
-        const uint32 ScoreToAdd = Multiplier * DifficultyData->ScoreChangeMap[CubeType];
-        if (const uint32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData->ScoreToSpeedUp)
+        const int32 ScoreRemains = Score % DifficultyData->ScoreToSpeedUp;
+        const int32 ScoreToAdd = Multiplier * DifficultyData->ScoreChangeMap[CubeType];
+        if (ScoreToAdd > 0)
         {
-            AddSpeed(SpeedToAdd);
+            if (const int32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData->ScoreToSpeedUp)
+            {
+                AddGameSpeed(SpeedToAdd);
+            }
         }
 
         AddScore(ScoreToAdd);
@@ -267,7 +270,7 @@ void ACGGameMode::AddTime(int32 TimeToAdd)
     }
 }
 
-void ACGGameMode::AddSpeed(int32 SpeedToAdd)
+void ACGGameMode::AddGameSpeed(int32 SpeedToAdd)
 {
     GameSpeed = UKismetMathLibrary::Max(GameSpeed + SpeedToAdd, 1);
     OnSpeedChanged.Broadcast(GameSpeed);
