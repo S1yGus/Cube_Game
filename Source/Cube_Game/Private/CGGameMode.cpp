@@ -59,11 +59,14 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
 
     if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->ScoreChangeMap.Contains(CubeType))
     {
-        const uint32 ScoreRemains = Score % DifficultyData->ScoreToSpeedUp;
-        const uint32 ScoreToAdd = Multiplier * DifficultyData->ScoreChangeMap[CubeType];
-        if (const uint32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData->ScoreToSpeedUp)
+        const int32 ScoreRemains = Score % DifficultyData->ScoreToSpeedUp;
+        const int32 ScoreToAdd = Multiplier * DifficultyData->ScoreChangeMap[CubeType];
+        if (ScoreToAdd > 0)
         {
-            AddGameSpeed(SpeedToAdd);
+            if (const int32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData->ScoreToSpeedUp)
+            {
+                AddGameSpeed(SpeedToAdd);
+            }
         }
 
         AddScore(ScoreToAdd);
