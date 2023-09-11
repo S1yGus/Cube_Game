@@ -85,7 +85,7 @@ void UCGLeaderboardUserWidget::OnClickedNameButton()
     if (auto* GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [=](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
+            [this](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
             {
                 return bNameAscending ? Lhs.Name.ToString() > Rhs.Name.ToString() : Lhs.Name.ToString() < Rhs.Name.ToString();
             });
@@ -101,7 +101,7 @@ void UCGLeaderboardUserWidget::OnClickedScoreButton()
     if (auto* GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [=](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
+            [this](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
             {
                 return bScoreAscending ? Lhs.Score > Rhs.Score : Lhs.Score < Rhs.Score;
             });
@@ -117,7 +117,7 @@ void UCGLeaderboardUserWidget::OnClickedDateButton()
     if (auto* GameInstance = GetGameInstance<UCGGameInstance>())
     {
         GameInstance->SortLeaderboard(
-            [=](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
+            [this](const FPlayerRecord& Lhs, const FPlayerRecord& Rhs)
             {
                 return bDateAscending ? Lhs.DateTime > Rhs.DateTime : Lhs.DateTime < Rhs.DateTime;
             });

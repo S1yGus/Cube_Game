@@ -1,5 +1,7 @@
 // Cube_Game, All rights reserved.
 
+#if WITH_AUTOMATION_TESTS
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -27,3 +29,5 @@ T* SpawnBlueprint(UWorld* World, const FString& Name, const FTransform& Transfor
 }
 
 }    // namespace Test
+
+#endif
