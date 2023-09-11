@@ -1,5 +1,7 @@
 // Cube_Game, All rights reserved.
 
+#if WITH_AUTOMATION_TESTS
+
 #include "Tests/CGTestUtils.h"
 #include "Misc/OutputDeviceNull.h"
 
@@ -24,3 +26,5 @@ void Test::CallFuncByNameWithParams(UObject* Object, const FString& FuncName, co
         Object->CallFunctionByNameWithArguments(*Command, OutputDeviceNull, nullptr, true);
     }
 }
+
+#endif

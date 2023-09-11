@@ -193,7 +193,7 @@ void ACGGameMode::ShowGameplayHint(EHintType HintType, float Delay)
         bShowingHint = true;
         GetWorldTimerManager().SetTimer(    //
             DelayHintTimerHandle,           //
-            [=]()
+            [this, &HintType]()
             {
                 ShowPopUpHint(GameplayHintsMap[HintType]);
             },
