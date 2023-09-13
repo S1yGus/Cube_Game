@@ -5,7 +5,6 @@
 #include "Tests/CGBonusComponentTests.h"
 #include "CoreMinimal.h"
 #include "CGCoreTypes.h"
-#include "CGUtils.h"
 #include "Tests/CGTestUtils.h"
 #include "Misc/AutomationTest.h"
 #include "Player/Components/CGBonusComponent.h"
@@ -23,7 +22,7 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
     LevelScope("/Game/Tests/TestLevel");
 
     {
-        UWorld* World = CGUtils::GetCurrentWorld();
+        UWorld* World = GetTestWorld();
         const FString PlayerBlueprintName{"Blueprint'/Game/Player/BP_CGPlayer.BP_CGPlayer'"};
         const FTransform SpawnTransform{FVector{1000.0f}};
         const auto* Playr = SpawnBlueprint<ACGPlayer>(World, PlayerBlueprintName, SpawnTransform);

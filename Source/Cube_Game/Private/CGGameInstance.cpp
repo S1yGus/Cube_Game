@@ -5,26 +5,40 @@
 #include "Saves/CGLeaderboardSave.h"
 #include "Settings/CGGameUserSettings.h"
 
-const TArray<FPlayerRecord>& UCGGameInstance::GetLeaderboard() const
+TArray<FPlayerRecord> UCGGameInstance::GetLeaderboard() const
 {
-    return LeaderboardSave->GetLeaderboard();
+    if (LeaderboardSave)
+    {
+        return LeaderboardSave->GetLeaderboard();
+    }
+
+    return {};
 }
 
 void UCGGameInstance::AddToLeaderboard(const FPlayerRecord& PlayerRecord)
 {
-    LeaderboardSave->AddToLeaderboard(PlayerRecord);
-    UGameplayStatics::SaveGameToSlot(LeaderboardSave, LeaderboardSaveSlotName, 0);
+    if (LeaderboardSave)
+    {
+        LeaderboardSave->AddToLeaderboard(PlayerRecord);
+        UGameplayStatics::SaveGameToSlot(LeaderboardSave, LeaderboardSaveSlotName, 0);
+    }
 }
 
 void UCGGameInstance::SortLeaderboard(TFunction<bool(const FPlayerRecord&, const FPlayerRecord&)> Predicate)
 {
-    LeaderboardSave->SortLeaderboard(Predicate);
+    if (LeaderboardSave)
+    {
+        LeaderboardSave->SortLeaderboard(Predicate);
+    }
 }
 
 void UCGGameInstance::ClearLeaderboard()
 {
-    LeaderboardSave->ClearLeaderboard();
-    UGameplayStatics::SaveGameToSlot(LeaderboardSave, LeaderboardSaveSlotName, 0);
+    if (LeaderboardSave)
+    {
+        LeaderboardSave->ClearLeaderboard();
+        UGameplayStatics::SaveGameToSlot(LeaderboardSave, LeaderboardSaveSlotName, 0);
+    }
 }
 
 void UCGGameInstance::OpenMainMenu()
@@ -70,6 +84,4 @@ void UCGGameInstance::CheckLeaderboardSave()
     {
         LeaderboardSave = Cast<UCGLeaderboardSave>(UGameplayStatics::CreateSaveGameObject(UCGLeaderboardSave::StaticClass()));
     }
-
-    check(LeaderboardSave);
 }

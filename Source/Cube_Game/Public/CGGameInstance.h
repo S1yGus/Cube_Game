@@ -19,7 +19,7 @@ public:
     void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
     const TArray<FHintData>& GetHowToPlayHints() const { return HowToPlayHints; }
 
-    const TArray<FPlayerRecord>& GetLeaderboard() const;
+    TArray<FPlayerRecord> GetLeaderboard() const;
     void AddToLeaderboard(const FPlayerRecord& PlayerRecord);
     void SortLeaderboard(TFunction<bool(const FPlayerRecord&, const FPlayerRecord&)> Predicate);
     void ClearLeaderboard();

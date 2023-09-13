@@ -27,4 +27,20 @@ void Test::CallFuncByNameWithParams(UObject* Object, const FString& FuncName, co
     }
 }
 
+UWorld* Test::GetTestWorld()
+{
+    if (GEngine)
+    {
+        for (const auto& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::GamePreview)
+            {
+                return Context.World();
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 #endif

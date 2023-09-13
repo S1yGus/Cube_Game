@@ -12,8 +12,8 @@
 #include "CGGameInstance.h"
 #include "AudioDevice.h"
 #include "AudioThread.h"
-#include "CGUtils.h"
 #include "Settings/CGSettingsConstants.h"
+#include "Engine/GameEngine.h"
 
 using namespace SettingsConstants;
 
@@ -357,28 +357,26 @@ void UCGGameUserSettings::InitGameSettings()
         Setting->AddActionFunc(
             []()
             {
-                const auto* World = CGUtils::GetCurrentWorld();
-                if (!World)
-                    return;
-
-                auto* GameInstance = World->GetGameInstance<UCGGameInstance>();
-                if (!GameInstance)
-                    return;
-
-                GameInstance->ClearLeaderboard();
+                if (const auto* GameEngine = Cast<UGameEngine>(GEngine))
+                {
+                    if (auto* GameInstance = Cast<UCGGameInstance>(GameEngine->GameInstance))
+                    {
+                        GameInstance->ClearLeaderboard();
+                    }
+                }
             });
         Setting->AddStatusFunc(
             []()
             {
-                const auto* World = CGUtils::GetCurrentWorld();
-                if (!World)
-                    return false;
+                if (const auto* GameEngine = Cast<UGameEngine>(GEngine))
+                {
+                    if (const auto* GameInstance = Cast<UCGGameInstance>(GameEngine->GameInstance))
+                    {
+                        return !GameInstance->GetLeaderboard().IsEmpty();
+                    }
+                }
 
-                const auto* GameInstance = World->GetGameInstance<UCGGameInstance>();
-                if (!GameInstance)
-                    return false;
-
-                return !GameInstance->GetLeaderboard().IsEmpty();
+                return false;
             });
     }
 }
