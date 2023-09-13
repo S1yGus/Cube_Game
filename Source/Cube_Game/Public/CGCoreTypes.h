@@ -178,22 +178,22 @@ struct FHintsStatus
     // clang-format off
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<EHintType, bool> HintsMap = {
-        TPair<EHintType, bool>{EHintType::Startup,      true},
-        TPair<EHintType, bool>{EHintType::Multiplier,   true},
-        TPair<EHintType, bool>{EHintType::LowTime,      true},
-        TPair<EHintType, bool>{EHintType::SpeedUp,      true},
-        TPair<EHintType, bool>{EHintType::BonusCharged, true}
+        {EHintType::Startup,      true},
+        {EHintType::Multiplier,   true},
+        {EHintType::LowTime,      true},
+        {EHintType::SpeedUp,      true},
+        {EHintType::BonusCharged, true}
     };
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<ECubeType, bool> CollectHintsMap = {
-        TPair<ECubeType, bool>{ECubeType::GoodCube,    true},
-        TPair<ECubeType, bool>{ECubeType::BadCube,     true},
-        TPair<ECubeType, bool>{ECubeType::ScoreCube,   true},
-        TPair<ECubeType, bool>{ECubeType::TimeCube,    true},
-        TPair<ECubeType, bool>{ECubeType::BonusCube,   true},
-        TPair<ECubeType, bool>{ECubeType::SpeedCube,   true},
-        TPair<ECubeType, bool>{ECubeType::VeryBadCube, true}
+        {ECubeType::GoodCube,    true},
+        {ECubeType::BadCube,     true},
+        {ECubeType::ScoreCube,   true},
+        {ECubeType::TimeCube,    true},
+        {ECubeType::BonusCube,   true},
+        {ECubeType::SpeedCube,   true},
+        {ECubeType::VeryBadCube, true}
     };
     // clang-format on
 };

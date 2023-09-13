@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
-#include "CGUtils.h"
 #include "Tests/CGTestUtils.h"
 #include "CGGameMode.h"
 
@@ -29,7 +28,7 @@ void FFramework::Define()
                      [this]()
                      {
                          AutomationOpenMap("/Game/Tests/TestLevel");
-                         World = CGUtils::GetCurrentWorld();
+                         World = GetTestWorld();
                          TestNotNull("World should exist.", World);
                          GameMode = World->GetAuthGameMode<ACGGameMode>();
                          TestNotNull("GameMode should exist.", GameMode);

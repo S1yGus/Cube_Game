@@ -20,6 +20,7 @@ public:
 
 void SpecCloseLevel(const UWorld* World);
 void CallFuncByNameWithParams(UObject* Object, const FString& FuncName, const TArray<FString>& Params);
+UWorld* GetTestWorld();
 
 template <class T>
 T* SpawnBlueprint(UWorld* World, const FString& Name, const FTransform& Transform = FTransform::Identity)

@@ -57,7 +57,7 @@ void UCGLeaderboardUserWidget::UpdateLeaderboard()
         {
             PlayerRecordRowWidget->SetNameText(PlayerRecord.Name);
             PlayerRecordRowWidget->SetScoreText(FText::FromString(FString::FromInt(PlayerRecord.Score)));
-            PlayerRecordRowWidget->SetDateText(FText::AsDate(PlayerRecord.DateTime));
+            PlayerRecordRowWidget->SetDateText(FText::AsDate(PlayerRecord.DateTime, EDateTimeStyle::Type::Short));
             LeaderboardVerticalBox->AddChild(PlayerRecordRowWidget);
         }
     }
