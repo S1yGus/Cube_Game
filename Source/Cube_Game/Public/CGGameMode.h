@@ -24,7 +24,6 @@ public:
 
     int32 GetGameTime() const { return GameTime; }
     int32 GetGameSpeed() const { return GameSpeed; }
-    const FVector2D& GetSpeedRange() const { return SpeedRange; }
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
     const FDifficulty* GetDifficultyData() const;
