@@ -21,6 +21,8 @@ class CUBE_GAME_API ACGFieldActor : public AActor
 public:
     ACGFieldActor();
 
+    virtual void PostInitializeComponents() override;
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
@@ -95,8 +97,6 @@ private:
     FORCEINLINE const FDifficulty* GetDifficultyData() const;
     FORCEINLINE const APawn* GetPlayerPawn() const;
 
-    void Setup();
-
     void OnSpawnCube();
     void SpawnCube(int32 SpawnPosition);
     void OnSpeedChanged(int32 NewSpeed);
@@ -111,6 +111,9 @@ private:
     UFUNCTION()
     void OnBonusIndicatorDestroyed(AActor* DestroyedActor);
 
+    UFUNCTION()
+    void OnSpectralAnalysis(const TArray<float>& Magnitudes);
+
     template <class T>
     T* SpawnCubeActor(UClass* CubeClass, const FVector& RelativeLocation, const FCubeColorData& CubeColorData)
     {
@@ -120,6 +123,4 @@ private:
         SpawnedCube->SetColor(CubeColorData);
         return SpawnedCube;
     }
-
-    friend class UCGMusicComponent;
 };

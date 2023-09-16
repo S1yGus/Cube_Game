@@ -9,29 +9,56 @@
 #include "Components/WidgetComponent.h"
 #include "Gameplay/Components/CGMusicComponent.h"
 
+constexpr static float IndicatorAmplitudeMultiplier{200.0f};
+
 ACGFieldActor::ACGFieldActor()
 {
     PrimaryActorTick.bCanEverTick = false;
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+    check(StaticMeshComponent);
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->CastShadow = false;
 
     WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
+    check(WidgetComponent);
     WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     WidgetComponent->SetDrawAtDesiredSize(true);
     WidgetComponent->SetupAttachment(StaticMeshComponent);
 
     MusicComponent = CreateDefaultSubobject<UCGMusicComponent>("MusicComponent");
+    check(MusicComponent);
 
     SetRootComponent(StaticMeshComponent);
+}
+
+void ACGFieldActor::PostInitializeComponents()
+{
+    Super::PostInitializeComponents();
+
+    MusicComponent->OnSubmixSpectralAnalysis.BindDynamic(this, &ThisClass::OnSpectralAnalysis);
 }
 
 void ACGFieldActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    Setup();
+    if (auto* GameMode = GetGameMode())
+    {
+        GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
+        GameMode->OnMultiplierChanged.AddUObject(this, &ThisClass::OnMultiplierChanged);
+        BonusIndicatorPosition = GameMode->GetMaxMultiplier() - 1;
+    }
+
+    if (const auto* PlayerPawn = GetPlayerPawn())
+    {
+        if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
+        {
+            BonusComponent->OnBonusChanged.AddUObject(this, &ThisClass::OnBonusChanged);
+        }
+    }
+
+    ChangeFieldColor(EBonusType::None);    // Set default field color.
 
     RestoreSpawnPositions();
     GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
@@ -98,26 +125,6 @@ const APawn* ACGFieldActor::GetPlayerPawn() const
     }
 
     return nullptr;
-}
-
-void ACGFieldActor::Setup()
-{
-    if (auto* GameMode = GetGameMode())
-    {
-        GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
-        GameMode->OnMultiplierChanged.AddUObject(this, &ThisClass::OnMultiplierChanged);
-        BonusIndicatorPosition = GameMode->GetMaxMultiplier() - 1;
-    }
-
-    if (const auto* PlayerPawn = GetPlayerPawn())
-    {
-        if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
-        {
-            BonusComponent->OnBonusChanged.AddUObject(this, &ThisClass::OnBonusChanged);
-        }
-    }
-
-    ChangeFieldColor(EBonusType::None);    // Set default field color.
 }
 
 void ACGFieldActor::OnSpawnCube()
@@ -242,4 +249,24 @@ void ACGFieldActor::OnBonusIndicatorDestroyed(AActor* DestroyedActor)
         return;
 
     SpawnBonusIndicator(NewBonusIndicatorType);
+}
+
+void ACGFieldActor::OnSpectralAnalysis(const TArray<float>& Magnitudes)
+{
+    for (int32 i = 0; i < Indicators.Num(); ++i)
+    {
+        if (IsValid(Indicators[i]) && i < Magnitudes.Num())
+        {
+            FVector NewLocation = Indicators[i]->GetActorLocation();
+            NewLocation.Z = Magnitudes[i] * IndicatorAmplitudeMultiplier;
+            Indicators[i]->SetActorLocation(NewLocation);
+        }
+    }
+
+    if (IsValid(BonusIndicator) && BonusIndicatorPosition < Magnitudes.Num())
+    {
+        FVector NewLocation = BonusIndicator->GetActorLocation();
+        NewLocation.Z = Magnitudes[BonusIndicatorPosition] * IndicatorAmplitudeMultiplier;
+        BonusIndicator->SetActorLocation(NewLocation);
+    }
 }

@@ -258,21 +258,6 @@ void UCGGameUserSettings::InitSoundSettings()
         Setting->AddGetter(BIND_SOUND_GETTER(MusicVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCMusicName, MusicVolume));
     }
-
-    {
-        auto Setting = CreateIntSetting(LOCTEXT("MusicType_Loc", "Music type"), MusicTypeOptions, SoundSettings);
-        Setting->AddGetter(
-            [&]()
-            {
-                return static_cast<int32>(SettingsSave->SoundSettings.bStaticMusic);
-            });
-        Setting->AddSetter(
-            [&](int32 NewValue)
-            {
-                SettingsSave->SoundSettings.bStaticMusic = static_cast<bool>(NewValue);
-                OnMusicTypeChanged.Broadcast(SettingsSave->SoundSettings.bStaticMusic);
-            });
-    }
 }
 
 void UCGGameUserSettings::InitGameSettings()
