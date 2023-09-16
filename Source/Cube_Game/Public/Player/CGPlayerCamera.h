@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "CGCoreTypes.h"
 #include "CGPlayerCamera.generated.h"
 
 class UCameraComponent;
@@ -20,9 +19,4 @@ public:
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UCameraComponent> CameraComponent;
-
-    virtual void BeginPlay() override;
-
-private:
-    void OnAspectRatioChanged(const FAspectRatioData& NewAspectRatioData);
 };

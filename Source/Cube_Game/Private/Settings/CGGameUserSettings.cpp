@@ -64,16 +64,6 @@ const FHintsStatus& UCGGameUserSettings::GetHintsStatus() const
     return SettingsSave->GameSettings.HintsStatus;
 }
 
-const FAspectRatioData& UCGGameUserSettings::GetAspectRatio() const
-{
-    return SettingsSave->VideoSettings.AspectRatioData;
-}
-
-bool UCGGameUserSettings::GetMusicType() const
-{
-    return SettingsSave->SoundSettings.bStaticMusic;
-}
-
 void UCGGameUserSettings::SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap)
 {
     SettingsSave->GameSettings.HintsStatus.HintsMap = NewHintsMap;
@@ -189,31 +179,6 @@ void UCGGameUserSettings::InitVideoSettings()
                 SetFrameRateLimit(NewValue == 0 ? 0.0f    //
                                                 : FCString::Atof(*FramerateOptions[NewValue].ToString()));
                 ApplyNonResolutionSettings();
-            });
-    }
-
-    {
-        TArray<FText> AspectRatioOptions;
-        for (const auto& Data : AspectRatioData)
-        {
-            AspectRatioOptions.Add(Data.DisplayName);
-        }
-
-        auto Setting = CreateIntSetting(LOCTEXT("AspectRatio_Loc", "Aspect ratio"), AspectRatioOptions, VideoSettings);
-        Setting->AddGetter(
-            [&, AspectRatioOptions]() -> int32
-            {
-                if (GetFullscreenMode() == EWindowMode::Windowed || GetFullscreenMode() == EWindowMode::WindowedFullscreen)
-                {
-                    return INDEX_NONE;
-                }
-                return AspectRatioOptions.IndexOfByKey(SettingsSave->VideoSettings.AspectRatioData.DisplayName);
-            });
-        Setting->AddSetter(
-            [&](int32 NewValue)
-            {
-                SettingsSave->VideoSettings.AspectRatioData = AspectRatioData[NewValue];
-                OnAspectRatioChanged.Broadcast(AspectRatioData[NewValue]);
             });
     }
 
