@@ -14,9 +14,6 @@ class CUBE_GAME_API UCGSettingsSave : public USaveGame
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    FVideoSettings VideoSettings;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     FSoundSettings SoundSettings;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")

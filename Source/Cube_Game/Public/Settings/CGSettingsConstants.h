@@ -14,13 +14,6 @@ const FString SCUIName             = "SC_UI";
 const FString SCFXName             = "SC_FX";
 const FString SCMusicName          = "SC_Music";
 
-const TArray<FAspectRatioData> AspectRatioData =
-    {
-        {1.3333333f, 73.5f,  FText::FromString("4:3")},
-        {1.7777777f, 90.0f,  FText::FromString("16:9")},
-        {2.3333333f, 105.0f, FText::FromString("21:9")}
-    };
-
 const TArray<FCultureData> CultureData =
     {
         {"en",     LOCTEXT("English_Loc", "English")},
@@ -64,12 +57,6 @@ const TArray<FText> PopUpTypeOptions    //
         LOCTEXT("PopUpTypeOff_Loc", "Off"),                  //
         LOCTEXT("PopUpTypeMultiplier_Loc", "Multiplier"),    //
         LOCTEXT("PopUpTypeAmount_Loc", "Amount")             //
-    };
-
-const TArray<FText> MusicTypeOptions    //
-    {
-        LOCTEXT("DynamicMusic_Loc", "Dynamic"),    //
-        LOCTEXT("StaticMusic_Loc", "Static")       //
     };
 }    // namespace SettingsConstants
 

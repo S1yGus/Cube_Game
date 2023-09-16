@@ -22,8 +22,6 @@ public:
     FOnResolutionChangedSignature OnResolutionChanged;
     FOnPopUpTypeChangedSignature OnPopUpTypeChanged;
     FOnHintsStatusChangedSignature OnHintsStatusChanged;
-    FOnAspectRatioChangedSignature OnAspectRatioChanged;
-    FOnMusicTypeChangedSignature OnMusicTypeChanged;
 
     UCGGameUserSettings();
 
@@ -33,8 +31,6 @@ public:
     const TArray<TObjectPtr<UCGSetting>>& GetGameSettings() const { return GameSettings; }
     EPopUpType GetPopUpType() const;
     const FHintsStatus& GetHintsStatus() const;
-    const FAspectRatioData& GetAspectRatio() const;
-    bool GetMusicType() const;
     void SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap);
     void SetCollectHintsStatus(const TMap<ECubeType, bool>& NewHintsMap);
     void SetLastConfirmedResolutionSettings();
