@@ -71,6 +71,13 @@ enum class EHintType : uint8
     Multiplier,
     LowTime,
     BonusCharged,
+    GoodCube,
+    BadCube,
+    ScoreCube,
+    TimeCube,
+    BonusCube,
+    SpeedCube,
+    VeryBadCube,
     Max
 };
 
@@ -144,34 +151,6 @@ struct FSoundSettings
 };
 
 USTRUCT(BlueprintType)
-struct FHintsStatus
-{
-    GENERATED_USTRUCT_BODY()
-
-    // clang-format off
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<EHintType, bool> HintsMap = {
-        {EHintType::Startup,      true},
-        {EHintType::Multiplier,   true},
-        {EHintType::LowTime,      true},
-        {EHintType::SpeedUp,      true},
-        {EHintType::BonusCharged, true}
-    };
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<ECubeType, bool> CollectHintsMap = {
-        {ECubeType::GoodCube,    true},
-        {ECubeType::BadCube,     true},
-        {ECubeType::ScoreCube,   true},
-        {ECubeType::TimeCube,    true},
-        {ECubeType::BonusCube,   true},
-        {ECubeType::SpeedCube,   true},
-        {ECubeType::VeryBadCube, true}
-    };
-    // clang-format on
-};
-
-USTRUCT(BlueprintType)
 struct FGameSettings
 {
     GENERATED_USTRUCT_BODY()
@@ -179,8 +158,21 @@ struct FGameSettings
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     EPopUpType PopUpType{EPopUpType::Multiplier};
 
+    // clang-format off
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    FHintsStatus HintsStatus;
+    TMap<EHintType, bool> HintsStatusMap = {{EHintType::Startup,      false},
+                                            {EHintType::Multiplier,   false},
+                                            {EHintType::LowTime,      false},
+                                            {EHintType::SpeedUp,      false},
+                                            {EHintType::BonusCharged, false},
+                                            {EHintType::GoodCube,     false},
+                                            {EHintType::BadCube,      false},
+                                            {EHintType::ScoreCube,    false},
+                                            {EHintType::TimeCube,     false},
+                                            {EHintType::BonusCube,    false},
+                                            {EHintType::SpeedCube,    false},
+                                            {EHintType::VeryBadCube,  false}};
+    // clang-format on
 };
 
 USTRUCT(BlueprintType)
@@ -240,4 +232,5 @@ DECLARE_MULTICAST_DELEGATE(FOnPressedEscSignature);
 DECLARE_MULTICAST_DELEGATE(FOnPressedEnterSignature);
 DECLARE_MULTICAST_DELEGATE(FOnResolutionChangedSignature);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
+using FHintsStatus = TMap<EHintType, bool>;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);
