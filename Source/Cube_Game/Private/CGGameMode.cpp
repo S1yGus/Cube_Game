@@ -7,21 +7,22 @@
 #include "UI/CGHUDGame.h"
 #include "Settings/CGGameUserSettings.h"
 #include "Player/Components/CGBonusComponent.h"
+#include "Player/CGPlayerController.h"
 
 constexpr static float CountdownTimerRate{1.0f};
-constexpr static float NextHintsDelay{0.2f};
 
 static TQueue<EHintType> HintsQueue;
 
 ACGGameMode::ACGGameMode()
 {
+    PlayerControllerClass = ACGPlayerController::StaticClass();
     DefaultPawnClass = ACGPlayer::StaticClass();
     HUDClass = ACGHUDGame::StaticClass();
 }
 
 int32 ACGGameMode::GetCubeSpeed() const
 {
-    if (const auto DifficultyData = GetDifficultyData())
+    if (const FDifficulty* DifficultyData = GetDifficultyData())
     {
         return FMath::GetMappedRangeValueClamped(SpeedRange, DifficultyData->CubesSpeedRange, static_cast<float>(GameSpeed));
     }
@@ -82,7 +83,15 @@ void ACGGameMode::EnqueueHint(ECubeType CubeType)
 
 void ACGGameMode::GameOver()
 {
-    SetPause(EGameState::GameOver);
+    SetPauseAndChangeGameState(EGameState::GameOver);
+}
+
+void ACGGameMode::SetPauseAndChangeGameState(EGameState NewGameState)
+{
+    if (GetWorld() && SetPause(GetWorld()->GetFirstPlayerController()))
+    {
+        SetGameState(NewGameState);
+    }
 }
 
 void ACGGameMode::StartPlay()
@@ -100,20 +109,6 @@ void ACGGameMode::StartPlay()
             EnqueueHint(EHintType::Startup);
         },
         StartupHintDelay, false);
-}
-
-bool ACGGameMode::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
-{
-    return Super::SetPause(PC, CanUnpauseDelegate);    // To be able to overload the function.
-}
-
-bool ACGGameMode::SetPause(EGameState NewGameState)
-{
-    if (!GetWorld() || !SetPause(GetWorld()->GetFirstPlayerController()))
-        return false;
-
-    SetGameState(NewGameState);
-    return true;
 }
 
 bool ACGGameMode::ClearPause()
@@ -147,9 +142,19 @@ void ACGGameMode::SetupGameMode()
     FormatHints();
 
     OnMultiplierChanged.AddLambda(
-        [this](ECubeType CubeType, int32 CurrentMultiplier)
+        [this](ECubeType, int32)
         {
             EnqueueHint(EHintType::Multiplier);
+        });
+    OnLowTime.AddLambda(
+        [this]()
+        {
+            EnqueueHint(EHintType::LowTime);
+        });
+    OnSpeedChanged.AddLambda(
+        [this](int32)
+        {
+            EnqueueHint(EHintType::SpeedUp);
         });
 
     if (GetWorld())
@@ -181,7 +186,6 @@ void ACGGameMode::OnCountdown()
     if (GameTime < LowTimeThreshold)
     {
         OnLowTime.Broadcast();
-        EnqueueHint(EHintType::LowTime);
     }
 }
 
@@ -239,7 +243,7 @@ void ACGGameMode::EnqueueHint(EHintType HintType)
 
         if (!GetWorldTimerManager().IsTimerActive(HintDelayTimerHandle))
         {
-            OnShowHint();
+            GetWorldTimerManager().SetTimer(HintDelayTimerHandle, this, &ThisClass::OnShowHint, NextHintDelay);
         }
     }
 }
@@ -248,9 +252,9 @@ void ACGGameMode::OnShowHint()
 {
     if (EHintType HintType; HintsQueue.Dequeue(HintType))
     {
-        if (GameplayHintsMap.Contains(HintType))
+        if (CachedHintsStatusMap.Contains(HintType) && !CachedHintsStatusMap[HintType] && GameplayHintsMap.Contains(HintType))
         {
-            SetPause(EGameState::PopUpHint);
+            SetPauseAndChangeGameState(EGameState::PopUpHint);
             OnShowPopUpHint.Broadcast(GameplayHintsMap[HintType]);
             InvalidateHintStatus(HintType);
         }
@@ -258,7 +262,7 @@ void ACGGameMode::OnShowHint()
 
     if (!HintsQueue.IsEmpty())
     {
-        GetWorldTimerManager().SetTimer(HintDelayTimerHandle, this, &ThisClass::OnShowHint, NextHintsDelay);
+        GetWorldTimerManager().SetTimer(HintDelayTimerHandle, this, &ThisClass::OnShowHint, NextHintDelay);
     }
 }
 
@@ -282,7 +286,6 @@ void ACGGameMode::AddGameSpeed(int32 SpeedToAdd)
 {
     GameSpeed = UKismetMathLibrary::Max(GameSpeed + SpeedToAdd, 1);
     OnSpeedChanged.Broadcast(GameSpeed);
-    EnqueueHint(EHintType::SpeedUp);
 }
 
 void ACGGameMode::AddScore(int32 ScoreToAdd)

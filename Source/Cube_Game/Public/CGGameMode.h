@@ -35,10 +35,9 @@ public:
     void EnqueueHint(ECubeType CubeType);
 
     void GameOver();
+    void SetPauseAndChangeGameState(EGameState NewGameState);
 
     virtual void StartPlay() override;
-    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause());
-    bool SetPause(EGameState NewGameState);
     virtual bool ClearPause() override;
     virtual void PreInitializeComponents() override;
 
@@ -57,6 +56,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
     float StartupHintDelay{2.0f};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
+    float NextHintDelay{0.2f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Multiplier", Meta = (ClampMin = "1"))
     int32 MaxMultiplier{8};

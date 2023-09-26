@@ -7,6 +7,8 @@
 #include "Tests/AutomationCommon.h"
 #include "Tests/CGTestUtils.h"
 #include "CGGameMode.h"
+#include "Settings/CGGameUserSettings.h"
+#include "Player/Components/CGBonusComponent.h"
 
 #define WHAT_FORMAT_STR L"%s: current value: %d, expected value: %d"
 
@@ -60,8 +62,6 @@ void FFramework::Define()
                                 TestTrue(WhatMsg, CurrentValue == PrevSpeed);
                             }
                         }
-
-                        SpecCloseLevel(World);
                     });
 
                  It("GameScoreShouldBeChanged",
@@ -91,8 +91,6 @@ void FFramework::Define()
                                 TestTrue(WhatMsg, CurrentValue == PrevScore);
                             }
                         }
-
-                        SpecCloseLevel(World);
                     });
 
                  It("GameSpeedShouldBeChangedDependingOnTheScore",
@@ -131,9 +129,170 @@ void FFramework::Define()
                                 TestTrue(WhatMsg, CurrentValue == PrevSpeed);
                             }
                         }
-
-                        SpecCloseLevel(World);
                     });
+
+                 It("UnshownHintsShouldBeQueued", EAsyncExecution::ThreadPool,
+                    [this]()
+                    {
+                        auto* GameUserSettings = UCGGameUserSettings::Get();
+                        if (!TestNotNull("GameUserSettings should exist.", GameUserSettings))
+                            return;
+
+                        const APawn* PlayerPawn = World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
+                        if (!TestNotNull("PlayerPawn should exist.", PlayerPawn))
+                            return;
+
+                        const auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>();
+                        if (!TestNotNull("BonusComponent should exist.", BonusComponent))
+                            return;
+
+                        int32 PopUpHintAmount{0};
+                        const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, false},   {EHintType::Multiplier, false},   {EHintType::LowTime, false},
+                                                             {EHintType::SpeedUp, false},   {EHintType::BonusCharged, false}, {EHintType::GoodCube, false},
+                                                             {EHintType::BadCube, false},   {EHintType::ScoreCube, false},    {EHintType::TimeCube, false},
+                                                             {EHintType::BonusCube, false}, {EHintType::SpeedCube, false},    {EHintType::VeryBadCube, false}};
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameMode->OnShowPopUpHint.AddLambda(
+                                          [&](const FHintData&)
+                                          {
+                                              ++PopUpHintAmount;
+                                          });
+
+                                      GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
+
+                                      for (int32 i = 1; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
+                                      {
+                                          GameMode->EnqueueHint(static_cast<ECubeType>(i));
+                                      }
+                                      GameMode->OnMultiplierChanged.Broadcast(static_cast<ECubeType>(0), 0);
+                                      GameMode->OnLowTime.Broadcast();
+                                      GameMode->OnSpeedChanged.Broadcast(0);
+                                      BonusComponent->OnBonusCharged.Broadcast(true);
+                                  });
+
+                        const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
+                        const float StartupHintDelay = GetPropertyValueByName<float>(GameMode, "StartupHintDelay");
+                        const float ThreadSyncDelta{0.5f};
+                        FPlatformProcess::Sleep(FMath::Max(NextHintDelay * NewHintsStatus.Num(), StartupHintDelay) + ThreadSyncDelta);
+
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameUserSettings->SetHintsStatus(OldHintsStatus);
+                                  });
+                        FPlatformProcess::Sleep(ThreadSyncDelta);
+
+                        TestTrueExpr(PopUpHintAmount == NewHintsStatus.Num());
+                    });
+
+                 It("ShownHintsShouldNotBeQueued", EAsyncExecution::ThreadPool,
+                    [this]()
+                    {
+                        auto* GameUserSettings = UCGGameUserSettings::Get();
+                        if (!TestNotNull("GameUserSettings should exist.", GameUserSettings))
+                            return;
+
+                        const APawn* PlayerPawn = World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
+                        if (!TestNotNull("PlayerPawn should exist.", PlayerPawn))
+                            return;
+
+                        const auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>();
+                        if (!TestNotNull("BonusComponent should exist.", BonusComponent))
+                            return;
+
+                        int32 PopUpHintAmount{0};
+                        const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},   {EHintType::Multiplier, true},   {EHintType::LowTime, true},
+                                                             {EHintType::SpeedUp, true},   {EHintType::BonusCharged, true}, {EHintType::GoodCube, true},
+                                                             {EHintType::BadCube, true},   {EHintType::ScoreCube, true},    {EHintType::TimeCube, true},
+                                                             {EHintType::BonusCube, true}, {EHintType::SpeedCube, true},    {EHintType::VeryBadCube, true}};
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameMode->OnShowPopUpHint.AddLambda(
+                                          [&](const FHintData&)
+                                          {
+                                              ++PopUpHintAmount;
+                                          });
+
+                                      GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
+
+                                      for (int32 i = 1; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
+                                      {
+                                          GameMode->EnqueueHint(static_cast<ECubeType>(i));
+                                      }
+                                      GameMode->OnMultiplierChanged.Broadcast(static_cast<ECubeType>(0), 0);
+                                      GameMode->OnLowTime.Broadcast();
+                                      GameMode->OnSpeedChanged.Broadcast(0);
+                                      BonusComponent->OnBonusCharged.Broadcast(true);
+                                  });
+
+                        const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
+                        const float StartupHintDelay = GetPropertyValueByName<float>(GameMode, "StartupHintDelay");
+                        const float ThreadSyncDelta{0.5f};
+                        FPlatformProcess::Sleep(FMath::Max(NextHintDelay * NewHintsStatus.Num(), StartupHintDelay) + ThreadSyncDelta);
+
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameUserSettings->SetHintsStatus(OldHintsStatus);
+                                  });
+                        FPlatformProcess::Sleep(ThreadSyncDelta);
+
+                        TestTrueExpr(PopUpHintAmount == 0);
+                    });
+
+                 It("HintsShouldBeShownOnlyOnce", EAsyncExecution::ThreadPool,
+                    [this]()
+                    {
+                        auto* GameUserSettings = UCGGameUserSettings::Get();
+                        if (!TestNotNull("GameUserSettings should exist.", GameUserSettings))
+                            return;
+
+                        int32 PopUpHintAmount{0};
+                        const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},   {EHintType::Multiplier, true},   {EHintType::LowTime, true},
+                                                             {EHintType::SpeedUp, true},   {EHintType::BonusCharged, true}, {EHintType::GoodCube, false},
+                                                             {EHintType::BadCube, true},   {EHintType::ScoreCube, true},    {EHintType::TimeCube, true},
+                                                             {EHintType::BonusCube, true}, {EHintType::SpeedCube, true},    {EHintType::VeryBadCube, true}};
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameMode->OnShowPopUpHint.AddLambda(
+                                          [&](const FHintData&)
+                                          {
+                                              ++PopUpHintAmount;
+                                          });
+
+                                      GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
+
+                                      GameMode->EnqueueHint(ECubeType::GoodCube);
+                                      GameMode->EnqueueHint(ECubeType::GoodCube);
+                                      GameMode->EnqueueHint(ECubeType::GoodCube);
+                                  });
+
+                        const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
+                        const float ThreadSyncDelta{0.5f};
+                        FPlatformProcess::Sleep(NextHintDelay * 3 + ThreadSyncDelta);
+
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameUserSettings->SetHintsStatus(OldHintsStatus);
+                                  });
+                        FPlatformProcess::Sleep(ThreadSyncDelta);
+
+                        TestTrueExpr(PopUpHintAmount == 1);
+                    });
+
+                 AfterEach(
+                     [this]()
+                     {
+                         SpecCloseLevel(World);
+                     });
              });
 }
 
