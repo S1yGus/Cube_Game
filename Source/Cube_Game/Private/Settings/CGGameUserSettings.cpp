@@ -61,18 +61,12 @@ EPopUpType UCGGameUserSettings::GetPopUpType() const
 
 const FHintsStatus& UCGGameUserSettings::GetHintsStatus() const
 {
-    return SettingsSave->GameSettings.HintsStatus;
+    return SettingsSave->GameSettings.HintsStatusMap;
 }
 
-void UCGGameUserSettings::SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap)
+void UCGGameUserSettings::SetHintsStatus(const FHintsStatus& NewHintsMap)
 {
-    SettingsSave->GameSettings.HintsStatus.HintsMap = NewHintsMap;
-    SaveSettings();
-}
-
-void UCGGameUserSettings::SetCollectHintsStatus(const TMap<ECubeType, bool>& NewHintsMap)
-{
-    SettingsSave->GameSettings.HintsStatus.CollectHintsMap = NewHintsMap;
+    SettingsSave->GameSettings.HintsStatusMap = NewHintsMap;
     SaveSettings();
 }
 
@@ -267,32 +261,19 @@ void UCGGameUserSettings::InitGameSettings()
         Setting->AddActionFunc(
             [&]()
             {
-                for (auto& HintPair : SettingsSave->GameSettings.HintsStatus.HintsMap)
+                for (auto& HintPair : SettingsSave->GameSettings.HintsStatusMap)
                 {
-                    HintPair.Value = true;
+                    HintPair.Value = false;
                 }
 
-                for (auto& HintPair : SettingsSave->GameSettings.HintsStatus.CollectHintsMap)
-                {
-                    HintPair.Value = true;
-                }
-
-                OnHintsStatusChanged.Broadcast(SettingsSave->GameSettings.HintsStatus);
+                OnHintsStatusChanged.Broadcast(SettingsSave->GameSettings.HintsStatusMap);
             });
         Setting->AddStatusFunc(
             [&]()
             {
-                for (const auto& HintPair : SettingsSave->GameSettings.HintsStatus.HintsMap)
+                for (const auto& HintPair : SettingsSave->GameSettings.HintsStatusMap)
                 {
-                    if (!HintPair.Value)    // If hint already have been shown.
-                    {
-                        return true;
-                    }
-                }
-
-                for (const auto& HintPair : SettingsSave->GameSettings.HintsStatus.CollectHintsMap)
-                {
-                    if (!HintPair.Value)    // If hint already have been shown.
+                    if (HintPair.Value)    // If hint already have been shown.
                     {
                         return true;
                     }

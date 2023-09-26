@@ -49,7 +49,6 @@ protected:
 private:
     FTimerHandle MovementTimerHandle;
     int32 CurrentPosition{0};
-    TMap<ECubeType, bool> CachedCollectHintsMap;
 
     FORCEINLINE FVector GetCurrentPositionLocation() const;
 
@@ -70,8 +69,6 @@ private:
                                  const FHitResult& SweepResult);              //
 
     void CollectCube(ECubeType CubeType);
-    void ShowPopUpHint(ECubeType CubeType);
-    void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
 
     friend void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor);
 };

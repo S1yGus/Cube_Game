@@ -41,5 +41,5 @@ void UCGHUDUserWidget::OnPressedEsc()
     if (!GameMode)
         return;
 
-    GameMode->SetPause(EGameState::Pause);
+    GameMode->SetPauseAndChangeGameState(EGameState::Pause);
 }

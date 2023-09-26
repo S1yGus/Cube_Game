@@ -31,8 +31,7 @@ public:
     const TArray<TObjectPtr<UCGSetting>>& GetGameSettings() const { return GameSettings; }
     EPopUpType GetPopUpType() const;
     const FHintsStatus& GetHintsStatus() const;
-    void SetGameplayHintsStatus(const TMap<EHintType, bool>& NewHintsMap);
-    void SetCollectHintsStatus(const TMap<ECubeType, bool>& NewHintsMap);
+    void SetHintsStatus(const FHintsStatus& NewHintsMap);
     void SetLastConfirmedResolutionSettings();
 
     void InitSoundVolume();

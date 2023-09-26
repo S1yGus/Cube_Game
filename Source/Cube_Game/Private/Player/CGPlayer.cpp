@@ -7,7 +7,6 @@
 #include "Player/Components/CGFXComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
-#include "Settings/CGGameUserSettings.h"
 
 constexpr static float MovementTimerRate{0.016f};
 constexpr static float MovementSpeed{10.0f};
@@ -17,25 +16,25 @@ ACGPlayer::ACGPlayer()
     PrimaryActorTick.bCanEverTick = false;
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+    check(StaticMeshComponent);
     StaticMeshComponent->SetupAttachment(GetRootComponent());
 
     WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
+    check(WidgetComponent);
     WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
     WidgetComponent->SetDrawAtDesiredSize(true);
     WidgetComponent->SetupAttachment(StaticMeshComponent);
 
     BonusComponent = CreateDefaultSubobject<UCGBonusComponent>("BonusComponent");
+    check(BonusComponent);
+
     FXComponent = CreateDefaultSubobject<UCGFXComponent>("FXComponent");
+    check(FXComponent);
 }
 
 void ACGPlayer::BeginPlay()
 {
     Super::BeginPlay();
-
-    check(StaticMeshComponent);
-    check(WidgetComponent);
-    check(BonusComponent);
-    check(FXComponent);
 
     SetupPlayer();
     MoveToCurrentPosition();
@@ -62,12 +61,6 @@ void ACGPlayer::SetupPlayer()
 
     StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnComponentBeginOverlap);
     BonusComponent->OnBonusCharged.AddUObject(FXComponent, &UCGFXComponent::OnBonusCharged);
-
-    if (auto* GameUserSettings = UCGGameUserSettings::Get())
-    {
-        GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
-        CachedCollectHintsMap = GameUserSettings->GetHintsStatus().CollectHintsMap;
-    }
 }
 
 void ACGPlayer::MoveRight()
@@ -142,44 +135,16 @@ void ACGPlayer::CollectCube(ECubeType CubeType)
     FXComponent->SetCollectColor(CubeType);
     FXComponent->MakeCameraShake(CubeType);
 
-    ShowPopUpHint(CubeType);
-
     if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->ChangeGameTime(CubeType);
         GameMode->ChangeGameSpeed(CubeType);
         GameMode->ChangeScore(CubeType);
+        GameMode->EnqueueHint(CubeType);
     }
 
     if (CubeType == ECubeType::BonusCube)
     {
         BonusComponent->CollectBonusCube();
     }
-}
-
-void ACGPlayer::ShowPopUpHint(ECubeType CubeType)
-{
-    if (!CachedCollectHintsMap.Contains(CubeType))
-        return;
-
-    if (!CachedCollectHintsMap[CubeType])
-        return;
-
-    auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-    if (!GameMode || !GameMode->GetCollectHints().Contains(CubeType))
-        return;
-
-    GameMode->ShowPopUpHint(GameMode->GetCollectHints()[CubeType]);
-
-    CachedCollectHintsMap[CubeType] = false;
-
-    if (auto* GameUserSettings = UCGGameUserSettings::Get())
-    {
-        GameUserSettings->SetCollectHintsStatus(CachedCollectHintsMap);
-    }
-}
-
-void ACGPlayer::OnHintsStatusChanged(const FHintsStatus& NewHintsStatus)
-{
-    CachedCollectHintsMap = NewHintsStatus.CollectHintsMap;
 }

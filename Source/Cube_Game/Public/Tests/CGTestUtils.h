@@ -29,6 +29,24 @@ T* SpawnBlueprint(UWorld* World, const FString& Name, const FTransform& Transfor
     return (World && Blueprint) ? World->SpawnActor<T>(Blueprint->GeneratedClass, Transform) : nullptr;
 }
 
+template <class PropertyClass, class ObjectClass>
+PropertyClass GetPropertyValueByName(ObjectClass* Obj, const FString& PropName)
+{
+    if (Obj)
+    {
+        for (TFieldIterator<FProperty> PropIt(Obj->StaticClass()); PropIt; ++PropIt)
+        {
+            const FProperty* Property = *PropIt;
+            if (Property && Property->GetName().Equals(PropName))
+            {
+                return *Property->ContainerPtrToValuePtr<PropertyClass>(Obj);
+            }
+        }
+    }
+
+    return PropertyClass();
+}
+
 }    // namespace Test
 
 #endif
