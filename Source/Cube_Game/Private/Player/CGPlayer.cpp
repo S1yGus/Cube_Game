@@ -129,12 +129,15 @@ void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent
     }
 }
 
-void ACGPlayer::CollectCube(ECubeType CubeType)
+void ACGPlayer::PlayCollectEffects(ECubeType CubeType)
 {
     FXComponent->PlayCollectSound(CubeType);
     FXComponent->SetCollectColor(CubeType);
     FXComponent->MakeCameraShake(CubeType);
+}
 
+void ACGPlayer::UpdateGameMode(ECubeType CubeType)
+{
     if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
         GameMode->ChangeGameTime(CubeType);
@@ -142,9 +145,20 @@ void ACGPlayer::CollectCube(ECubeType CubeType)
         GameMode->ChangeScore(CubeType);
         GameMode->EnqueueHint(CubeType);
     }
+}
+
+void ACGPlayer::CollectBonusCube()
+{
+    BonusComponent->CollectBonusCube();
+}
+
+void ACGPlayer::CollectCube(ECubeType CubeType)
+{
+    PlayCollectEffects(CubeType);
+    UpdateGameMode(CubeType);
 
     if (CubeType == ECubeType::BonusCube)
     {
-        BonusComponent->CollectBonusCube();
+        CollectBonusCube();
     }
 }
