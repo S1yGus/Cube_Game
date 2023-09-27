@@ -68,6 +68,9 @@ private:
                                  bool bFromSweep,                             //
                                  const FHitResult& SweepResult);              //
 
+    FORCEINLINE void PlayCollectEffects(ECubeType CubeType);
+    FORCEINLINE void UpdateGameMode(ECubeType CubeType);
+    FORCEINLINE void CollectBonusCube();
     void CollectCube(ECubeType CubeType);
 
     friend void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor);
