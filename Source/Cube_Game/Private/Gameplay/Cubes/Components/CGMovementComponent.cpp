@@ -43,7 +43,7 @@ void UCGMovementComponent::OnMoving()
     if (AActor* Owner = GetOwner())
     {
         FVector NewLocation = Owner->GetActorLocation();
-        NewLocation.Y = NewLocation.Y + GetCubeSpeed() * MovingTeimerRate;
+        NewLocation.X = NewLocation.X - GetCubeSpeed() * MovingTeimerRate;
         Owner->SetActorLocation(NewLocation);
     }
 }

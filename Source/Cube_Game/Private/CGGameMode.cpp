@@ -8,8 +8,12 @@
 #include "Settings/CGGameUserSettings.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Player/CGPlayerController.h"
+#include "Gameplay/CGFieldActor.h"
+#include "Player/CGPlayer.h"
+#include "NiagaraFunctionLibrary.h"
 
 constexpr static float CountdownTimerRate{1.0f};
+constexpr static double VFXSpawnZOffset{-100.0};
 
 static TQueue<EHintType> HintsQueue;
 
@@ -139,7 +143,32 @@ void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ACGGameMode::SetupGameMode()
 {
-    FormatHints();
+    if (!GetWorld())
+        return;
+
+    const auto Origin{FTransform::Identity};
+    const auto* Field = GetWorld()->SpawnActor<ACGFieldActor>(FieldClass, Origin);
+    check(Field);
+
+    const FVector FieldSize = Field->GetSize();
+    const auto* BackgroundVFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),                 //
+                                                                               BackgroundNiagaraSystem,    //
+                                                                               FVector{0.5 * FieldSize.X, 0.5 * FieldSize.Y, VFXSpawnZOffset});
+    check(BackgroundVFX);
+
+    if (auto* PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn<ACGPlayer>() : nullptr)
+    {
+        PlayerPawn->UpdateLocation(Origin, FieldSize);
+
+        if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
+        {
+            BonusComponent->OnBonusCharged.AddLambda(
+                [this](bool IsCharged)
+                {
+                    EnqueueHint(EHintType::BonusCharged);
+                });
+        }
+    }
 
     OnMultiplierChanged.AddLambda(
         [this](ECubeType, int32)
@@ -157,20 +186,7 @@ void ACGGameMode::SetupGameMode()
             EnqueueHint(EHintType::SpeedUp);
         });
 
-    if (GetWorld())
-    {
-        if (const APawn* PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn() : nullptr)
-        {
-            if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
-            {
-                BonusComponent->OnBonusCharged.AddLambda(
-                    [this](bool IsCharged)
-                    {
-                        EnqueueHint(EHintType::BonusCharged);
-                    });
-            }
-        }
-    }
+    FormatHints();
 
     if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {

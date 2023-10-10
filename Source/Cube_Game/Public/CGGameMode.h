@@ -7,6 +7,9 @@
 #include "CGCoreTypes.h"
 #include "CGGameMode.generated.h"
 
+class ACGFieldActor;
+class UNiagaraSystem;
+
 UCLASS()
 class CUBE_GAME_API ACGGameMode : public ACGGameModeBase
 {
@@ -62,6 +65,12 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Multiplier", Meta = (ClampMin = "1"))
     int32 MaxMultiplier{8};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSubclassOf<ACGFieldActor> FieldClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    TObjectPtr<UNiagaraSystem> BackgroundNiagaraSystem;
 
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

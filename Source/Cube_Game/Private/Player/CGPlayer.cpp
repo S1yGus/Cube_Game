@@ -3,6 +3,7 @@
 #include "Player/CGPlayer.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Player/Components/CGFXComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
@@ -10,6 +11,18 @@
 
 constexpr static float MovementTimerRate{0.016f};
 constexpr static float MovementSpeed{10.0f};
+constexpr static double FieldMargin{300.0};
+
+static double HalfFOVTan(double FOV)
+{
+    return FMath::Tan(FMath::DegreesToRadians(FOV * 0.5));
+}
+
+// https://en.wikipedia.org/wiki/Field_of_view_in_video_games
+static double VerticalFOV(double HorizontalFOV, double AspectRatioHW)
+{
+    return 2.0 * FMath::RadiansToDegrees(FMath::Atan(HalfFOVTan(HorizontalFOV) * AspectRatioHW));
+}
 
 ACGPlayer::ACGPlayer()
 {
@@ -32,12 +45,26 @@ ACGPlayer::ACGPlayer()
     check(FXComponent);
 }
 
+void ACGPlayer::UpdateLocation(const FTransform& InOrigin, const FVector& InFieldSize)
+{
+    Origin = InOrigin;
+    FieldSize = InFieldSize;
+
+    if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
+    {
+        FViewport* Viewport = GEngine->GameViewport->Viewport;
+        Viewport->ViewportResizedEvent.Remove(OnViewportResizedHandle);
+        OnViewportResizedHandle = Viewport->ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResized);
+
+        OnViewportResized(Viewport, 0);
+    }
+}
+
 void ACGPlayer::BeginPlay()
 {
     Super::BeginPlay();
 
     SetupPlayer();
-    MoveToCurrentPosition();
 }
 
 void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -49,9 +76,9 @@ void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     PlayerInputComponent->BindAction("UseBonus", EInputEvent::IE_Pressed, this, &ThisClass::UseCurrentBonus);
 }
 
-FVector ACGPlayer::GetCurrentPositionLocation() const
+FVector ACGPlayer::GetTargetPositionLocation() const
 {
-    return FVector{CurrentPosition * MovementStep, 0.0, PositionZOffset};
+    return Origin.GetLocation() + FVector{PositionXOffset, CurrentPosition * MovementStep + PositionYOffset, PositionZOffset};
 }
 
 void ACGPlayer::SetupPlayer()
@@ -75,7 +102,7 @@ void ACGPlayer::MoveRight()
         ++CurrentPosition;
     }
 
-    MoveToCurrentPosition();
+    StartMovingToCurrentPosition();
 }
 
 void ACGPlayer::MoveLeft()
@@ -90,20 +117,20 @@ void ACGPlayer::MoveLeft()
         --CurrentPosition;
     }
 
-    MoveToCurrentPosition();
+    StartMovingToCurrentPosition();
 }
 
-void ACGPlayer::MoveToCurrentPosition()
+void ACGPlayer::StartMovingToCurrentPosition()
 {
     GetWorldTimerManager().SetTimer(MovementTimerHandle, this, &ThisClass::OnMoving, MovementTimerRate, true);
 }
 
 void ACGPlayer::OnMoving()
 {
-    const FVector NewLocation = FMath::VInterpTo(StaticMeshComponent->GetComponentLocation(), GetCurrentPositionLocation(), MovementTimerRate, MovementSpeed);
+    const FVector NewLocation = FMath::VInterpTo(StaticMeshComponent->GetComponentLocation(), GetTargetPositionLocation(), MovementTimerRate, MovementSpeed);
     StaticMeshComponent->SetWorldLocation(NewLocation);
 
-    if (StaticMeshComponent->GetComponentLocation().Equals(GetCurrentPositionLocation()))
+    if (StaticMeshComponent->GetComponentLocation().Equals(GetTargetPositionLocation()))
     {
         GetWorldTimerManager().ClearTimer(MovementTimerHandle);
     }
@@ -127,6 +154,28 @@ void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent
         OverlapedCube->Collect();
         CollectCube(OverlapedCube->GetCubeType());
     }
+}
+
+void ACGPlayer::OnViewportResized(FViewport* Viewport, uint32 Value)
+{
+    if (!Viewport || Viewport->GetSizeXY().X == 0 || Viewport->GetSizeXY().Y == 0 || FieldSize.Y == 0)
+        return;
+
+    double ZLocation{0.0};
+    const double ViewportAspect = static_cast<double>(Viewport->GetSizeXY().X) / Viewport->GetSizeXY().Y;
+    const double FieldAspect = FieldSize.Y / FieldSize.X;
+    if (FieldAspect < ViewportAspect)
+    {
+        const uint32 MarginHeight = FieldSize.X + FieldMargin;
+        ZLocation = MarginHeight / HalfFOVTan(VerticalFOV(CameraComponent->FieldOfView, 1.0 / ViewportAspect));
+    }
+    else
+    {
+        const uint32 MarginWidth = FieldSize.Y + FieldMargin;
+        ZLocation = MarginWidth / HalfFOVTan(CameraComponent->FieldOfView);
+    }
+    SetActorLocation(Origin.GetLocation() + 0.5 * FVector{FieldSize.X, FieldSize.Y, ZLocation});
+    StaticMeshComponent->SetWorldLocation(GetTargetPositionLocation());
 }
 
 void ACGPlayer::PlayCollectEffects(ECubeType CubeType)

@@ -19,17 +19,22 @@ ACGFieldActor::ACGFieldActor()
     check(StaticMeshComponent);
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->CastShadow = false;
+    SetRootComponent(StaticMeshComponent);
 
     WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
     check(WidgetComponent);
-    WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+    WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
     WidgetComponent->SetDrawAtDesiredSize(true);
-    WidgetComponent->SetupAttachment(StaticMeshComponent);
+    WidgetComponent->SetupAttachment(GetRootComponent());
 
     MusicComponent = CreateDefaultSubobject<UCGMusicComponent>("MusicComponent");
     check(MusicComponent);
+}
 
-    SetRootComponent(StaticMeshComponent);
+FVector ACGFieldActor::GetSize() const
+{
+    const FBox Box = StaticMeshComponent->GetStaticMesh()->GetBoundingBox();
+    return {Box.GetSize().X, Box.GetSize().Y + CubesSpawnStep, Box.GetSize().Z};
 }
 
 void ACGFieldActor::PostInitializeComponents()
@@ -42,6 +47,8 @@ void ACGFieldActor::PostInitializeComponents()
 void ACGFieldActor::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(StaticMeshComponent->GetStaticMesh());
 
     if (auto* GameMode = GetGameMode())
     {
@@ -156,7 +163,7 @@ void ACGFieldActor::OnSpawnCube()
 
 void ACGFieldActor::SpawnCube(int32 SpawnPosition)
 {
-    const FVector RelativeLocation{SpawnPosition * SpawnStep + SpawnXOffset, SpawnYOffset, SpawnZOffset};
+    const FVector RelativeLocation{CubesSpawnXOffset, SpawnPosition * CubesSpawnStep + CubesSpawnYOffset, CubesSpawnZOffset};
     const ECubeType CubeType = GetRandomCubeType();
     const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
     auto* SpawnedCube = SpawnCubeActor<ACGCubeActor>(SpawningCubeClass, RelativeLocation, CubeColorData);
@@ -198,9 +205,9 @@ void ACGFieldActor::OnMultiplierChanged(ECubeType CubeType, int32 Multiplier)
 void ACGFieldActor::SpawnIndicator(ECubeType CubeType, int32 Multiplier)
 {
     // (Multiplier - 2) because the first an indicator cube spawn when Multiplier be 2.
-    const FVector RelativeLocation{SpawnPositionsAmount * SpawnStep + SpawnXOffset,                     //
-                                   (Multiplier - 2) * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
-                                   IndicatorsSpawnZOffset};                                             //
+    const FVector RelativeLocation{(Multiplier - 2) * IndicatorsSpawnStep + IndicatorsSpawnXOffset,    //
+                                   SpawnPositionsAmount * CubesSpawnStep + CubesSpawnYOffset,          //
+                                   CubesSpawnZOffset};                                                 //
     const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
     auto* Indicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
     Indicators.Add(Indicator);
@@ -235,9 +242,9 @@ void ACGFieldActor::ChangeFieldColor(EBonusType BonusType)
 
 void ACGFieldActor::SpawnBonusIndicator(EBonusType BonusType)
 {
-    const FVector RelativeLocation{SpawnPositionsAmount * SpawnStep + SpawnXOffset,                           //
-                                   BonusIndicatorPosition * -IndicatorsSpawnStep + IndicatorsSpawnYOffset,    //
-                                   IndicatorsSpawnZOffset};                                                   //
+    const FVector RelativeLocation{BonusIndicatorPosition * IndicatorsSpawnStep + IndicatorsSpawnXOffset,    //
+                                   SpawnPositionsAmount * CubesSpawnStep + CubesSpawnYOffset,                //
+                                   CubesSpawnZOffset};                                                       //
     const auto CubeColorData = BonusColorDataMap.Contains(BonusType) ? BonusColorDataMap[BonusType] : FCubeColorData{};
     BonusIndicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
     BonusIndicator->OnDestroyed.AddDynamic(this, &ThisClass::OnBonusIndicatorDestroyed);

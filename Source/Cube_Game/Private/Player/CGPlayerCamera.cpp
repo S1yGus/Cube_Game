@@ -9,6 +9,7 @@ ACGPlayerCamera::ACGPlayerCamera()
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     check(CameraComponent);
-    CameraComponent->bConstrainAspectRatio = true;
+    CameraComponent->bOverrideAspectRatioAxisConstraint = true;
+    CameraComponent->AspectRatioAxisConstraint = EAspectRatioAxisConstraint::AspectRatio_MaintainXFOV;
     SetRootComponent(CameraComponent);
 }

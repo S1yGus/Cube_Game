@@ -21,6 +21,8 @@ class CUBE_GAME_API ACGFieldActor : public AActor
 public:
     ACGFieldActor();
 
+    FVector GetSize() const;
+
     virtual void PostInitializeComponents() override;
 
 protected:
@@ -52,16 +54,16 @@ protected:
     int32 SpawnPositionsAmount{4};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn", Meta = (ClampMin = "0.0", Units = "cm"))
-    float SpawnStep{200.0f};
+    float CubesSpawnStep{200.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn|Offset", Meta = (Units = "cm"))
-    float SpawnXOffset{100.0f};
+    float CubesSpawnXOffset{1600.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn|Offset", Meta = (Units = "cm"))
-    float SpawnYOffset{-1600.0f};
+    float CubesSpawnYOffset{100.0f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn|Offset", Meta = (Units = "cm"))
-    float SpawnZOffset{65.0f};
+    float CubesSpawnZOffset{65.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Indicators")
     TSubclassOf<ACGBaseCubeActor> IndicatorClass;
@@ -70,10 +72,7 @@ protected:
     float IndicatorsSpawnStep{207.15f};
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators|Offset", Meta = (Units = "cm"))
-    float IndicatorsSpawnYOffset{-100.0f};
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Indicators|Offset", Meta = (Units = "cm"))
-    float IndicatorsSpawnZOffset{65.0f};
+    float IndicatorsSpawnXOffset{100.0f};
 
     virtual void BeginPlay() override;
 
@@ -110,7 +109,6 @@ private:
     void SpawnBonusIndicator(EBonusType BonusType);
     UFUNCTION()
     void OnBonusIndicatorDestroyed(AActor* DestroyedActor);
-
     UFUNCTION()
     void OnSpectralAnalysis(const TArray<float>& Magnitudes);
 

@@ -7,7 +7,6 @@
 #include "CGGameMode.h"
 
 constexpr static float CubeLifeSpan{2.0f};
-constexpr static float LifeDistance{2500.0f};
 constexpr static float UpdatePositionTimerRate{0.03f};
 
 ACGCubeActor::ACGCubeActor()
@@ -26,7 +25,7 @@ void ACGCubeActor::Annihilat()
 {
     EndPlayAction();
     UNiagaraComponent* NiagaraFX = SpawnNiagaraEffect(AnnihilatNiagaraSystem);
-    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{0.0, static_cast<double>(MovementComponent->GetCubeSpeed()), 0.0});
+    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{-static_cast<double>(MovementComponent->GetCubeSpeed()), 0.0, 0.0});
 }
 
 void ACGCubeActor::Collect()
@@ -50,7 +49,7 @@ void ACGCubeActor::BeginPlay()
     check(TrailNiagaraComponent);
     check(MovementComponent);
 
-    SetLifeSpan(LifeDistance / static_cast<float>(GetCubeSpeed()));
+    SetLifeSpan(LifeDistance / GetCubeSpeed());
 }
 
 int32 ACGCubeActor::GetCubeSpeed() const

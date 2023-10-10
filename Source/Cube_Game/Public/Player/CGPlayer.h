@@ -20,6 +20,8 @@ class CUBE_GAME_API ACGPlayer : public ACGPlayerCamera
 public:
     ACGPlayer();
 
+    void UpdateLocation(const FTransform& InOrigin, const FVector& InFieldSize);
+
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
@@ -41,22 +43,31 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0", Units = "cm"))
     float MovementStep{200.0f};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0", Units = "cm"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (Units = "cm"))
+    float PositionXOffset{100.0f};
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (Units = "cm"))
+    float PositionYOffset{100.0f};
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (Units = "cm"))
     float PositionZOffset{65.0f};
 
     virtual void BeginPlay() override;
 
 private:
     FTimerHandle MovementTimerHandle;
+    FDelegateHandle OnViewportResizedHandle;
+    FTransform Origin{FTransform::Identity};
+    FVector FieldSize{0.0};
     int32 CurrentPosition{0};
 
-    FORCEINLINE FVector GetCurrentPositionLocation() const;
+    FORCEINLINE FVector GetTargetPositionLocation() const;
 
     void SetupPlayer();
 
     void MoveRight();
     void MoveLeft();
-    FORCEINLINE void MoveToCurrentPosition();
+    FORCEINLINE void StartMovingToCurrentPosition();
     void OnMoving();
     void UseCurrentBonus();
 
@@ -67,6 +78,7 @@ private:
                                  int32 OtherBodyIndex,                        //
                                  bool bFromSweep,                             //
                                  const FHitResult& SweepResult);              //
+    void OnViewportResized(FViewport* Viewport, uint32 Value);
 
     FORCEINLINE void PlayCollectEffects(ECubeType CubeType);
     FORCEINLINE void UpdateGameMode(ECubeType CubeType);
