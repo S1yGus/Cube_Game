@@ -11,7 +11,6 @@
 
 constexpr static float MovementTimerRate{0.016f};
 constexpr static float MovementSpeed{10.0f};
-constexpr static double FieldMargin{300.0};
 
 static double HalfFOVTan(double FOV)
 {

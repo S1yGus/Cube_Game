@@ -40,17 +40,20 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0"))
     int32 PositionsAmount{4};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (ClampMin = "0.0", Units = "cm"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform", Meta = (ClampMin = "0.0", Units = "cm"))
     float MovementStep{200.0f};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (Units = "cm"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform", Meta = (Units = "cm"))
     float PositionXOffset{100.0f};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (Units = "cm"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform", Meta = (Units = "cm"))
     float PositionYOffset{100.0f};
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control", Meta = (Units = "cm"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform", Meta = (Units = "cm"))
     float PositionZOffset{65.0f};
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform", Meta = (Units = "cm"))
+    float FieldMargin{300.0f};
 
     virtual void BeginPlay() override;
 
