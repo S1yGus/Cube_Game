@@ -22,6 +22,13 @@ void SpecCloseLevel(const UWorld* World);
 void CallFuncByNameWithParams(UObject* Object, const FString& FuncName, const TArray<FString>& Params);
 UWorld* GetTestWorld();
 
+template <typename T1, typename T2>
+struct TestPayload
+{
+    T1 TestValue;
+    T2 ExpectedValue;
+};
+
 template <class T>
 T* SpawnBlueprint(UWorld* World, const FString& Name, const FTransform& Transform = FTransform::Identity)
 {

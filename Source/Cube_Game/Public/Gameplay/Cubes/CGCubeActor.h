@@ -49,6 +49,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     FName NiagaraColorParamName{"Color"};
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    float LifeDistance{1800.0f};
+
     virtual void BeginPlay() override;
 
 private:

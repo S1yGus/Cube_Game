@@ -8,7 +8,9 @@
 #include "Tests/CGTestUtils.h"
 #include "CGGameMode.h"
 #include "Settings/CGGameUserSettings.h"
+#include "Player/CGPlayer.h"
 #include "Player/Components/CGBonusComponent.h"
+#include "Slate/SceneViewport.h"
 
 #define WHAT_FORMAT_STR L"%s: current value: %d, expected value: %d"
 
@@ -286,6 +288,68 @@ void FFramework::Define()
                         FPlatformProcess::Sleep(ThreadSyncDelta);
 
                         TestTrueExpr(PopUpHintAmount == 1);
+                    });
+
+                 AfterEach(
+                     [this]()
+                     {
+                         SpecCloseLevel(World);
+                     });
+             });
+
+    Describe("Framework.Pawn",
+             [this]()
+             {
+                 BeforeEach(
+                     [this]()
+                     {
+                         AutomationOpenMap("/Game/Tests/TestLevel");
+                         World = GetTestWorld();
+                         TestNotNull("World should exist.", World);
+                     });
+
+                 It("PawnLocationShouldBeAdjustCorrectly",
+                    [this]()
+                    {
+                        TestNotNull("GEngine should exist.", GEngine);
+                        TestNotNull("GameViewport should exist.", GEngine->GameViewport.Get());
+
+                        FSceneViewport* SceneViewport = GEngine->GameViewport->GetGameViewport();
+                        TestNotNull("SceneViewport should exist.", SceneViewport);
+
+                        const APlayerController* PC = World->GetFirstPlayerController();
+                        TestNotNull("PlayerController should exist.", PC);
+
+                        auto* PlayerPawn = Cast<ACGPlayer>(PC->GetPawn());
+                        TestNotNull("PlayerPawn should exist.", PlayerPawn);
+
+                        struct TestValue
+                        {
+                            FUintPoint ViewportSize;
+                            FVector FieldSize;
+                        };
+                        const TArray<TestPayload<TestValue, FVector>> Payload{{{FUintPoint{600, 100}, FVector{1000.0, 400.0, 0.0}}, FVector{500.0, 200.0, 3900.0}},
+                                                                              {{FUintPoint{2000, 100}, FVector{1200.0, 200.0, 0.0}}, FVector{600.0, 100.0, 15000.0}},
+                                                                              {{FUintPoint{600, 100}, FVector{400.0, 1000.0, 0.0}}, FVector{200.0, 500.0, 2100.0}},
+                                                                              {{FUintPoint{2000, 100}, FVector{200.0, 1200.0, 0.0}}, FVector{100.0, 600.0, 5000.0}},
+                                                                              {{FUintPoint{100, 600}, FVector{1000.0, 400.0, 0.0}}, FVector{500.0, 200.0, 350.0}},
+                                                                              {{FUintPoint{100, 2000}, FVector{1200.0, 200.0, 0.0}}, FVector{600.0, 100.0, 250.0}},
+                                                                              {{FUintPoint{100, 600}, FVector{400.0, 1000.0, 0.0}}, FVector{200.0, 500.0, 650.0}},
+                                                                              {{FUintPoint{100, 2000}, FVector{200.0, 1200.0, 0.0}}, FVector{100.0, 600.0, 750.0}},
+                                                                              {{FUintPoint{600, 600}, FVector{1000.0, 400.0, 0.0}}, FVector{500.0, 200.0, 650.0}},
+                                                                              {{FUintPoint{600, 600}, FVector{200.0, 1200.0, 0.0}}, FVector{100.0, 600.0, 750.0}},
+                                                                              {{FUintPoint{2000, 2000}, FVector{1000.0, 400.0, 0.0}}, FVector{500.0, 200.0, 650.0}},
+                                                                              {{FUintPoint{2000, 2000}, FVector{200.0, 1200.0, 0.0}}, FVector{100.0, 600.0, 750.0}}};
+
+                        for (const auto& OnePayload : Payload)
+                        {
+                            PlayerPawn->UpdateLocation(FTransform::Identity, OnePayload.TestValue.FieldSize);
+
+                            const FUintPoint ViewportSize = OnePayload.TestValue.ViewportSize;
+                            SceneViewport->SetViewportSize(ViewportSize.X, ViewportSize.Y);
+
+                            TestTrueExpr(PlayerPawn->GetActorLocation().Equals(OnePayload.ExpectedValue));
+                        }
                     });
 
                  AfterEach(
