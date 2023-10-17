@@ -2,14 +2,26 @@
 
 #include "Player/CGPlayerController.h"
 #include "CGGameMode.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 void ACGPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    check(InputComponent);
-    InputComponent->BindAction("Enter", EInputEvent::IE_Pressed, this, &ThisClass::OnPressedEnter).bExecuteWhenPaused = true;
-    InputComponent->BindAction("Esc", EInputEvent::IE_Pressed, this, &ThisClass::OnPressedEscape).bExecuteWhenPaused = true;
+    if (const auto* LocalPlayer = Cast<ULocalPlayer>(Player))
+    {
+        if (auto* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(); InputSystem && InputMapping)
+        {
+            InputSystem->AddMappingContext(InputMapping, 0);
+        }
+    }
+
+    if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent))
+    {
+        Input->BindAction(EnterAction, ETriggerEvent::Started, this, &ThisClass::OnPressEnter);
+        Input->BindAction(EscapeAction, ETriggerEvent::Started, this, &ThisClass::OnPressEscape);
+    }
 }
 
 void ACGPlayerController::BeginPlay()
@@ -41,12 +53,12 @@ void ACGPlayerController::OnGameStateChanged(EGameState NewGameState)
     }
 }
 
-void ACGPlayerController::OnPressedEnter()
+void ACGPlayerController::OnPressEnter()
 {
-    OnPressedEnt.Broadcast();
+    OnPressedEnter.Broadcast();
 }
 
-void ACGPlayerController::OnPressedEscape()
+void ACGPlayerController::OnPressEscape()
 {
-    OnPressedEsc.Broadcast();
+    OnPressedEscape.Broadcast();
 }

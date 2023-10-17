@@ -42,7 +42,7 @@ private:
 
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressedEnter();
-    void OnPressedEsc();
+    void OnPressedEscape();
     void OnSaveSettings();
     void OnCancelSettings();
 

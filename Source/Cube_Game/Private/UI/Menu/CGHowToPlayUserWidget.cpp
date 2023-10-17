@@ -36,7 +36,7 @@ void UCGHowToPlayUserWidget::Setup()
 
     if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
-        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+        PC->OnPressedEscape.AddUObject(this, &ThisClass::OnPressedEscape);
     }
 }
 
@@ -94,7 +94,7 @@ void UCGHowToPlayUserWidget::OnClickedPrevButton()
     PlayAnimation(FadeoutHintAnimation);
 }
 
-void UCGHowToPlayUserWidget::OnPressedEsc()
+void UCGHowToPlayUserWidget::OnPressedEscape()
 {
     if (!IsVisible() || IsAnyAnimationPlaying())
         return;

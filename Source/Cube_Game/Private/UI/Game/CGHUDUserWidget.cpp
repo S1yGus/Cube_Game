@@ -17,7 +17,7 @@ void UCGHUDUserWidget::NativeOnInitialized()
 
     if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
-        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+        PC->OnPressedEscape.AddUObject(this, &ThisClass::OnPressedEscape);
     }
 }
 
@@ -32,7 +32,7 @@ void UCGHUDUserWidget::OnLowTime()
     UGameplayStatics::PlaySound2D(GetWorld(), LowTimeSound);
 }
 
-void UCGHUDUserWidget::OnPressedEsc()
+void UCGHUDUserWidget::OnPressedEscape()
 {
     if (!IsVisible())
         return;

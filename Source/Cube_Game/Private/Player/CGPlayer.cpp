@@ -8,6 +8,7 @@
 #include "Player/Components/CGFXComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
+#include "EnhancedInputComponent.h"
 
 constexpr static float MovementTimerRate{0.016f};
 constexpr static float MovementSpeed{10.0f};
@@ -70,9 +71,12 @@ void ACGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    PlayerInputComponent->BindAction("Right", EInputEvent::IE_Pressed, this, &ThisClass::MoveRight);
-    PlayerInputComponent->BindAction("Left", EInputEvent::IE_Pressed, this, &ThisClass::MoveLeft);
-    PlayerInputComponent->BindAction("UseBonus", EInputEvent::IE_Pressed, this, &ThisClass::UseCurrentBonus);
+    if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+    {
+        Input->BindAction(UseCurrentBonusAction, ETriggerEvent::Started, this, &ThisClass::OnUseCurrentBonus);
+        Input->BindAction(MoveRightAction, ETriggerEvent::Started, this, &ThisClass::OnMoveRight);
+        Input->BindAction(MoveLeftAction, ETriggerEvent::Started, this, &ThisClass::OnMoveLeft);
+    }
 }
 
 FVector ACGPlayer::GetTargetPositionLocation() const
@@ -89,7 +93,13 @@ void ACGPlayer::SetupPlayer()
     BonusComponent->OnBonusCharged.AddUObject(FXComponent, &UCGFXComponent::OnBonusCharged);
 }
 
-void ACGPlayer::MoveRight()
+void ACGPlayer::OnUseCurrentBonus()
+{
+    FXComponent->MakeCameraShake(BonusComponent->GetCurrentBonusType());
+    BonusComponent->UseCurrentBonus();
+}
+
+void ACGPlayer::OnMoveRight()
 {
     if (CurrentPosition + 1 >= PositionsAmount)
     {
@@ -104,7 +114,7 @@ void ACGPlayer::MoveRight()
     StartMovingToCurrentPosition();
 }
 
-void ACGPlayer::MoveLeft()
+void ACGPlayer::OnMoveLeft()
 {
     if (CurrentPosition - 1 < 0)
     {
@@ -133,12 +143,6 @@ void ACGPlayer::OnMoving()
     {
         GetWorldTimerManager().ClearTimer(MovementTimerHandle);
     }
-}
-
-void ACGPlayer::UseCurrentBonus()
-{
-    FXComponent->MakeCameraShake(BonusComponent->GetCurrentBonusType());
-    BonusComponent->UseCurrentBonus();
 }
 
 void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //

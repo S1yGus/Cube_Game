@@ -28,5 +28,5 @@ private:
     inline ACGGameMode* GetGameMode() const;
 
     void OnLowTime();
-    void OnPressedEsc();
+    void OnPressedEscape();
 };
