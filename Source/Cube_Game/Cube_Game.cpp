@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Cube_Game, All rights reserved.
 
 #include "Cube_Game.h"
 #include "Modules/ModuleManager.h"

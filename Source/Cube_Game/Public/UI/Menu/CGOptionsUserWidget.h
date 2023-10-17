@@ -54,7 +54,7 @@ private:
     void UpdateOptions();
 
     void OnGameStateChanged(EGameState NewGameState);
-    void OnPressedEsc();
+    void OnPressedEscape();
     void OnResolutionChanged();
     void OnClickedBackButton();
 

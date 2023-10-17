@@ -45,7 +45,7 @@ private:
     void ChangeGameState(EGameState NewGameState);
 
     void OnGameStateChanged(EGameState NewGameState);
-    void OnPressedEsc();
+    void OnPressedEscape();
     void OnClickedResumeButton();
     void OnClickedHowButton();
     void OnClickedOptionsButton();

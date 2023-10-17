@@ -47,7 +47,7 @@ private:
     void UpdateLeaderboard();
 
     void OnGameStateChanged(EGameState NewGameState);
-    void OnPressedEsc();
+    void OnPressedEscape();
     void OnClickedNameButton();
     void OnClickedScoreButton();
     void OnClickedDateButton();

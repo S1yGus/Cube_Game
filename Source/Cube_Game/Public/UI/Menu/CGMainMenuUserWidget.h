@@ -44,7 +44,7 @@ private:
     inline void ChangeGameState(EGameState NewGameState);
 
     void OnGameStateChanged(EGameState NewGameState);
-    void OnPressedEsc();
+    void OnPressedEscape();
     void OnClickedGameButton();
     void OnClickedLeaderButton();
     void OnClickedHowButton();

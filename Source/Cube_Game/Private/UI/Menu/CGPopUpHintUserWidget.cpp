@@ -30,8 +30,8 @@ void UCGPopUpHintUserWidget::Setup()
 
     if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
-        PC->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
-        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEnter);
+        PC->OnPressedEnter.AddUObject(this, &ThisClass::OnPressedEnter);
+        PC->OnPressedEscape.AddUObject(this, &ThisClass::OnPressedEnter);
     }
 }
 

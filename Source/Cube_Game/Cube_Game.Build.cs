@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Cube_Game, All rights reserved.
 
 using UnrealBuildTool;
 
@@ -8,7 +8,7 @@ public class Cube_Game : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore", "Niagara", "AudioMixer" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore", "Niagara", "AudioMixer", "EnhancedInput" });
 
         PrivateDependencyModuleNames.AddRange(new string[] {});
     }

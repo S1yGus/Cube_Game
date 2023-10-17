@@ -39,7 +39,7 @@ void UCGMainMenuUserWidget::Setup()
 
     if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
-        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+        PC->OnPressedEscape.AddUObject(this, &ThisClass::OnPressedEscape);
     }
 }
 
@@ -65,7 +65,7 @@ void UCGMainMenuUserWidget::OnGameStateChanged(EGameState NewGameState)
     ResetWidget();
 }
 
-void UCGMainMenuUserWidget::OnPressedEsc()
+void UCGMainMenuUserWidget::OnPressedEscape()
 {
     if (!IsVisible() || IsAnyAnimationPlaying())
         return;

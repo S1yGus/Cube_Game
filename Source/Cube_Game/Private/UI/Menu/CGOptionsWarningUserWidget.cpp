@@ -46,8 +46,8 @@ void UCGOptionsWarningUserWidget::Setup()
 
     if (auto* PC = GetOwningPlayer<ACGPlayerController>())
     {
-        PC->OnPressedEnt.AddUObject(this, &ThisClass::OnPressedEnter);
-        PC->OnPressedEsc.AddUObject(this, &ThisClass::OnPressedEsc);
+        PC->OnPressedEnter.AddUObject(this, &ThisClass::OnPressedEnter);
+        PC->OnPressedEscape.AddUObject(this, &ThisClass::OnPressedEscape);
     }
 }
 
@@ -77,7 +77,7 @@ void UCGOptionsWarningUserWidget::OnPressedEnter()
     OnSaveSettings();
 }
 
-void UCGOptionsWarningUserWidget::OnPressedEsc()
+void UCGOptionsWarningUserWidget::OnPressedEscape()
 {
     if (!IsVisible() || IsAnyAnimationPlaying())
         return;

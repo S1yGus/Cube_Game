@@ -51,7 +51,7 @@ private:
     void OnClickedBackButton();
     void OnClickedNextButton();
     void OnClickedPrevButton();
-    void OnPressedEsc();
+    void OnPressedEscape();
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
 };

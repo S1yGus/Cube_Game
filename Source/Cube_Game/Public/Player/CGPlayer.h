@@ -11,6 +11,7 @@
 class UWidgetComponent;
 class UCGBonusComponent;
 class UCGFXComponent;
+class UInputAction;
 
 UCLASS()
 class CUBE_GAME_API ACGPlayer : public ACGPlayerCamera
@@ -55,6 +56,15 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform", Meta = (Units = "cm"))
     float FieldMargin{300.0f};
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TObjectPtr<UInputAction> UseCurrentBonusAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TObjectPtr<UInputAction> MoveRightAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TObjectPtr<UInputAction> MoveLeftAction;
+
     virtual void BeginPlay() override;
 
 private:
@@ -68,11 +78,11 @@ private:
 
     void SetupPlayer();
 
-    void MoveRight();
-    void MoveLeft();
+    void OnUseCurrentBonus();
+    void OnMoveRight();
+    void OnMoveLeft();
     FORCEINLINE void StartMovingToCurrentPosition();
     void OnMoving();
-    void UseCurrentBonus();
 
     UFUNCTION()
     void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
