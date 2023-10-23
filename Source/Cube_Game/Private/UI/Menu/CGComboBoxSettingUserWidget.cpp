@@ -11,23 +11,23 @@ void UCGComboBoxSettingUserWidget::Init(TObjectPtr<UCGIntSetting> NewSetting)
         return;
 
     Setting = NewSetting;
-    SettingNameText->SetText(Setting->GetName());
+    SettingNameText->SetText(NewSetting->GetName());
 
     Update();
 }
 
 void UCGComboBoxSettingUserWidget::Update()
 {
-    if (!Setting)
+    if (!Setting.IsValid())
         return;
 
     SettingComboBox->ClearOptions();
-    for (const FText& Option : Setting->GetOptions())
+    for (const FText& Option : Setting.Get()->GetOptions())
     {
         SettingComboBox->AddOption(Option.ToString());
     }
 
-    const int32 CurrentValue = Setting->GetCurrentValue();
+    const int32 CurrentValue = Setting.Get()->GetCurrentValue();
     if (CurrentValue != INDEX_NONE)
     {
         SettingComboBox->SetSelectedIndex(CurrentValue);
@@ -48,8 +48,8 @@ void UCGComboBoxSettingUserWidget::NativeOnInitialized()
 
 void UCGComboBoxSettingUserWidget::OnSelectionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
-    if (SelectionType == ESelectInfo::Direct || !Setting)
+    if (SelectionType == ESelectInfo::Direct || !Setting.IsValid())
         return;
 
-    Setting->SetValue(SettingComboBox->FindOptionIndex(SelectedItem));
+    Setting.Get()->SetValue(SettingComboBox->FindOptionIndex(SelectedItem));
 }

@@ -11,7 +11,7 @@ void UCGSliderSettingUserWidget::Init(TObjectPtr<UCGFloatSetting> NewSetting)
         return;
 
     Setting = NewSetting;
-    SettingNameText->SetText(Setting->GetName());
+    SettingNameText->SetText(NewSetting->GetName());
 
     Update();
 }
@@ -24,10 +24,10 @@ void UCGSliderSettingUserWidget::UpdatePercentText()
 
 void UCGSliderSettingUserWidget::Update()
 {
-    if (!Setting)
+    if (!Setting.IsValid())
         return;
 
-    SettingSlider->SetValue(Setting->GetCurrentValue());
+    SettingSlider->SetValue(Setting.Get()->GetCurrentValue());
     UpdatePercentText();
 }
 
@@ -50,8 +50,8 @@ void UCGSliderSettingUserWidget::OnValueChanged(float Value)
 
 void UCGSliderSettingUserWidget::OnMouseCaptureEnd()
 {
-    if (!Setting)
+    if (!Setting.IsValid())
         return;
 
-    Setting->SetValue(SettingSlider->GetNormalizedValue());
+    Setting.Get()->SetValue(SettingSlider->GetNormalizedValue());
 }

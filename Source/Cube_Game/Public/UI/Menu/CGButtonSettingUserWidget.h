@@ -27,11 +27,10 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     TObjectPtr<UCGButtonUserWidget> ActionButton;
 
-    UPROPERTY()
-    TObjectPtr<UCGActionSetting> Setting;
-
     virtual void NativeOnInitialized() override;
 
 private:
+    TWeakObjectPtr<UCGActionSetting> Setting;
+
     void OnClickedButton();
 };

@@ -2,7 +2,6 @@
 
 #include "UI/Menu/CGOptionsUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
-#include "Components/VerticalBox.h"
 #include "Settings/CGGameUserSettings.h"
 #include "UI/Menu/CGComboBoxSettingUserWidget.h"
 #include "UI/Menu/CGSliderSettingUserWidget.h"
@@ -15,21 +14,6 @@
 #include "Interfaces/CGSettingWidgetInterface.h"
 #include "Player/CGPlayerController.h"
 
-#define UPDATE_SETTINGS_WIDGETS(ContainerWidget)                           \
-    for (const auto& Widget : ContainerWidget->GetAllChildren())           \
-    {                                                                      \
-        if (auto* SettingWidget = Cast<ICGSettingWidgetInterface>(Widget)) \
-        {                                                                  \
-            SettingWidget->Update();                                       \
-        }                                                                  \
-    }
-
-#define CREATE_AND_ADD_SETTING_WIDGET(T, WidgetClass, Setting, ToContainerWidget) \
-    T* SettingWidget = CreateWidget<T>(GetWorld(), WidgetClass);                  \
-    check(SettingWidget);                                                         \
-    SettingWidget->Init(Setting);                                                 \
-    ToContainerWidget->AddChild(SettingWidget);
-
 void UCGOptionsUserWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
@@ -37,7 +21,7 @@ void UCGOptionsUserWidget::NativeOnInitialized()
     Setup();
 }
 
-void UCGOptionsUserWidget::InitSettingsWidgets(const TArray<UCGSetting*>& SettingsArray, UVerticalBox* VerticalBox)
+void UCGOptionsUserWidget::InitSettingsWidgets(const TArray<TObjectPtr<UCGSetting>>& SettingsArray, UVerticalBox* VerticalBox)
 {
     VerticalBox->ClearChildren();
 
@@ -45,15 +29,15 @@ void UCGOptionsUserWidget::InitSettingsWidgets(const TArray<UCGSetting*>& Settin
     {
         if (auto* IntSetting = Cast<UCGIntSetting>(Setting))
         {
-            CREATE_AND_ADD_SETTING_WIDGET(UCGComboBoxSettingUserWidget, ComboBoxSettingWidgetClass, IntSetting, VerticalBox);
+            CreateAndAddSettingWidget<UCGComboBoxSettingUserWidget>(ComboBoxSettingWidgetClass, IntSetting, VerticalBox);
         }
         else if (auto* FloatSetting = Cast<UCGFloatSetting>(Setting))
         {
-            CREATE_AND_ADD_SETTING_WIDGET(UCGSliderSettingUserWidget, SliderSettingWidgetClass, FloatSetting, VerticalBox);
+            CreateAndAddSettingWidget<UCGSliderSettingUserWidget>(SliderSettingWidgetClass, FloatSetting, VerticalBox);
         }
         else if (auto* ActionSetting = Cast<UCGActionSetting>(Setting))
         {
-            CREATE_AND_ADD_SETTING_WIDGET(UCGButtonSettingUserWidget, ButtonSettingWidgetClass, ActionSetting, VerticalBox);
+            CreateAndAddSettingWidget<UCGButtonSettingUserWidget>(ButtonSettingWidgetClass, ActionSetting, VerticalBox);
         }
     }
 }
@@ -96,9 +80,20 @@ void UCGOptionsUserWidget::ResetWidget()
 
 void UCGOptionsUserWidget::UpdateOptions()
 {
-    UPDATE_SETTINGS_WIDGETS(VideoSettingsVerticalBox);
-    UPDATE_SETTINGS_WIDGETS(SoundSettingsVerticalBox);
-    UPDATE_SETTINGS_WIDGETS(GameSettingsVerticalBox);
+    UpdateSettingsWidget(VideoSettingsVerticalBox);
+    UpdateSettingsWidget(SoundSettingsVerticalBox);
+    UpdateSettingsWidget(GameSettingsVerticalBox);
+}
+
+void UCGOptionsUserWidget::UpdateSettingsWidget(UVerticalBox* Container)
+{
+    for (auto* Widget : Container->GetAllChildren())
+    {
+        if (auto* SettingWidget = Cast<ICGSettingWidgetInterface>(Widget))
+        {
+            SettingWidget->Update();
+        }
+    }
 }
 
 void UCGOptionsUserWidget::OnGameStateChanged(EGameState NewGameState)
@@ -119,8 +114,7 @@ void UCGOptionsUserWidget::OnPressedEscape()
 
 void UCGOptionsUserWidget::OnResolutionChanged()
 {
-    GameStateToSet = EGameState::OptionsWarning;
-    ShowFadeoutAnimation();
+    ShowFadeoutAnimationAndSetGameState(EGameState::OptionsWarning);
 }
 
 void UCGOptionsUserWidget::OnClickedBackButton()
@@ -137,23 +131,15 @@ void UCGOptionsUserWidget::OnAnimationFinished_Implementation(const UWidgetAnima
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    if (GameStateToSet == EGameState::OptionsWarning)
+    if (Animation == FadeoutAnimation)
     {
-        SetGameState(GameStateToSet);
-    }
-    else
-    {
-        const APlayerController* PC = GetOwningPlayer();
-        if (!PC)
-            return;
-
-        auto* HUD = PC->GetHUD<ACGHUDBase>();
-        if (!HUD)
-            return;
-
-        HUD->BackToRootMenu();
+        if (GameStateToSet == EGameState::OptionsWarning)
+        {
+            SetGameState(GameStateToSet);
+        }
+        else if (auto* HUD = GetOwningPlayer() ? GetOwningPlayer()->GetHUD<ACGHUDBase>() : nullptr)
+        {
+            HUD->BackToRootMenu();
+        }
     }
 }

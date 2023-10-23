@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
 #include "CGCoreTypes.h"
+#include "Components/VerticalBox.h"
 #include "CGOptionsUserWidget.generated.h"
 
-class UVerticalBox;
 class UCGButtonUserWidget;
 class UCGComboBoxSettingUserWidget;
 class UCGSliderSettingUserWidget;
@@ -44,14 +44,13 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    EGameState GameStateToSet{EGameState::WaitingToStart};
-
-    void InitSettingsWidgets(const TArray<UCGSetting*>& SettingsArray, UVerticalBox* VerticalBox);
+    void InitSettingsWidgets(const TArray<TObjectPtr<UCGSetting>>& SettingsArray, UVerticalBox* VerticalBox);
 
     void Setup();
     void ResetWidget();
 
     void UpdateOptions();
+    FORCEINLINE void UpdateSettingsWidget(UVerticalBox* Container);
 
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressedEscape();
@@ -59,4 +58,13 @@ private:
     void OnClickedBackButton();
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+
+    template <class T1, class T2>
+    void CreateAndAddSettingWidget(TSubclassOf<UUserWidget> WidgetClass, T2* Setting, UVerticalBox* ToContainerWidget)
+    {
+        T1* SettingWidget = CreateWidget<T1>(GetWorld(), WidgetClass);
+        check(SettingWidget);
+        SettingWidget->Init(Setting);
+        ToContainerWidget->AddChild(SettingWidget);
+    }
 };

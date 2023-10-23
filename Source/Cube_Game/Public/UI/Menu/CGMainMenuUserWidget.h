@@ -36,12 +36,8 @@ private:
     UPROPERTY()
     TArray<TObjectPtr<UCGButtonUserWidget>> WidgetButtons;
 
-    EGameState GameStateToSet = EGameState::WaitingToStart;
-
     void Setup();
     void ResetWidget();
-
-    inline void ChangeGameState(EGameState NewGameState);
 
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressedEscape();

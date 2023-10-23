@@ -53,12 +53,6 @@ void UCGPauseUserWidget::ResetWidget()
     GameStateToSet = EGameState::WaitingToStart;
 }
 
-void UCGPauseUserWidget::ChangeGameState(EGameState NewGameState)
-{
-    GameStateToSet = NewGameState;
-    ShowFadeoutAnimation();
-}
-
 void UCGPauseUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
     if (NewGameState != EGameState::Pause)
@@ -77,22 +71,22 @@ void UCGPauseUserWidget::OnPressedEscape()
 
 void UCGPauseUserWidget::OnClickedResumeButton()
 {
-    ChangeGameState(EGameState::Game);
+    ShowFadeoutAnimationAndSetGameState(EGameState::Game);
 }
 
 void UCGPauseUserWidget::OnClickedHowButton()
 {
-    ChangeGameState(EGameState::HowToPlay);
+    ShowFadeoutAnimationAndSetGameState(EGameState::HowToPlay);
 }
 
 void UCGPauseUserWidget::OnClickedOptionsButton()
 {
-    ChangeGameState(EGameState::Options);
+    ShowFadeoutAnimationAndSetGameState(EGameState::Options);
 }
 
 void UCGPauseUserWidget::OnClickedMenuButton()
 {
-    ChangeGameState(EGameState::MainMenu);
+    ShowFadeoutAnimationAndSetGameState(EGameState::MainMenu);
 }
 
 void UCGPauseUserWidget::OnClickedQuitButton()
@@ -105,15 +99,11 @@ void UCGPauseUserWidget::OnClickedQuitButton()
 
 void UCGPauseUserWidget::SetGameState(EGameState NewGameState)
 {
-    ACGGameModeBase* GameModeBase = GetGameModeBase();
-    if (!GameModeBase)
-        return;
+    Super::SetGameState(NewGameState);
 
-    GameModeBase->SetGameState(NewGameState);
-
-    if (NewGameState == EGameState::Game)
+    if (NewGameState == EGameState::Game && GetGameModeBase())
     {
-        GameModeBase->ClearPause();
+        GetGameModeBase()->ClearPause();
     }
 }
 
@@ -121,18 +111,18 @@ void UCGPauseUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimati
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    if (GameStateToSet == EGameState::MainMenu)
+    if (Animation == FadeoutAnimation)
     {
-        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+        if (GameStateToSet == EGameState::MainMenu)
         {
-            GameInstnce->OpenMainMenu();
+            if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+            {
+                GameInstnce->OpenMainMenu();
+            }
         }
-    }
-    else
-    {
-        SetGameState(GameStateToSet);
+        else
+        {
+            SetGameState(GameStateToSet);
+        }
     }
 }
