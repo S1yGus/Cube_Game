@@ -111,8 +111,8 @@ void UCGOptionsWarningUserWidget::OnAnimationFinished_Implementation(const UWidg
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    SetGameState(EGameState::Options);
+    if (Animation == FadeoutAnimation)
+    {
+        SetGameState(EGameState::Options);
+    }
 }

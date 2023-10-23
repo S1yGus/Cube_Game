@@ -32,6 +32,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     TObjectPtr<USoundCue> FadeoutSound;
 
+    EGameState GameStateToSet{EGameState::WaitingToStart};
+
+    void ShowFadeoutAnimationAndSetGameState(EGameState GameState);
     TObjectPtr<ACGGameModeBase> GetGameModeBase() const;
 
     virtual void SetGameState(EGameState NewGameState);

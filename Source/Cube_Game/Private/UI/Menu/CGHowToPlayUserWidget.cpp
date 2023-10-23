@@ -89,9 +89,8 @@ void UCGHowToPlayUserWidget::OnClickedPrevButton()
     if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
         CurrentHintIndex = CurrentHintIndex - 1 < 0 ? GameInstance->GetHowToPlayHints().Num() - 1 : CurrentHintIndex - 1;
+        PlayAnimation(FadeoutHintAnimation);
     }
-
-    PlayAnimation(FadeoutHintAnimation);
 }
 
 void UCGHowToPlayUserWidget::OnPressedEscape()
@@ -108,15 +107,10 @@ void UCGHowToPlayUserWidget::OnAnimationFinished_Implementation(const UWidgetAni
 
     if (Animation == FadeoutAnimation)
     {
-        const APlayerController* PC = GetOwningPlayer();
-        if (!PC)
-            return;
-
-        auto* HUD = PC->GetHUD<ACGHUDBase>();
-        if (!HUD)
-            return;
-
-        HUD->BackToRootMenu();
+        if (auto* HUD = GetOwningPlayer() ? GetOwningPlayer()->GetHUD<ACGHUDBase>() : nullptr)
+        {
+            HUD->BackToRootMenu();
+        }
     }
 
     if (Animation == FadeoutHintAnimation)

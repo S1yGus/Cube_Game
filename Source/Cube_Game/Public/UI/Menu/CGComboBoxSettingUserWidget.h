@@ -27,12 +27,11 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     TObjectPtr<UComboBoxString> SettingComboBox;
 
-    UPROPERTY()
-    TObjectPtr<UCGIntSetting> Setting;
-
     virtual void NativeOnInitialized() override;
 
 private:
+    TWeakObjectPtr<UCGIntSetting> Setting;
+
     UFUNCTION()
     void OnSelectionChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 };

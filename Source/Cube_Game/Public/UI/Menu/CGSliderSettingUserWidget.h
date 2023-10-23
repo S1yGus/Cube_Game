@@ -31,12 +31,11 @@ protected:
     UPROPERTY(Meta = (BindWidget))
     TObjectPtr<UCGTextUserWidget> PercentText;
 
-    UPROPERTY()
-    TObjectPtr<UCGFloatSetting> Setting;
-
     virtual void NativeOnInitialized() override;
 
 private:
+    TWeakObjectPtr<UCGFloatSetting> Setting;
+
     UFUNCTION()
     void OnValueChanged(float Value);
     UFUNCTION()

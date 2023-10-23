@@ -51,12 +51,6 @@ void UCGMainMenuUserWidget::ResetWidget()
     }
 }
 
-void UCGMainMenuUserWidget::ChangeGameState(EGameState NewGameState)
-{
-    GameStateToSet = NewGameState;
-    ShowFadeoutAnimation();
-}
-
 void UCGMainMenuUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
     if (NewGameState != EGameState::MainMenu)
@@ -75,22 +69,22 @@ void UCGMainMenuUserWidget::OnPressedEscape()
 
 void UCGMainMenuUserWidget::OnClickedGameButton()
 {
-    ChangeGameState(EGameState::DifficultySelection);
+    ShowFadeoutAnimationAndSetGameState(EGameState::DifficultySelection);
 }
 
 void UCGMainMenuUserWidget::OnClickedLeaderButton()
 {
-    ChangeGameState(EGameState::Leaderboard);
+    ShowFadeoutAnimationAndSetGameState(EGameState::Leaderboard);
 }
 
 void UCGMainMenuUserWidget::OnClickedHowButton()
 {
-    ChangeGameState(EGameState::HowToPlay);
+    ShowFadeoutAnimationAndSetGameState(EGameState::HowToPlay);
 }
 
 void UCGMainMenuUserWidget::OnClickedOptionsButton()
 {
-    ChangeGameState(EGameState::Options);
+    ShowFadeoutAnimationAndSetGameState(EGameState::Options);
 }
 
 void UCGMainMenuUserWidget::OnClickedQuitButton()
@@ -105,8 +99,8 @@ void UCGMainMenuUserWidget::OnAnimationFinished_Implementation(const UWidgetAnim
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    SetGameState(GameStateToSet);
+    if (Animation == FadeoutAnimation)
+    {
+        SetGameState(GameStateToSet);
+    }
 }

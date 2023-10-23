@@ -11,18 +11,18 @@ void UCGButtonSettingUserWidget::Init(TObjectPtr<UCGActionSetting> NewSetting)
         return;
 
     Setting = NewSetting;
-    SettingNameText->SetText(Setting->GetName());
-    ActionButton->SetText(Setting->GetActionName());
+    SettingNameText->SetText(NewSetting->GetName());
+    ActionButton->SetText(NewSetting->GetActionName());
 
     Update();
 }
 
 void UCGButtonSettingUserWidget::Update()
 {
-    if (!Setting)
+    if (!Setting.IsValid())
         return;
 
-    ActionButton->SetIsEnabled(Setting->IsActionAvailable());
+    ActionButton->SetIsEnabled(Setting.Get()->IsActionAvailable());
 }
 
 void UCGButtonSettingUserWidget::NativeOnInitialized()
@@ -37,9 +37,9 @@ void UCGButtonSettingUserWidget::NativeOnInitialized()
 
 void UCGButtonSettingUserWidget::OnClickedButton()
 {
-    if (!Setting)
+    if (!Setting.IsValid())
         return;
 
-    Setting->DoAction();
+    Setting.Get()->DoAction();
     Update();
 }

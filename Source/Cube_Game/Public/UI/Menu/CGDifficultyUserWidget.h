@@ -31,7 +31,7 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    inline void SetDifficulty(EDifficulty NewDifficulty);
+    FORCEINLINE void SetDifficulty(EDifficulty NewDifficulty);
 
     void OnClickedEasyButton();
     void OnClickedMediumButton();

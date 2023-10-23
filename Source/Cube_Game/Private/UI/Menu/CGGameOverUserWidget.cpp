@@ -56,14 +56,12 @@ void UCGGameOverUserWidget::OnClickedAddButton()
 
 void UCGGameOverUserWidget::OnClickedPlayAgainButton()
 {
-    GameStateToSet = EGameState::Game;
-    ShowFadeoutAnimation();
+    ShowFadeoutAnimationAndSetGameState(EGameState::Game);
 }
 
 void UCGGameOverUserWidget::OnClickedMenuButton()
 {
-    GameStateToSet = EGameState::MainMenu;
-    ShowFadeoutAnimation();
+    ShowFadeoutAnimationAndSetGameState(EGameState::MainMenu);
 }
 
 void UCGGameOverUserWidget::OnClickedQuitButton()
@@ -107,22 +105,21 @@ void UCGGameOverUserWidget::OnAnimationFinished_Implementation(const UWidgetAnim
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    auto* GameInstnce = GetGameInstance<UCGGameInstance>();
-    if (!GameInstnce)
-        return;
-
-    switch (GameStateToSet)
+    if (Animation == FadeoutAnimation)
     {
-        case EGameState::Game:
-            GameInstnce->StartGame();
-            break;
-        case EGameState::MainMenu:
-            GameInstnce->OpenMainMenu();
-            break;
-        default:
-            break;
+        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+        {
+            switch (GameStateToSet)
+            {
+                case EGameState::Game:
+                    GameInstnce->StartGame();
+                    break;
+                case EGameState::MainMenu:
+                    GameInstnce->OpenMainMenu();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

@@ -50,8 +50,6 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    EGameState GameStateToSet = EGameState::WaitingToStart;
-
     void Setup();
 
     void UpdateAddButton();

@@ -135,11 +135,13 @@ void UCGLeaderboardUserWidget::OnClickedBackButton()
 
 void UCGLeaderboardUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
 {
-    if (Animation != FadeoutAnimation)
-        return;
+    Super::OnAnimationFinished_Implementation(Animation);
 
-    if (ACGGameModeBase* GameMode = GetGameModeBase())
+    if (Animation == FadeoutAnimation)
     {
-        GameMode->SetGameState(EGameState::MainMenu);
+        if (ACGGameModeBase* GameMode = GetGameModeBase())
+        {
+            GameMode->SetGameState(EGameState::MainMenu);
+        }
     }
 }

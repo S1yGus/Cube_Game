@@ -72,12 +72,11 @@ void UCGPopUpHintUserWidget::OnAnimationFinished_Implementation(const UWidgetAni
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    ACGGameModeBase* GameMode = GetGameModeBase();
-    if (!GameMode)
-        return;
-
-    GameMode->ClearPause();
+    if (Animation == FadeoutAnimation)
+    {
+        if (ACGGameModeBase* GameMode = GetGameModeBase())
+        {
+            GameMode->ClearPause();
+        }
+    }
 }

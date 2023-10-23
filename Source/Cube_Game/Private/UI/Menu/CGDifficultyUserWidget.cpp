@@ -48,13 +48,12 @@ void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAn
 {
     Super::OnAnimationFinished_Implementation(Animation);
 
-    if (Animation != FadeoutAnimation)
-        return;
-
-    auto* GameInstnce = GetGameInstance<UCGGameInstance>();
-    if (!GameInstnce)
-        return;
-
-    GameInstnce->StartGame();
-    UGameplayStatics::PopSoundMixModifier(this, FadeOutSoundMix);    // Smoothly returns all sounds.
+    if (Animation == FadeoutAnimation)
+    {
+        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+        {
+            GameInstnce->StartGame();
+            UGameplayStatics::PopSoundMixModifier(this, FadeOutSoundMix);    // Smoothly returns all sounds.
+        }
+    }
 }
