@@ -5,7 +5,7 @@
 #include "Tests/CGBonusComponentTests.h"
 #include "CoreMinimal.h"
 #include "CGCoreTypes.h"
-#include "Tests/CGTestUtils.h"
+#include "Tests/TestUtils.h"
 #include "Misc/AutomationTest.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -22,10 +22,10 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
     LevelScope("/Game/Tests/TestLevel");
 
     {
-        UWorld* World = GetTestWorld();
+        UWorld* World = GetTestGameWorld();
         const FString PlayerBlueprintName{"Blueprint'/Game/Player/BP_CGPlayer.BP_CGPlayer'"};
         const FTransform SpawnTransform{FVector{1000.0f}};
-        const auto* Playr = SpawnBlueprint<ACGPlayer>(World, PlayerBlueprintName, SpawnTransform);
+        const auto* Playr = CreateBlueprint<ACGPlayer>(World, PlayerBlueprintName, SpawnTransform);
         if (!TestNotNull("Player must exists.", Playr))
             return false;
 

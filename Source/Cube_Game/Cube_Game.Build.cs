@@ -1,5 +1,6 @@
 // Cube_Game, All rights reserved.
 
+using System.Linq;
 using UnrealBuildTool;
 
 public class Cube_Game : ModuleRules
@@ -8,8 +9,16 @@ public class Cube_Game : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        if (Target.ProjectDefinitions.Contains("UNOPTIMIZED_CODE"))
+        {
+            OptimizeCode = CodeOptimization.Never;
+        }
+
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore", "Niagara", "AudioMixer", "EnhancedInput" });
 
-        PrivateDependencyModuleNames.AddRange(new string[] {});
+        if (Target.Configuration != UnrealTargetConfiguration.Shipping)
+        {
+            PublicDependencyModuleNames.Add("FunctionalTesting");
+        }
     }
 }
