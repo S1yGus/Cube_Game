@@ -43,18 +43,12 @@ void UCGGameInstance::ClearLeaderboard()
 
 void UCGGameInstance::OpenMainMenu()
 {
-    if (MenuLevelName == NAME_None)
-        return;
-
-    UGameplayStatics::OpenLevel(this, MenuLevelName);
+    UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), MenuLevel);
 }
 
 void UCGGameInstance::StartGame()
 {
-    if (GameLevelName == NAME_None)
-        return;
-
-    UGameplayStatics::OpenLevel(this, GameLevelName);
+    UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), GameLevel);
 }
 
 void UCGGameInstance::QuitGame(APlayerController* SpecificPlayer)

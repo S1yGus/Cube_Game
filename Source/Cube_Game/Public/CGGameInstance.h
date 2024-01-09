@@ -29,13 +29,13 @@ public:
     void QuitGame(APlayerController* SpecificPlayer);
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Game")
-    FName MenuLevelName{NAME_None};
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSoftObjectPtr<UWorld> MenuLevel;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Game")
-    FName GameLevelName{NAME_None};
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSoftObjectPtr<UWorld> GameLevel;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Leaderboard")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     FString LeaderboardSaveSlotName{"LeaderboardSave"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
