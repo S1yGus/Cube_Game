@@ -32,14 +32,17 @@ public:
     EPopUpType GetPopUpType() const;
     const FHintsStatus& GetHintsStatus() const;
     void SetHintsStatus(const FHintsStatus& NewHintsMap);
-    void SetLastConfirmedResolutionSettings();
+    EDifficulty GetCurrentDifficulty() const { return CurrentDifficulty; }
+    void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
 
+    void SetLastConfirmedResolutionSettings();
     void InitSoundVolume();
 
     virtual void LoadSettings(bool bForceReload = false) override;
     virtual void SaveSettings() override;
 
 private:
+    EDifficulty CurrentDifficulty{EDifficulty::Medium};
     UPROPERTY()
     TArray<TObjectPtr<UCGSetting>> VideoSettings;
     UPROPERTY()
@@ -48,7 +51,6 @@ private:
     TArray<TObjectPtr<UCGSetting>> SoundSettings;
     UPROPERTY()
     TArray<TObjectPtr<UCGSetting>> GameSettings;
-
     UPROPERTY()
     TObjectPtr<UCGSettingsSave> SettingsSave;
 

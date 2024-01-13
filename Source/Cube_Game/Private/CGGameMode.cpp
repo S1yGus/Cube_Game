@@ -36,9 +36,10 @@ int32 ACGGameMode::GetCubeSpeed() const
 
 const FDifficulty* ACGGameMode::GetDifficultyData() const
 {
-    if (const auto* GameInstance = GetGameInstance<UCGGameInstance>(); GameInstance && DifficultyMap.Contains(GameInstance->GetDifficulty()))
+    if (const auto* GameUserSettings = UCGGameUserSettings::Get();    //
+        GameUserSettings && DifficultyMap.Contains(GameUserSettings->GetCurrentDifficulty()))
     {
-        return &DifficultyMap[GameInstance->GetDifficulty()];
+        return &DifficultyMap[GameUserSettings->GetCurrentDifficulty()];
     }
 
     return nullptr;
@@ -46,7 +47,8 @@ const FDifficulty* ACGGameMode::GetDifficultyData() const
 
 void ACGGameMode::ChangeGameTime(ECubeType CubeType)
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->TimeChangeMap.Contains(CubeType))
+    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
+        DifficultyData && DifficultyData->TimeChangeMap.Contains(CubeType))
     {
         AddTime(DifficultyData->TimeChangeMap[CubeType]);
     }
@@ -54,7 +56,8 @@ void ACGGameMode::ChangeGameTime(ECubeType CubeType)
 
 void ACGGameMode::ChangeGameSpeed(ECubeType CubeType)
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->SpeedChangeMap.Contains(CubeType))
+    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
+        DifficultyData && DifficultyData->SpeedChangeMap.Contains(CubeType))
     {
         AddGameSpeed(DifficultyData->SpeedChangeMap[CubeType]);
     }
@@ -64,7 +67,8 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
 {
     ChangeMultiplier(CubeType);
 
-    if (const FDifficulty* DifficultyData = GetDifficultyData(); DifficultyData && DifficultyData->ScoreChangeMap.Contains(CubeType))
+    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
+        DifficultyData && DifficultyData->ScoreChangeMap.Contains(CubeType))
     {
         const int32 ScoreRemains = Score % DifficultyData->ScoreToSpeedUp;
         const int32 ScoreToAdd = Multiplier * DifficultyData->ScoreChangeMap[CubeType];

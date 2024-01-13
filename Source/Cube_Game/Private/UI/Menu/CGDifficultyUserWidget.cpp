@@ -5,6 +5,7 @@
 #include "CGGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundMix.h"
+#include "Settings/CGGameUserSettings.h"
 
 void UCGDifficultyUserWidget::NativeOnInitialized()
 {
@@ -21,9 +22,9 @@ void UCGDifficultyUserWidget::NativeOnInitialized()
 
 void UCGDifficultyUserWidget::SetDifficulty(EDifficulty NewDifficulty)
 {
-    if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameInstnce->SetDifficulty(NewDifficulty);
+        GameUserSettings->SetDifficulty(NewDifficulty);
         ShowFadeoutAnimation();
         UGameplayStatics::PushSoundMixModifier(this, FadeOutSoundMix);    // Smoothly mutes all sounds.
     }
