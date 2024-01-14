@@ -7,6 +7,7 @@
 #include "CGCoreTypes.h"
 #include "CGDifficultyUserWidget.generated.h"
 
+class UVerticalBox;
 class UCGButtonUserWidget;
 class USoundMix;
 
@@ -17,13 +18,10 @@ class CUBE_GAME_API UCGDifficultyUserWidget : public UCGAnimatedUserWidget
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UCGButtonUserWidget> EasyButton;
+    TObjectPtr<UVerticalBox> DifficultyButtonsVerticalBox;
 
-    UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UCGButtonUserWidget> MediumButton;
-
-    UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UCGButtonUserWidget> HardButton;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UCGButtonUserWidget> DifficultyButtonWidgetClass;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     TObjectPtr<USoundMix> FadeOutSoundMix;
@@ -31,11 +29,8 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    FORCEINLINE void SetDifficulty(EDifficulty NewDifficulty);
-
-    void OnClickedEasyButton();
-    void OnClickedMediumButton();
-    void OnClickedHardButton();
+    void InitDifficultyButtons();
+    void CreateAndAddDifficultyButton(EDifficulty Difficulty);
 
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
 };

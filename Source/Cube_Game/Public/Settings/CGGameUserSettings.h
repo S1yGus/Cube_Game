@@ -34,6 +34,7 @@ public:
     void SetHintsStatus(const FHintsStatus& NewHintsMap);
     EDifficulty GetCurrentDifficulty() const { return CurrentDifficulty; }
     void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
+    FText GetDifficultyDisplayName(EDifficulty Difficylty) const;
 
     void SetLastConfirmedResolutionSettings();
     void InitSoundVolume();

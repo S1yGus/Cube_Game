@@ -70,6 +70,21 @@ void UCGGameUserSettings::SetHintsStatus(const FHintsStatus& NewHintsMap)
     SaveSettings();
 }
 
+FText UCGGameUserSettings::GetDifficultyDisplayName(EDifficulty Difficylty) const
+{
+    switch (Difficylty)
+    {
+        case EDifficulty::Easy:
+            return LOCTEXT("DifficultyEasy_Loc", "Easy");
+        case EDifficulty::Medium:
+            return LOCTEXT("DifficultyMedium_Loc", "Medium");
+        case EDifficulty::Hard:
+            return LOCTEXT("DifficultyHard_Loc", "Hard");
+        default:
+            return FText::GetEmpty();
+    }
+}
+
 void UCGGameUserSettings::SetLastConfirmedResolutionSettings()
 {
     SetFullscreenMode(GetLastConfirmedFullscreenMode());
