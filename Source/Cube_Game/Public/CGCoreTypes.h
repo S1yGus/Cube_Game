@@ -7,7 +7,7 @@
 UENUM(BlueprintType)
 enum class EGameState : uint8
 {
-    WaitingToStart,
+    WaitingToStart = 0,
     MainMenu,
     Options,
     OptionsWarning,
@@ -24,7 +24,7 @@ enum class EGameState : uint8
 UENUM(BlueprintType)
 enum class EDifficulty : uint8
 {
-    Easy,
+    Easy = 0,
     Medium,
     Hard,
     Max
@@ -33,7 +33,7 @@ enum class EDifficulty : uint8
 UENUM(BlueprintType)
 enum class ECubeType : uint8
 {
-    None,
+    None = 0,
     GoodCube,
     BadCube,
     ScoreCube,
@@ -47,7 +47,7 @@ enum class ECubeType : uint8
 UENUM(BlueprintType)
 enum class EBonusType : uint8
 {
-    None,
+    None = 0,
     Missile,
     Shield,
     Bomb,
@@ -57,7 +57,7 @@ enum class EBonusType : uint8
 UENUM(BlueprintType)
 enum class EPopUpType : uint8
 {
-    Off,
+    Off = 0,
     Multiplier,
     Amount,
     Max
@@ -66,7 +66,7 @@ enum class EPopUpType : uint8
 UENUM(BlueprintType)
 enum class EHintType : uint8
 {
-    Startup,
+    Startup = 0,
     SpeedUp,
     Multiplier,
     LowTime,

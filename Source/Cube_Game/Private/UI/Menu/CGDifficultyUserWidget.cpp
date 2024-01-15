@@ -2,46 +2,52 @@
 
 #include "UI/Menu/CGDifficultyUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
+#include "Components/VerticalBox.h"
 #include "CGGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundMix.h"
+#include "Settings/CGGameUserSettings.h"
 
 void UCGDifficultyUserWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    check(EasyButton);
-    check(MediumButton);
-    check(HardButton);
+    check(DifficultyButtonsVerticalBox);
 
-    EasyButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedEasyButton);
-    MediumButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedMediumButton);
-    HardButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedHardButton);
+    InitDifficultyButtons();
 }
 
-void UCGDifficultyUserWidget::SetDifficulty(EDifficulty NewDifficulty)
+void UCGDifficultyUserWidget::InitDifficultyButtons()
 {
-    if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+    DifficultyButtonsVerticalBox->ClearChildren();
+
+    const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
+    for (int32 i = 0; i < DifficultyEnum->NumEnums() - 1; ++i)
     {
-        GameInstnce->SetDifficulty(NewDifficulty);
-        ShowFadeoutAnimation();
-        UGameplayStatics::PushSoundMixModifier(this, FadeOutSoundMix);    // Smoothly mutes all sounds.
+        CreateAndAddDifficultyButton(static_cast<EDifficulty>(i));
     }
 }
 
-void UCGDifficultyUserWidget::OnClickedEasyButton()
+void UCGDifficultyUserWidget::CreateAndAddDifficultyButton(EDifficulty Difficulty)
 {
-    SetDifficulty(EDifficulty::Easy);
-}
-
-void UCGDifficultyUserWidget::OnClickedMediumButton()
-{
-    SetDifficulty(EDifficulty::Medium);
-}
-
-void UCGDifficultyUserWidget::OnClickedHardButton()
-{
-    SetDifficulty(EDifficulty::Hard);
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
+    {
+        if (const FText DifficultyDisplayName = GameUserSettings->GetDifficultyDisplayName(Difficulty);    //
+            !DifficultyDisplayName.IsEmpty())
+        {
+            auto* Button = CreateWidget<UCGButtonUserWidget>(GetWorld(), DifficultyButtonWidgetClass);
+            check(Button);
+            Button->SetText(DifficultyDisplayName);
+            Button->OnClickedButton.AddLambda(
+                [=, this]()
+                {
+                    GameUserSettings->SetDifficulty(Difficulty);
+                    ShowFadeoutAnimation();
+                    UGameplayStatics::PushSoundMixModifier(this, FadeOutSoundMix);    // Smoothly mutes all sounds.
+                });
+            DifficultyButtonsVerticalBox->AddChild(Button);
+        }
+    }
 }
 
 void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)

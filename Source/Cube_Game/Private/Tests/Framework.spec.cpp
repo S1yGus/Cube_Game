@@ -20,6 +20,7 @@ BEGIN_DEFINE_SPEC(FFramework, "CubeGame", EAutomationTestFlags::ApplicationConte
 
 UWorld* World;
 ACGGameMode* GameMode;
+UCGGameUserSettings* GameUserSettings;
 
 END_DEFINE_SPEC(FFramework)
 
@@ -31,11 +32,46 @@ void FFramework::Define()
                  BeforeEach(
                      [this]()
                      {
+                         AutomationOpenMap("/Game/Levels/GameLevel");
+                         World = GetTestGameWorld();
+                         TestNotNull("World should exist.", World);
+                         GameMode = World->GetAuthGameMode<ACGGameMode>();
+                         TestNotNull("GameMode should exist.", GameMode);
+                         GameUserSettings = UCGGameUserSettings::Get();
+                         TestNotNull("GameUserSettings should exist.", GameUserSettings);
+                     });
+
+                 It("AllDifficultyDataShouldBeSet",
+                    [this]()
+                    {
+                        const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
+                        for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
+                        {
+                            GameUserSettings->SetDifficulty(static_cast<EDifficulty>(i));
+                            TestTrueExpr(GameMode->GetDifficultyData() != nullptr);
+                        }
+                    });
+
+                 AfterEach(
+                     [this]()
+                     {
+                         SpecCloseLevel(World);
+                     });
+             });
+
+    Describe("Framework.GameMode",
+             [this]()
+             {
+                 BeforeEach(
+                     [this]()
+                     {
                          AutomationOpenMap("/Game/Tests/TestLevel");
                          World = GetTestGameWorld();
                          TestNotNull("World should exist.", World);
                          GameMode = World->GetAuthGameMode<ACGGameMode>();
                          TestNotNull("GameMode should exist.", GameMode);
+                         GameUserSettings = UCGGameUserSettings::Get();
+                         TestNotNull("GameUserSettings should exist.", GameUserSettings);
                      });
 
                  It("GameSpeedShouldBeChanged",
@@ -136,10 +172,6 @@ void FFramework::Define()
                  It("UnshownHintsShouldBeQueued", EAsyncExecution::ThreadPool,
                     [this]()
                     {
-                        auto* GameUserSettings = UCGGameUserSettings::Get();
-                        if (!TestNotNull("GameUserSettings should exist.", GameUserSettings))
-                            return;
-
                         const APawn* PlayerPawn = World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
                         if (!TestNotNull("PlayerPawn should exist.", PlayerPawn))
                             return;
@@ -193,10 +225,6 @@ void FFramework::Define()
                  It("ShownHintsShouldNotBeQueued", EAsyncExecution::ThreadPool,
                     [this]()
                     {
-                        auto* GameUserSettings = UCGGameUserSettings::Get();
-                        if (!TestNotNull("GameUserSettings should exist.", GameUserSettings))
-                            return;
-
                         const APawn* PlayerPawn = World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
                         if (!TestNotNull("PlayerPawn should exist.", PlayerPawn))
                             return;
@@ -250,10 +278,6 @@ void FFramework::Define()
                  It("HintsShouldBeShownOnlyOnce", EAsyncExecution::ThreadPool,
                     [this]()
                     {
-                        auto* GameUserSettings = UCGGameUserSettings::Get();
-                        if (!TestNotNull("GameUserSettings should exist.", GameUserSettings))
-                            return;
-
                         int32 PopUpHintAmount{0};
                         const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
                         const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},   {EHintType::Multiplier, true},   {EHintType::LowTime, true},
@@ -357,6 +381,39 @@ void FFramework::Define()
                      {
                          SpecCloseLevel(World);
                      });
+             });
+
+    Describe("Framework.GameUserSettings",
+             [this]()
+             {
+                 BeforeEach(
+                     [this]()
+                     {
+                         GameUserSettings = NewObject<UCGGameUserSettings>();
+                         TestNotNull("GameUserSettings should exist.", GameUserSettings);
+                     });
+
+                 It("AllDifficultyDisplayNamesShouldExist",
+                    [this]()
+                    {
+                        const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
+                        for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
+                        {
+                            TestTrueExpr(!GameUserSettings->GetDifficultyDisplayName(static_cast<EDifficulty>(i)).IsEmpty());
+                        }
+                    });
+
+                 It("DifficultyShouldBeSaved",
+                    [this]()
+                    {
+                        const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
+                        for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
+                        {
+                            const auto Difficulty = static_cast<EDifficulty>(i);
+                            GameUserSettings->SetDifficulty(Difficulty);
+                            TestTrueExpr(GameUserSettings->GetCurrentDifficulty() == Difficulty);
+                        }
+                    });
              });
 }
 

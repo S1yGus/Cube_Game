@@ -15,8 +15,6 @@ class CUBE_GAME_API UCGGameInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
-    EDifficulty GetDifficulty() const { return CurrentDifficulty; }
-    void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
     const TArray<FHintData>& GetHowToPlayHints() const { return HowToPlayHints; }
 
     TArray<FPlayerRecord> GetLeaderboard() const;
@@ -44,8 +42,6 @@ protected:
     virtual void OnStart() override;
 
 private:
-    EDifficulty CurrentDifficulty{EDifficulty::Medium};
-
     UPROPERTY()
     TObjectPtr<UCGLeaderboardSave> LeaderboardSave;
 
