@@ -15,10 +15,6 @@ public class Cube_Game : ModuleRules
         }
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore", "Niagara", "AudioMixer", "EnhancedInput" });
-
-        if (Target.Configuration != UnrealTargetConfiguration.Shipping)
-        {
-            PublicDependencyModuleNames.Add("FunctionalTesting");
-        }
+        PublicIncludePaths.AddRange(new string[] { "Cube_Game/Public" });
     }
 }

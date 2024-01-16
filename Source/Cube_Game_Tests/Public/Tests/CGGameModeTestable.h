@@ -7,7 +7,7 @@
 #include "CGGameModeTestable.generated.h"
 
 UCLASS()
-class CUBE_GAME_API ACGGameModeTestable : public ACGGameMode
+class CUBE_GAME_TESTS_API ACGGameModeTestable : public ACGGameMode
 {
     GENERATED_BODY()
 
