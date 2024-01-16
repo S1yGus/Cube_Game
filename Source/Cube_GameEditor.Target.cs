@@ -15,7 +15,7 @@ public class Cube_GameEditorTarget : TargetRules
         DefaultBuildSettings = BuildSettingsVersion.V4;
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-        ExtraModuleNames.AddRange(new string[] { "Cube_Game" });
+        ExtraModuleNames.AddRange(new string[] { "Cube_Game", "Cube_Game_Tests" });
 
         if (UnoptimizedCode)
         {

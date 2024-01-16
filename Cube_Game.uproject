@@ -13,24 +13,21 @@
 				"UMG",
 				"CoreUObject"
 			]
+		},
+		{
+			"Name": "Cube_Game_Tests",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG",
+				"CoreUObject"
+			]
 		}
 	],
 	"Plugins": [
 		{
-			"Name": "Bridge",
-			"Enabled": true,
-			"SupportedTargetPlatforms": [
-				"Win64",
-				"Mac",
-				"Linux"
-			]
-		},
-		{
 			"Name": "Metasound",
-			"Enabled": true
-		},
-		{
-			"Name": "Synthesis",
 			"Enabled": false
 		}
 	],
