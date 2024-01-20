@@ -1,6 +1,5 @@
 Binaries/
 Build/
-BuildFromBat/
 DerivedDataCache/
 Intermediate/
 Saved/
@@ -17,3 +16,4 @@ Documentation/
 *.xcworkspace
 *.log
 .vsconfig
+HoloLensEngine.ini
