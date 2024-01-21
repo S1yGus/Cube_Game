@@ -5,11 +5,11 @@
 #include "NiagaraComponent.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
 
-constexpr static float MissileLifeSpan{5.0f};
+constexpr static float MissileLifeSpan{4.0f};
 
 ACGMissileBonusActor::ACGMissileBonusActor()
 {
-    NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Niagara");
+    NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Trail");
     NiagaraComponent->SetupAttachment(StaticMeshComponent);
 
     MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
@@ -31,7 +31,6 @@ void ACGMissileBonusActor::Teardown()
     StaticMeshComponent->SetVisibility(false);
     NiagaraComponent->Deactivate();
     MovementComponent->StopMoving();
-    SetLifeSpan(MissileLifeSpan);
 }
 
 void ACGMissileBonusActor::BeginPlay()

@@ -5,9 +5,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "CGGameMode.h"
-
-constexpr static float CubeLifeSpan{2.0f};
-constexpr static float UpdatePositionTimerRate{0.03f};
+#include "CGUtils.h"
 
 ACGCubeActor::ACGCubeActor()
 {
@@ -21,18 +19,16 @@ ACGCubeActor::ACGCubeActor()
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
-void ACGCubeActor::Annihilat()
+void ACGCubeActor::Annihilate()
 {
     EndPlayAction();
-    UNiagaraComponent* NiagaraFX = SpawnNiagaraEffect(AnnihilatNiagaraSystem);
-    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{-static_cast<double>(MovementComponent->GetCubeSpeed()), 0.0, 0.0});
+    SpawnAnnihilateEffect();
 }
 
 void ACGCubeActor::Collect()
 {
     EndPlayAction();
-    CollectNiagaraComponent = SpawnNiagaraEffect(CollectNiagaraSystem);
-    GetWorldTimerManager().SetTimer(UpdateNiagaraTargetPositionTimerHandle, this, &ThisClass::OnUpdateNiagaraTargetPosition, UpdatePositionTimerRate, true);
+    SpawnCollectEffect();
 }
 
 void ACGCubeActor::SetColor(const FCubeColorData& NewCubeColorData)
@@ -61,7 +57,6 @@ int32 ACGCubeActor::GetCubeSpeed() const
             return GameMode->GetCubeSpeed();
         }
     }
-
     return 0;
 }
 
@@ -70,23 +65,31 @@ void ACGCubeActor::EndPlayAction()
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->SetVisibility(false, true);
     MovementComponent->StopMoving();
-    SetLifeSpan(CubeLifeSpan);
 }
 
-UNiagaraComponent* ACGCubeActor::SpawnNiagaraEffect(TObjectPtr<UNiagaraSystem> NiagaraSystem)
+void ACGCubeActor::SpawnAnnihilateEffect()
 {
-    UNiagaraComponent* NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, NiagaraSystem, GetActorLocation());
+    UNiagaraComponent* NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AnnihilateNiagaraSystem, GetActorLocation());
     check(NiagaraFX);
     NiagaraFX->SetColorParameter(NiagaraColorParamName, CubeColorData.Color * CubeColorData.EmissivePower);
-
-    return NiagaraFX;
+    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{-static_cast<double>(MovementComponent->GetCubeSpeed()), 0.0, 0.0});
+    NiagaraFX->SetVectorParameter(NiagaraCubeSizeParamName, CubeGame::Utils::GetMeshAABBBoxSize(StaticMeshComponent->GetStaticMesh()));
 }
 
-void ACGCubeActor::OnUpdateNiagaraTargetPosition()
+void ACGCubeActor::SpawnCollectEffect()
 {
-    const auto* PlayerMesh = GetPlayerMesh();
-    if (!PlayerMesh || !CollectNiagaraComponent)
-        return;
-
-    CollectNiagaraComponent->SetVectorParameter(NiagaraTargetPositionParamName, PlayerMesh->GetComponentLocation());
+    if (auto* PlayerMesh = GetPlayerMesh())
+    {
+        UNiagaraComponent* NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAttached(CollectNiagaraSystem,             //
+                                                                                    PlayerMesh,                       //
+                                                                                    CollectEffectSocketName,          //
+                                                                                    FVector::ZeroVector,              //
+                                                                                    FRotator::ZeroRotator,            //
+                                                                                    EAttachLocation::SnapToTarget,    //
+                                                                                    true);
+        check(NiagaraFX);
+        NiagaraFX->SetColorParameter(NiagaraColorParamName, CubeColorData.Color * CubeColorData.EmissivePower);
+        NiagaraFX->SetVariablePosition(NiagaraSpawnPositionParamName, GetActorLocation());
+        NiagaraFX->SetVectorParameter(NiagaraCubeSizeParamName, CubeGame::Utils::GetMeshAABBBoxSize(StaticMeshComponent->GetStaticMesh()));
+    }
 }

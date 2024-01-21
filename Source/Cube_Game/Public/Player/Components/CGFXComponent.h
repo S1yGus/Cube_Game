@@ -63,6 +63,12 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Niagara")
     TObjectPtr<UNiagaraSystem> BonusChargedNiagaraSystem;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Niagara")
+    FName ChargedEffectSocketName{"CentralSocket"};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Niagara")
+    FName NiagaraCubeSizeParamName{"Size"};
+
 private:
     FTimerHandle MaterialTimerHandle;
 

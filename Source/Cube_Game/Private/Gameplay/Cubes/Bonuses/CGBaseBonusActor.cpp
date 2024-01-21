@@ -30,7 +30,7 @@ void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
     else
     {
         UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
-        CubeActor->Annihilat();
+        CubeActor->Annihilate();
     }
 }
 

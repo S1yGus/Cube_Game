@@ -22,7 +22,7 @@ public:
     void SetCubeType(ECubeType NewCubeType) { CubeType = NewCubeType; }
     ECubeType GetCubeType() const { return CubeType; }
 
-    void Annihilat();
+    void Annihilate();
     void Collect();
 
     virtual void SetColor(const FCubeColorData& NewCubeColorData) override;
@@ -35,13 +35,19 @@ protected:
     TObjectPtr<UCGMovementComponent> MovementComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    TObjectPtr<UNiagaraSystem> AnnihilatNiagaraSystem;
+    TObjectPtr<UNiagaraSystem> AnnihilateNiagaraSystem;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     TObjectPtr<UNiagaraSystem> CollectNiagaraSystem;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    FName NiagaraTargetPositionParamName{"TargetPosition"};
+    FName CollectEffectSocketName{"CentralSocket"};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FName NiagaraCubeSizeParamName{"Size"};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FName NiagaraSpawnPositionParamName{"SpawnPosition"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     FName NiagaraVelocityParamName{"Velocity"};
@@ -56,13 +62,9 @@ protected:
 
 private:
     ECubeType CubeType{ECubeType::None};
-    FTimerHandle UpdateNiagaraTargetPositionTimerHandle;
-    UPROPERTY()
-    TObjectPtr<UNiagaraComponent> CollectNiagaraComponent;
 
     FORCEINLINE int32 GetCubeSpeed() const;
-    void EndPlayAction();
-    UNiagaraComponent* SpawnNiagaraEffect(TObjectPtr<UNiagaraSystem> NiagaraSystem);
-
-    void OnUpdateNiagaraTargetPosition();
+    FORCEINLINE void EndPlayAction();
+    FORCEINLINE void SpawnAnnihilateEffect();
+    FORCEINLINE void SpawnCollectEffect();
 };
