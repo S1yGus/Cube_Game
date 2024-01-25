@@ -18,13 +18,12 @@ void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
     if (!CubeActor)
         return;
 
-    const ECubeType CubeType = CubeActor->GetCubeType();
-    if (bCharged && !IsCubeNegative(CubeType))
+    if (const ECubeType CubeType = CubeActor->GetCubeType(); bCharged && !IsCubeNegative(CubeType))
     {
         if (auto* Player = GetOwner<ACGPlayer>())
         {
             Player->CollectCube(CubeType);
-            CubeActor->Teardown();
+            CubeActor->Collect();
         }
     }
     else

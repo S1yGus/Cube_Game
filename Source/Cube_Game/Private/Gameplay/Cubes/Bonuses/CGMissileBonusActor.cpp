@@ -10,9 +10,11 @@ constexpr static float MissileLifeSpan{4.0f};
 ACGMissileBonusActor::ACGMissileBonusActor()
 {
     NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Trail");
+    check(NiagaraComponent);
     NiagaraComponent->SetupAttachment(StaticMeshComponent);
 
     MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
+    check(MovementComponent);
 }
 
 void ACGMissileBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -37,8 +39,7 @@ void ACGMissileBonusActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(NiagaraComponent);
-    check(MovementComponent);
+    check(NiagaraComponent->GetAsset());
 
     SetLifeSpan(MissileLifeSpan);
 }

@@ -12,9 +12,11 @@ ACGCubeActor::ACGCubeActor()
     PrimaryActorTick.bCanEverTick = false;
 
     TrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Trail");
+    check(TrailNiagaraComponent);
     TrailNiagaraComponent->SetupAttachment(StaticMeshComponent);
 
     MovementComponent = CreateDefaultSubobject<UCGMovementComponent>("MovementComponent");
+    check(MovementComponent);
 
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
@@ -42,8 +44,7 @@ void ACGCubeActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(TrailNiagaraComponent);
-    check(MovementComponent);
+    check(TrailNiagaraComponent->GetAsset());
 
     SetLifeSpan(LifeDistance / GetCubeSpeed());
 }
