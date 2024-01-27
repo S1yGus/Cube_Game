@@ -5,6 +5,7 @@
 #include "Sound/SoundCue.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "CGUtils.h"
 
 UCGFXComponent::UCGFXComponent()
 {
@@ -71,15 +72,17 @@ void UCGFXComponent::OnReturnDefaultColor()
 
 void UCGFXComponent::OnBonusCharged(bool bCharged)
 {
-    if (!BonusChargedNiagaraComponent)
+    if (!BonusChargedNiagaraComponent && GetOwnerMesh())
     {
         BonusChargedNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(BonusChargedNiagaraSystem,        //
                                                                                     GetOwnerMesh(),                   //
-                                                                                    NAME_None,                        //
+                                                                                    ChargedEffectSocketName,          //
                                                                                     FVector::ZeroVector,              //
                                                                                     FRotator::ZeroRotator,            //
                                                                                     EAttachLocation::SnapToTarget,    //
                                                                                     false);
+        check(BonusChargedNiagaraComponent);
+        BonusChargedNiagaraComponent->SetVectorParameter(NiagaraCubeSizeParamName, CubeGame::Utils::GetMeshAABBBoxSize(GetOwnerMesh()->GetStaticMesh()));
     }
 
     if (bCharged)

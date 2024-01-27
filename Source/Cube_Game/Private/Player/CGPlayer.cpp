@@ -64,6 +64,8 @@ void ACGPlayer::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(StaticMeshComponent->GetStaticMesh());
+
     SetupPlayer();
 }
 

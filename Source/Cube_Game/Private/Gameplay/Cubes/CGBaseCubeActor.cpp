@@ -10,6 +10,7 @@ ACGBaseCubeActor::ACGBaseCubeActor()
     PrimaryActorTick.bCanEverTick = false;
 
     StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+    check(StaticMeshComponent);
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
     StaticMeshComponent->SetGenerateOverlapEvents(true);
@@ -50,7 +51,7 @@ void ACGBaseCubeActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(StaticMeshComponent);
+    check(StaticMeshComponent->GetStaticMesh());
 
     SetActorScale3D(FVector::ZeroVector);
     GetWorldTimerManager().SetTimer(ScaleTimerHandle, this, &ThisClass::OnScaling, ScalingTimerRate, true);

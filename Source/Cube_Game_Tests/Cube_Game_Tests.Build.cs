@@ -8,7 +8,7 @@ public class Cube_Game_Tests : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "FunctionalTesting", "Cube_Game" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "FunctionalTesting", "Cube_Game", "Niagara" });
         PublicIncludePaths.AddRange(new string[] { "Cube_Game_Tests/Public", "Cube_Game/Public" });
     }
 }
