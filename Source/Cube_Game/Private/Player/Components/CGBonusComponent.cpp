@@ -32,7 +32,17 @@ void UCGBonusComponent::UseCurrentBonus()
 
 void UCGBonusComponent::SetRandomBonus()
 {
-    const int32 RandBonusNum = FMath::RandHelper(static_cast<int32>(EBonusType::Max) - 1) + 1;    // - 1 and + 1 to avoid EBonusType::None
+    int32 RandBonusNum{0};
+    if (CurrentBonus == EBonusType::None)
+    {
+        RandBonusNum = FMath::RandHelper(static_cast<int32>(EBonusType::Max) - 1);    // - 1 for none type
+    }
+    else
+    {
+        const int32 ToAdd = FMath::RandRange(1, static_cast<int32>(EBonusType::Max) - 2);    // - 2 for none type and current type
+        RandBonusNum = (static_cast<int32>(CurrentBonus) + ToAdd) % (static_cast<int32>(EBonusType::Max) - 1);
+    }
+
     SetBonus(static_cast<EBonusType>(RandBonusNum));
     ChargeBonus(false);
 }
