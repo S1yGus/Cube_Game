@@ -33,24 +33,24 @@ enum class EDifficulty : uint8
 UENUM(BlueprintType)
 enum class ECubeType : uint8
 {
-    None = 0,
-    GoodCube,
+    GoodCube = 0,
     BadCube,
     ScoreCube,
     TimeCube,
     BonusCube,
     SpeedCube,
     VeryBadCube,
+    None,
     Max
 };
 
 UENUM(BlueprintType)
 enum class EBonusType : uint8
 {
-    None = 0,
-    Missile,
+    Missile = 0,
     Shield,
     Bomb,
+    None,
     Max
 };
 

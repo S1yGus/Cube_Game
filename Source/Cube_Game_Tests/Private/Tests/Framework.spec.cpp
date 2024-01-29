@@ -197,7 +197,7 @@ void FFramework::Define()
 
                                       GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
 
-                                      for (int32 i = 1; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
+                                      for (int32 i = 0; i < StaticEnum<ECubeType>()->NumEnums() - 3; ++i)
                                       {
                                           GameMode->EnqueueHint(static_cast<ECubeType>(i));
                                       }
