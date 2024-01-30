@@ -15,10 +15,14 @@ ACGBaseBonusActor::ACGBaseBonusActor()
 void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
     auto* CubeActor = Cast<ACGCubeActor>(OtherActor);
-    if (!CubeActor)
+    if (!CubeActor || !GetWorld())
         return;
 
-    if (const ECubeType CubeType = CubeActor->GetCubeType(); bCharged && !IsCubeNegative(CubeType))
+    const auto* GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
+    if (!GameMode)
+        return;
+
+    if (const ECubeType CubeType = CubeActor->GetCubeType(); bCharged && !GameMode->IsCubeNegative(CubeType))
     {
         if (auto* Player = GetOwner<ACGPlayer>())
         {
@@ -38,39 +42,4 @@ void ACGBaseBonusActor::BeginPlay()
     Super::BeginPlay();
 
     UGameplayStatics::PlaySound2D(GetWorld(), InitialSound);
-}
-
-bool ACGBaseBonusActor::IsCubeNegative(ECubeType CubeType)
-{
-    if (const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
-    {
-        if (const FDifficulty* DifficultyData = GameMode->GetDifficultyData())
-        {
-            if (DifficultyData->ScoreChangeMap.Contains(CubeType))
-            {
-                if (DifficultyData->ScoreChangeMap[CubeType] < 0.0f)
-                {
-                    return true;
-                }
-            }
-
-            if (DifficultyData->TimeChangeMap.Contains(CubeType))
-            {
-                if (DifficultyData->TimeChangeMap[CubeType] < 0.0f)
-                {
-                    return true;
-                }
-            }
-
-            if (DifficultyData->SpeedChangeMap.Contains(CubeType))
-            {
-                if (DifficultyData->SpeedChangeMap[CubeType] > 0.0f)
-                {
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
 }

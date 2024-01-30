@@ -45,6 +45,38 @@ const FDifficulty* ACGGameMode::GetDifficultyData() const
     return nullptr;
 }
 
+bool ACGGameMode::IsCubeNegative(ECubeType CubeType) const
+{
+    if (const FDifficulty* DifficultyData = GetDifficultyData())
+    {
+        if (DifficultyData->ScoreChangeMap.Contains(CubeType))
+        {
+            if (DifficultyData->ScoreChangeMap[CubeType] < 0)
+            {
+                return true;
+            }
+        }
+
+        if (DifficultyData->TimeChangeMap.Contains(CubeType))
+        {
+            if (DifficultyData->TimeChangeMap[CubeType] < 0)
+            {
+                return true;
+            }
+        }
+
+        if (DifficultyData->SpeedChangeMap.Contains(CubeType))
+        {
+            if (DifficultyData->SpeedChangeMap[CubeType] > 0)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void ACGGameMode::ChangeGameTime(ECubeType CubeType)
 {
     if (const FDifficulty* DifficultyData = GetDifficultyData();    //
