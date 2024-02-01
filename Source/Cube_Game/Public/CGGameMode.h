@@ -30,6 +30,7 @@ public:
     int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
     const FDifficulty* GetDifficultyData() const;
+    bool IsCubeNegative(ECubeType CubeType) const;
     int32 GetMaxMultiplier() const { return MaxMultiplier; }
 
     void ChangeGameTime(ECubeType CubeType);

@@ -30,7 +30,4 @@ protected:
     bool bCharged{false};
 
     virtual void BeginPlay() override;
-
-private:
-    bool IsCubeNegative(ECubeType CubeType);
 };

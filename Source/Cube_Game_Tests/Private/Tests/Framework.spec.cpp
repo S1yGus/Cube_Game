@@ -6,6 +6,7 @@
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/TestUtils.h"
+#include "Tests/CGTestUtils.h"
 #include "CGGameMode.h"
 #include "Settings/CGGameUserSettings.h"
 #include "Player/CGPlayer.h"
@@ -313,6 +314,57 @@ void FFramework::Define()
 
                         TestTrueExpr(PopUpHintAmount == 1);
                     });
+
+                 {
+                     using Payload = TArray<TTuple<ECubeType, FChangeData, bool>>;
+                     // clang-format off
+                     Payload TestPayload{{ECubeType::BadCube,     FChangeData{ 1,  1,  1}, true},
+                                         {ECubeType::BonusCube,   FChangeData{ 1,  1, -1}, false},
+                                         {ECubeType::GoodCube,    FChangeData{ 1,  1,  0}, false},
+                                         {ECubeType::ScoreCube,   FChangeData{ 1, -1,  1}, true},
+                                         {ECubeType::SpeedCube,   FChangeData{ 1, -1, -1}, true},
+                                         {ECubeType::TimeCube,    FChangeData{ 1, -1,  0}, true},
+                                         {ECubeType::VeryBadCube, FChangeData{ 1,  0,  1}, true},
+                                         {ECubeType::BadCube,     FChangeData{ 1,  0, -1}, false},
+                                         {ECubeType::BonusCube,   FChangeData{ 1,  0,  0}, false},
+                                         {ECubeType::GoodCube,    FChangeData{-1,  1,  1}, true},
+                                         {ECubeType::ScoreCube,   FChangeData{-1,  1, -1}, true},
+                                         {ECubeType::SpeedCube,   FChangeData{-1,  1,  0}, true},
+                                         {ECubeType::TimeCube,    FChangeData{-1, -1,  1}, true},
+                                         {ECubeType::VeryBadCube, FChangeData{-1, -1, -1}, true},
+                                         {ECubeType::BadCube,     FChangeData{-1, -1,  0}, true},
+                                         {ECubeType::BonusCube,   FChangeData{-1,  0,  1}, true},
+                                         {ECubeType::GoodCube,    FChangeData{-1,  0, -1}, true},
+                                         {ECubeType::ScoreCube,   FChangeData{-1,  0,  0}, true},
+                                         {ECubeType::SpeedCube,   FChangeData{ 0,  1,  1}, true},
+                                         {ECubeType::TimeCube,    FChangeData{ 0,  1, -1}, false},
+                                         {ECubeType::VeryBadCube, FChangeData{ 0,  1,  0}, false},
+                                         {ECubeType::BadCube,     FChangeData{ 0, -1,  1}, true},
+                                         {ECubeType::BonusCube,   FChangeData{ 0, -1, -1}, true},
+                                         {ECubeType::GoodCube,    FChangeData{ 0, -1,  0}, true},
+                                         {ECubeType::ScoreCube,   FChangeData{ 0,  0,  1}, true},
+                                         {ECubeType::SpeedCube,   FChangeData{ 0,  0, -1}, false},
+                                         {ECubeType::TimeCube,    FChangeData{ 0,  0,  0}, false}};
+                     // clang-format on
+                     for (const auto& [CubeType, ChangeData, ExpectedValue] : TestPayload)
+                     {
+                         const FString CubeName{StaticEnum<ECubeType>()->GetNameStringByValue(static_cast<int64>(CubeType))};
+                         It(FString::Printf(TEXT("CubeEffectShouldBeCorrectlyDefined.%s:Score(%d)Time(%d)Speed(%d)"),    //
+                                            *CubeName,                                                                   //
+                                            ChangeData.Score,                                                            //
+                                            ChangeData.Time,                                                             //
+                                            ChangeData.Speed),
+                            [=, this]()
+                            {
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    //
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    //
+                                                          ChangeData.ToString()});
+
+                                TestTrueExpr(GameMode->IsCubeNegative(CubeType) == ExpectedValue);
+                            });
+                     }
+                 }
 
                  AfterEach(
                      [this]()
