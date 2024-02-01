@@ -99,22 +99,22 @@ struct FDifficulty
     TMap<ECubeType, float> SpawnWeightMap;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "s"))
-    int32 InitialTime;
+    int32 InitialTime{0};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "cm"))
-    float DistanceBetweenCubes;
+    float DistanceBetweenCubes{0.0f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "CentimetersPerSecond"))
     FVector2D CubesSpeedRange;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
-    int32 ScoreToSpeedUp;
+    int32 ScoreToSpeedUp{1};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    int32 MaxNumOfCubesInLine;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
+    int32 MaxNumOfCubesInLine{1};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
-    float ChanceToAddCubeInLine;
+    float ChanceToAddCubeInLine{0.0f};
 };
 
 USTRUCT(BlueprintType)
