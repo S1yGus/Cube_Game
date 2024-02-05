@@ -91,8 +91,9 @@ void ACGPlayer::SetupPlayer()
     FXComponent->SetCollectColor(ECubeType::None);    // Set default player color.
     CurrentPosition = FMath::RandHelper(PositionsAmount);
 
-    StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnComponentBeginOverlap);
+    StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
     BonusComponent->OnBonusCharged.AddUObject(FXComponent, &UCGFXComponent::OnBonusCharged);
+    BonusComponent->OnBonusBeginOverlap.AddUObject(this, &ACGPlayer::OnBonusBeginOverlap);
 }
 
 void ACGPlayer::OnUseCurrentBonus()
@@ -147,17 +148,31 @@ void ACGPlayer::OnMoving()
     }
 }
 
-void ACGPlayer::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
-                                        AActor* OtherActor,                          //
-                                        UPrimitiveComponent* OtherComp,              //
-                                        int32 OtherBodyIndex,                        //
-                                        bool bFromSweep,                             //
-                                        const FHitResult& SweepResult)               //
+void ACGPlayer::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
+                                     AActor* OtherActor,                          //
+                                     UPrimitiveComponent* OtherComp,              //
+                                     int32 OtherBodyIndex,                        //
+                                     bool bFromSweep,                             //
+                                     const FHitResult& SweepResult)               //
 {
-    if (auto* OverlapedCube = Cast<ACGCubeActor>(OtherActor))
+    if (auto* Cube = Cast<ACGCubeActor>(OtherActor))
     {
-        OverlapedCube->Collect();
-        CollectCube(OverlapedCube->GetCubeType());
+        CollectCube(Cube);
+    }
+}
+
+void ACGPlayer::OnBonusBeginOverlap(ACGCubeActor* Cube, bool bCharged)
+{
+    if (const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+    {
+        if (bCharged && !GameMode->IsCubeNegative(Cube->GetCubeType()))
+        {
+            CollectCube(Cube);
+        }
+        else
+        {
+            Cube->Annihilate();
+        }
     }
 }
 
@@ -183,7 +198,7 @@ void ACGPlayer::OnViewportResized(FViewport* Viewport, uint32 Value)
     StaticMeshComponent->SetWorldLocation(GetTargetPositionLocation());
 }
 
-void ACGPlayer::PlayCollectEffects(ECubeType CubeType)
+void ACGPlayer::ProduceCollectEffects(ECubeType CubeType)
 {
     FXComponent->PlayCollectSound(CubeType);
     FXComponent->SetCollectColor(CubeType);
@@ -201,18 +216,14 @@ void ACGPlayer::UpdateGameMode(ECubeType CubeType)
     }
 }
 
-void ACGPlayer::CollectBonusCube()
+void ACGPlayer::CollectCube(ACGCubeActor* Cube)
 {
-    BonusComponent->CollectBonusCube();
-}
-
-void ACGPlayer::CollectCube(ECubeType CubeType)
-{
-    PlayCollectEffects(CubeType);
+    const auto CubeType{Cube->GetCubeType()};
+    ProduceCollectEffects(CubeType);
     UpdateGameMode(CubeType);
-
     if (CubeType == ECubeType::BonusCube)
     {
-        CollectBonusCube();
+        BonusComponent->CollectBonusCube();
     }
+    Cube->Collect();
 }

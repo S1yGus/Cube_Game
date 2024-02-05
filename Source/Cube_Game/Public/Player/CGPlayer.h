@@ -83,20 +83,17 @@ private:
     void OnMoveLeft();
     FORCEINLINE void StartMovingToCurrentPosition();
     void OnMoving();
-
     UFUNCTION()
-    void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
-                                 AActor* OtherActor,                          //
-                                 UPrimitiveComponent* OtherComp,              //
-                                 int32 OtherBodyIndex,                        //
-                                 bool bFromSweep,                             //
-                                 const FHitResult& SweepResult);              //
+    void OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent,    //
+                              AActor* OtherActor,                          //
+                              UPrimitiveComponent* OtherComp,              //
+                              int32 OtherBodyIndex,                        //
+                              bool bFromSweep,                             //
+                              const FHitResult& SweepResult);              //
+    void OnBonusBeginOverlap(ACGCubeActor* Cube, bool bCharged);
     void OnViewportResized(FViewport* Viewport, uint32 Value);
 
-    FORCEINLINE void PlayCollectEffects(ECubeType CubeType);
+    FORCEINLINE void ProduceCollectEffects(ECubeType CubeType);
     FORCEINLINE void UpdateGameMode(ECubeType CubeType);
-    FORCEINLINE void CollectBonusCube();
-    void CollectCube(ECubeType CubeType);
-
-    friend void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor);
+    void CollectCube(ACGCubeActor* Cube);
 };

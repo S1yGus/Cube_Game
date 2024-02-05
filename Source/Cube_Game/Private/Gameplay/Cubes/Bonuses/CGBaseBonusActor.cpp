@@ -4,8 +4,6 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
-#include "CGGameMode.h"
-#include "Player/CGPlayer.h"
 
 ACGBaseBonusActor::ACGBaseBonusActor()
 {
@@ -14,26 +12,10 @@ ACGBaseBonusActor::ACGBaseBonusActor()
 
 void ACGBaseBonusActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-    auto* CubeActor = Cast<ACGCubeActor>(OtherActor);
-    if (!CubeActor || !GetWorld())
-        return;
-
-    const auto* GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>();
-    if (!GameMode)
-        return;
-
-    if (const ECubeType CubeType = CubeActor->GetCubeType(); bCharged && !GameMode->IsCubeNegative(CubeType))
-    {
-        if (auto* Player = GetOwner<ACGPlayer>())
-        {
-            Player->CollectCube(CubeType);
-            CubeActor->Collect();
-        }
-    }
-    else
+    if (auto* Cube = Cast<ACGCubeActor>(OtherActor))
     {
         UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
-        CubeActor->Annihilate();
+        OnBonusBeginOverlap.Broadcast(Cube, bCharged);
     }
 }
 

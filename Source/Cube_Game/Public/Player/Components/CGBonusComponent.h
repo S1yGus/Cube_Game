@@ -19,6 +19,7 @@ public:
 
     FOnBonusChangedSignature OnBonusChanged;
     FOnBonusChargedSignature OnBonusCharged;
+    FOnBonusBeginOverlapSignature OnBonusBeginOverlap;
 
     void CollectBonusCube();
     void UseCurrentBonus();

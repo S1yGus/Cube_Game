@@ -16,6 +16,8 @@ class CUBE_GAME_API ACGBaseBonusActor : public ACGBaseCubeActor
 public:
     ACGBaseBonusActor();
 
+    FOnBonusBeginOverlapSignature OnBonusBeginOverlap;
+
     void SetBonusCharged(bool IsCharged) { bCharged = IsCharged; }
 
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
