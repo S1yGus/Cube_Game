@@ -13,8 +13,6 @@
 #include "Player/Components/CGBonusComponent.h"
 #include "Slate/SceneViewport.h"
 
-#define WHAT_FORMAT_STR L"%s: current value: %d, expected value: %d"
-
 using namespace Test;
 
 BEGIN_DEFINE_SPEC(FFramework, "CubeGame", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::HighPriority)
@@ -35,9 +33,13 @@ void FFramework::Define()
                      {
                          AutomationOpenMap("/Game/Levels/GameLevel");
                          World = GetTestGameWorld();
-                         TestNotNull("World should exist.", World);
+                         if (!TestNotNull("World should exist.", World))
+                             return;
+
                          GameMode = World->GetAuthGameMode<ACGGameMode>();
-                         TestNotNull("GameMode should exist.", GameMode);
+                         if (!TestNotNull("GameMode should exist.", GameMode))
+                             return;
+
                          GameUserSettings = UCGGameUserSettings::Get();
                          TestNotNull("GameUserSettings should exist.", GameUserSettings);
                      });
@@ -49,6 +51,7 @@ void FFramework::Define()
                         for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
                         {
                             GameUserSettings->SetDifficulty(static_cast<EDifficulty>(i));
+
                             TestTrueExpr(GameMode->GetDifficultyData() != nullptr);
                         }
                     });
@@ -68,107 +71,141 @@ void FFramework::Define()
                      {
                          AutomationOpenMap("/Game/Tests/TestLevel");
                          World = GetTestGameWorld();
-                         TestNotNull("World should exist.", World);
+                         if (!TestNotNull("World should exist.", World))
+                             return;
+
                          GameMode = World->GetAuthGameMode<ACGGameMode>();
-                         TestNotNull("GameMode should exist.", GameMode);
+                         if (!TestNotNull("GameMode should exist.", GameMode))
+                             return;
+
                          GameUserSettings = UCGGameUserSettings::Get();
                          TestNotNull("GameUserSettings should exist.", GameUserSettings);
                      });
 
-                 It("GameSpeedShouldBeChanged",
-                    [this]()
-                    {
-                        for (int32 i = 0; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
-                        {
-                            const auto CurrentType = static_cast<ECubeType>(i);
-                            const FString CurrentTypeStr = StaticEnum<ECubeType>()->GetDisplayNameTextByIndex(i).ToString();
-                            const int32 PrevSpeed = GameMode->GetGameSpeed();
-                            const FDifficulty* DifficultyData = GameMode->GetDifficultyData();
-                            TestNotNull("DifficultyData should be set.", DifficultyData);
-
-                            GameMode->ChangeGameSpeed(CurrentType);
-
-                            const int32 CurrentValue = GameMode->GetGameSpeed();
-                            if (DifficultyData->SpeedChangeMap.Contains(CurrentType))
+                 {
+                     const TArray<int32> TestPayload{0, 42, -42};
+                     for (const auto Speed : TestPayload)
+                     {
+                         It(FString::Printf(TEXT("GameSpeedShouldBeChanged.Speed(%d)"), Speed),
+                            [=, this]()
                             {
-                                const int32 ExpectedValue = FMath::Max(1, PrevSpeed + DifficultyData->SpeedChangeMap[static_cast<ECubeType>(i)]);
-                                const FString WhatMsg = FString::Printf(WHAT_FORMAT_STR, *CurrentTypeStr, CurrentValue, ExpectedValue);
-                                TestTrue(WhatMsg, CurrentValue == ExpectedValue);
-                            }
-                            else
+                                auto SpeedBefore = GameMode->GetGameSpeed();
+                                const auto CubeType{ECubeType::GoodCube};
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Speed = FMath::Abs(Speed)}.ToString(),                                // Speed
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
+
+                                GameMode->ChangeGameSpeed(CubeType);
+
+                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + FMath::Abs(Speed));
+
+                                SpeedBefore = GameMode->GetGameSpeed();
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Speed = Speed}.ToString(),                                            // Speed
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
+
+                                GameMode->ChangeGameSpeed(CubeType);
+
+                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + Speed);
+                            });
+                     }
+                 }
+
+                 {
+                     const TArray<int32> TestPayload{0, 42, -42};
+                     for (const auto Time : TestPayload)
+                     {
+                         It(FString::Printf(TEXT("GameTimeShouldBeChanged.Time(%d)"), Time),
+                            [=, this]()
                             {
-                                const FString WhatMsg = FString::Printf(WHAT_FORMAT_STR, *CurrentTypeStr, CurrentValue, PrevSpeed);
-                                TestTrue(WhatMsg, CurrentValue == PrevSpeed);
-                            }
-                        }
-                    });
+                                auto TimeBefore = GameMode->GetGameTime();
+                                const auto CubeType{ECubeType::GoodCube};
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Time = FMath::Abs(Time)}.ToString(),                                  // Time
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                 It("GameScoreShouldBeChanged",
-                    [this]()
-                    {
-                        for (int32 i = 0; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
-                        {
-                            const auto CurrentType = static_cast<ECubeType>(i);
-                            const FString CurrentTypeStr = StaticEnum<ECubeType>()->GetDisplayNameTextByIndex(i).ToString();
-                            const int32 PrevScore = GameMode->GetScore();
-                            const FDifficulty* DifficultyData = GameMode->GetDifficultyData();
-                            TestNotNull("DifficultyData should be set.", DifficultyData);
+                                GameMode->ChangeGameTime(CubeType);
 
-                            GameMode->ChangeScore(CurrentType);
+                                TestTrueExpr(GameMode->GetGameTime() == TimeBefore + FMath::Abs(Time));
 
-                            const int32 CurrentValue = GameMode->GetScore();
-                            if (DifficultyData->ScoreChangeMap.Contains(CurrentType))
+                                TimeBefore = GameMode->GetGameTime();
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Time = Time}.ToString(),                                              // Time
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
+
+                                GameMode->ChangeGameTime(CubeType);
+
+                                TestTrueExpr(GameMode->GetGameTime() == TimeBefore + Time);
+                            });
+                     }
+                 }
+
+                 {
+                     const TArray<int32> TestPayload{0, 42, -42};
+                     for (const auto Score : TestPayload)
+                     {
+                         It(FString::Printf(TEXT("GameScoreShouldBeChanged.Score(%d)"), Score),
+                            [=, this]()
                             {
+                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(1)});    // Turning off the significance of the multiplier.
+                                auto ScoreBefore = GameMode->GetScore();
+                                const auto CubeType{ECubeType::GoodCube};
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Score = FMath::Abs(Score)}.ToString(),                                // Score
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                const int32 ExpectedValue = FMath::Max(0, PrevScore + DifficultyData->ScoreChangeMap[static_cast<ECubeType>(i)]);
-                                const FString WhatMsg = FString::Printf(WHAT_FORMAT_STR, *CurrentTypeStr, CurrentValue, ExpectedValue);
-                                TestTrue(WhatMsg, CurrentValue == ExpectedValue);
-                            }
-                            else
+                                GameMode->ChangeScore(CubeType);
+
+                                TestTrueExpr(GameMode->GetScore() == ScoreBefore + FMath::Abs(Score));
+
+                                ScoreBefore = GameMode->GetScore();
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Score = Score}.ToString(),                                            // Score
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
+
+                                GameMode->ChangeScore(CubeType);    // Multiplier x2
+
+                                TestTrueExpr(GameMode->GetScore() == ScoreBefore + Score);
+                            });
+                     }
+                 }
+
+                 {
+                     using Payload = TArray<TTuple<int32, int32, int32>>;
+                     const Payload TestPayload{{0, 10, 0}, {9, 10, 0}, {10, 10, 1}, {11, 10, 1}, {20, 10, 2}};
+                     for (const auto [Score, ScoreToSpeedUp, AdditionalSpeed] : TestPayload)
+                     {
+                         It(FString::Printf(TEXT("GameSpeedShouldBeChangedDependingOnScore."
+                                                 "Score(%d)ScoreToSpeedUp(%d)AdditionalSpeed(%d)"),
+                                            Score, ScoreToSpeedUp, AdditionalSpeed),
+                            [=, this]()
                             {
-                                const FString WhatMsg = FString::Printf(WHAT_FORMAT_STR, *CurrentTypeStr, CurrentValue, PrevScore);
-                                TestTrue(WhatMsg, CurrentValue == PrevScore);
-                            }
-                        }
-                    });
+                                const auto SpeedBefore = GameMode->GetGameSpeed();
+                                const auto CubeType{ECubeType::GoodCube};
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          FChangeData{.Score = Score}.ToString(),                                            // Score
+                                                          FString::FromInt(ScoreToSpeedUp)});                                                // ScoreToSpeedUp
 
-                 It("GameSpeedShouldBeChangedDependingOnTheScore",
-                    [this]()
-                    {
-                        CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(1)});    // Turning off the significance of the multiplier.
+                                GameMode->ChangeScore(CubeType);
 
-                        for (int32 i = 0; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
-                        {
-                            const auto CurrentType = static_cast<ECubeType>(i);
-                            const FString CurrentTypeStr = StaticEnum<ECubeType>()->GetDisplayNameTextByIndex(i).ToString();
-                            const int32 PrevSpeed = GameMode->GetGameSpeed();
-                            const FDifficulty* DifficultyData = GameMode->GetDifficultyData();
-                            TestNotNull("DifficultyData should be set.", DifficultyData);
-
-                            if (DifficultyData->ScoreChangeMap.Contains(CurrentType) && DifficultyData->ScoreChangeMap[CurrentType] >= 0)
-                            {
-                                const int32 Iterations =
-                                    FMath::CeilToInt32(static_cast<float>(DifficultyData->ScoreToSpeedUp) / DifficultyData->ScoreChangeMap[CurrentType]);
-                                for (int32 j = 0; j < Iterations; ++j)
-                                {
-                                    GameMode->ChangeScore(CurrentType);
-                                }
-
-                                const int32 CurrentValue = GameMode->GetGameSpeed();
-                                const int32 ExpectedValue = PrevSpeed + 1;
-                                const FString WhatMsg = FString::Printf(WHAT_FORMAT_STR, *CurrentTypeStr, CurrentValue, ExpectedValue);
-                                TestTrue(WhatMsg, CurrentValue == ExpectedValue);
-                            }
-                            else
-                            {
-                                GameMode->ChangeScore(CurrentType);
-
-                                const int32 CurrentValue = GameMode->GetGameSpeed();
-                                const FString WhatMsg = FString::Printf(WHAT_FORMAT_STR, *CurrentTypeStr, CurrentValue, PrevSpeed);
-                                TestTrue(WhatMsg, CurrentValue == PrevSpeed);
-                            }
-                        }
-                    });
+                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + AdditionalSpeed);
+                            });
+                     }
+                 }
 
                  It("UnshownHintsShouldBeQueued", EAsyncExecution::ThreadPool,
                     [this]()
@@ -318,48 +355,50 @@ void FFramework::Define()
                  {
                      using Payload = TArray<TTuple<ECubeType, FChangeData, bool>>;
                      // clang-format off
-                     Payload TestPayload{{ECubeType::BadCube,     FChangeData{ 1,  1,  1}, true},
-                                         {ECubeType::BonusCube,   FChangeData{ 1,  1, -1}, false},
-                                         {ECubeType::GoodCube,    FChangeData{ 1,  1,  0}, false},
-                                         {ECubeType::ScoreCube,   FChangeData{ 1, -1,  1}, true},
-                                         {ECubeType::SpeedCube,   FChangeData{ 1, -1, -1}, true},
-                                         {ECubeType::TimeCube,    FChangeData{ 1, -1,  0}, true},
-                                         {ECubeType::VeryBadCube, FChangeData{ 1,  0,  1}, true},
-                                         {ECubeType::BadCube,     FChangeData{ 1,  0, -1}, false},
-                                         {ECubeType::BonusCube,   FChangeData{ 1,  0,  0}, false},
-                                         {ECubeType::GoodCube,    FChangeData{-1,  1,  1}, true},
-                                         {ECubeType::ScoreCube,   FChangeData{-1,  1, -1}, true},
-                                         {ECubeType::SpeedCube,   FChangeData{-1,  1,  0}, true},
-                                         {ECubeType::TimeCube,    FChangeData{-1, -1,  1}, true},
-                                         {ECubeType::VeryBadCube, FChangeData{-1, -1, -1}, true},
-                                         {ECubeType::BadCube,     FChangeData{-1, -1,  0}, true},
-                                         {ECubeType::BonusCube,   FChangeData{-1,  0,  1}, true},
-                                         {ECubeType::GoodCube,    FChangeData{-1,  0, -1}, true},
-                                         {ECubeType::ScoreCube,   FChangeData{-1,  0,  0}, true},
-                                         {ECubeType::SpeedCube,   FChangeData{ 0,  1,  1}, true},
-                                         {ECubeType::TimeCube,    FChangeData{ 0,  1, -1}, false},
-                                         {ECubeType::VeryBadCube, FChangeData{ 0,  1,  0}, false},
-                                         {ECubeType::BadCube,     FChangeData{ 0, -1,  1}, true},
-                                         {ECubeType::BonusCube,   FChangeData{ 0, -1, -1}, true},
-                                         {ECubeType::GoodCube,    FChangeData{ 0, -1,  0}, true},
-                                         {ECubeType::ScoreCube,   FChangeData{ 0,  0,  1}, true},
-                                         {ECubeType::SpeedCube,   FChangeData{ 0,  0, -1}, false},
-                                         {ECubeType::TimeCube,    FChangeData{ 0,  0,  0}, false}};
+                     const Payload TestPayload{{ECubeType::BadCube,     FChangeData{ 1,  1,  1}, true},
+                                               {ECubeType::BonusCube,   FChangeData{ 1,  1, -1}, false},
+                                               {ECubeType::GoodCube,    FChangeData{ 1,  1,  0}, false},
+                                               {ECubeType::ScoreCube,   FChangeData{ 1, -1,  1}, true},
+                                               {ECubeType::SpeedCube,   FChangeData{ 1, -1, -1}, true},
+                                               {ECubeType::TimeCube,    FChangeData{ 1, -1,  0}, true},
+                                               {ECubeType::VeryBadCube, FChangeData{ 1,  0,  1}, true},
+                                               {ECubeType::BadCube,     FChangeData{ 1,  0, -1}, false},
+                                               {ECubeType::BonusCube,   FChangeData{ 1,  0,  0}, false},
+                                               {ECubeType::GoodCube,    FChangeData{-1,  1,  1}, true},
+                                               {ECubeType::ScoreCube,   FChangeData{-1,  1, -1}, true},
+                                               {ECubeType::SpeedCube,   FChangeData{-1,  1,  0}, true},
+                                               {ECubeType::TimeCube,    FChangeData{-1, -1,  1}, true},
+                                               {ECubeType::VeryBadCube, FChangeData{-1, -1, -1}, true},
+                                               {ECubeType::BadCube,     FChangeData{-1, -1,  0}, true},
+                                               {ECubeType::BonusCube,   FChangeData{-1,  0,  1}, true},
+                                               {ECubeType::GoodCube,    FChangeData{-1,  0, -1}, true},
+                                               {ECubeType::ScoreCube,   FChangeData{-1,  0,  0}, true},
+                                               {ECubeType::SpeedCube,   FChangeData{ 0,  1,  1}, true},
+                                               {ECubeType::TimeCube,    FChangeData{ 0,  1, -1}, false},
+                                               {ECubeType::VeryBadCube, FChangeData{ 0,  1,  0}, false},
+                                               {ECubeType::BadCube,     FChangeData{ 0, -1,  1}, true},
+                                               {ECubeType::BonusCube,   FChangeData{ 0, -1, -1}, true},
+                                               {ECubeType::GoodCube,    FChangeData{ 0, -1,  0}, true},
+                                               {ECubeType::ScoreCube,   FChangeData{ 0,  0,  1}, true},
+                                               {ECubeType::SpeedCube,   FChangeData{ 0,  0, -1}, false},
+                                               {ECubeType::TimeCube,    FChangeData{ 0,  0,  0}, false}};
                      // clang-format on
                      for (const auto& [CubeType, ChangeData, ExpectedValue] : TestPayload)
                      {
                          const FString CubeName{StaticEnum<ECubeType>()->GetNameStringByValue(static_cast<int64>(CubeType))};
-                         It(FString::Printf(TEXT("CubeEffectShouldBeCorrectlyDefined.%s:Score(%d)Time(%d)Speed(%d)"),    //
-                                            *CubeName,                                                                   //
-                                            ChangeData.Score,                                                            //
-                                            ChangeData.Time,                                                             //
+                         It(FString::Printf(TEXT("CubeEffectShouldBeCorrectlyDefined."
+                                                 "%s:Score(%d)Time(%d)Speed(%d)"),    //
+                                            *CubeName,                                //
+                                            ChangeData.Score,                         //
+                                            ChangeData.Time,                          //
                                             ChangeData.Speed),
                             [=, this]()
                             {
                                 CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
-                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    //
-                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    //
-                                                          ChangeData.ToString()});
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          ChangeData.ToString(),                                                             // ChangeData
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
                                 TestTrueExpr(GameMode->IsCubeNegative(CubeType) == ExpectedValue);
                             });
@@ -387,17 +426,23 @@ void FFramework::Define()
                  It("PawnLocationShouldBeAdjustCorrectly",
                     [this]()
                     {
-                        TestNotNull("GEngine should exist.", GEngine);
-                        TestNotNull("GameViewport should exist.", GEngine->GameViewport.Get());
+                        if (!TestNotNull("GEngine should exist.", GEngine))
+                            return;
+
+                        if (!TestNotNull("GameViewport should exist.", GEngine->GameViewport.Get()))
+                            return;
 
                         FSceneViewport* SceneViewport = GEngine->GameViewport->GetGameViewport();
-                        TestNotNull("SceneViewport should exist.", SceneViewport);
+                        if (!TestNotNull("SceneViewport should exist.", SceneViewport))
+                            return;
 
                         const APlayerController* PC = World->GetFirstPlayerController();
-                        TestNotNull("PlayerController should exist.", PC);
+                        if (!TestNotNull("PlayerController should exist.", PC))
+                            return;
 
                         auto* PlayerPawn = Cast<ACGPlayer>(PC->GetPawn());
-                        TestNotNull("PlayerPawn should exist.", PlayerPawn);
+                        if (!TestNotNull("PlayerPawn should exist.", PlayerPawn))
+                            return;
 
                         struct TestValue
                         {

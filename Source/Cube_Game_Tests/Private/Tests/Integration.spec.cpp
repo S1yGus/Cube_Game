@@ -14,86 +14,111 @@
 #include "NiagaraSystem.h"
 #include "Settings/CGGameUserSettings.h"
 #include "CGGameMode.h"
+#include "Player/Components/CGBonusComponent.h"
 
 using namespace Test;
-
-static const FString CubeRef{"Blueprint'/Game/Gameplay/Cubes/BP_CGCubeActor.BP_CGCubeActor'"};
 
 BEGIN_DEFINE_SPEC(FIntegration, "CubeGame", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::HighPriority)
 
 UWorld* World;
 ACGGameMode* GameMode;
 UCGGameUserSettings* GameUserSettings;
+APawn* Pawn;
+UCGBonusComponent* BonusComponent;
+ACGCubeActor* Cube;
 
-const FChangeData NegativeSet{.Score = -1, .Time = -1, .Speed = 1};
-const FChangeData PositiveSet{.Score = 1, .Time = 1, .Speed = -1};
+const FString CubeRef{"Blueprint'/Game/Gameplay/Cubes/BP_CGCubeActor.BP_CGCubeActor'"};
+const FString MissileBonusRef{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'"};
+const FString BombBonusRef{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'"};
+const FString ShieldBonusRef{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'"};
+const FVector SpawnLocation{500.0};
+const ECubeType CubeType{ECubeType::GoodCube};
+const FChangeData NegativeSet{-1, -1, 1};
+const FChangeData PositiveSet{1, 1, -1};
 
 END_DEFINE_SPEC(FIntegration)
 
 void FIntegration::Define()
 {
-    Describe("Integration.Niagara",
+    Describe("Integration",
              [this]()
              {
                  BeforeEach(
                      [this]()
                      {
                          AutomationOpenMap("/Game/Tests/TestLevel");
+
                          World = GetTestGameWorld();
-                         TestNotNull("World should exist.", World);
+                         if (!TestNotNull("World should exist.", World))
+                             return;
+
+                         Pawn = World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
+                         if (!TestNotNull("Pawn should exist.", Pawn))
+                             return;
+
+                         BonusComponent = Pawn->FindComponentByClass<UCGBonusComponent>();
+                         if (!TestNotNull("BonusComponent should exist.", BonusComponent))
+                             return;
+
+                         Cube = CreateBlueprint<ACGCubeActor>(World, CubeRef, FTransform{SpawnLocation});
+                         if (!TestNotNull("Cube should exist.", Cube))
+                             return;
+
+                         Cube->SetCubeType(CubeType);
                          GameMode = World->GetAuthGameMode<ACGGameMode>();
-                         TestNotNull("GameMode should exist.", GameMode);
+                         if (!TestNotNull("GameMode should exist.", GameMode))
+                             return;
+
                          GameUserSettings = UCGGameUserSettings::Get();
                          TestNotNull("GameUserSettings should exist.", GameUserSettings);
                      });
 
                  {
+                     const FString AnnihilateEffectName{"NS_Annihilate"};
                      using Payload = TArray<TTuple<FString, bool, bool, FString>>;
-                     Payload TestPayload{{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'", true, true, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'", false, true, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'", false, false, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'", true, true, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'", false, true, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'", false, false, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'", true, true, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'", false, true, "NS_Annihilate"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'", false, false, "NS_Annihilate"}};
+                     const Payload TestPayload{{MissileBonusRef, true, true, AnnihilateEffectName},      //
+                                               {MissileBonusRef, false, true, AnnihilateEffectName},     //
+                                               {MissileBonusRef, false, false, AnnihilateEffectName},    //
+                                               {BombBonusRef, true, true, AnnihilateEffectName},         //
+                                               {BombBonusRef, false, true, AnnihilateEffectName},        //
+                                               {BombBonusRef, false, false, AnnihilateEffectName},       //
+                                               {ShieldBonusRef, true, true, AnnihilateEffectName},       //
+                                               {ShieldBonusRef, false, true, AnnihilateEffectName},      //
+                                               {ShieldBonusRef, false, false, AnnihilateEffectName}};
                      for (const auto& [BonusRef, bCharged, bCubeNegative, ExpectedAssetName] : TestPayload)
                      {
                          FString BonusName;
                          BonusRef.Split(".BP_CG", nullptr, &BonusName, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          BonusName.Split("Actor'", &BonusName, nullptr, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          const FString BonusCondition{bCharged ? "Charged" : "Uncharged"};
-                         const FString CubeType{bCubeNegative ? "NegativeCube" : "PositiveCube"};
-                         It(FString::Printf(TEXT("AnnihilationEffectShouldBeSpawned.%s%sAnd%s"), *BonusCondition, *BonusName, *CubeType),
+                         const FString CubeEffect{bCubeNegative ? "Negative" : "Positive"};
+                         It(FString::Printf(TEXT("Niagara."
+                                                 "AnnihilationEffectShouldBeSpawned."
+                                                 "%s%sAnd%sCube"),
+                                            *BonusCondition, *BonusName, *CubeEffect),
                             [=, this]()
                             {
-                                const ECubeType CubeType{ECubeType::GoodCube};
                                 CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
-                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    //
-                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    //
-                                                          (bCubeNegative ? NegativeSet : PositiveSet).ToString()});
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          (bCubeNegative ? NegativeSet : PositiveSet).ToString(),                            // ChangeData
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                const FVector SpawnLocation{300.0};
-                                auto* Cube = CreateBlueprint<ACGCubeActor>(World, CubeRef, FTransform{SpawnLocation});
-                                if (!TestNotNull("Cube should exist.", Cube))
-                                    return;
-
-                                Cube->SetCubeType(CubeType);
                                 auto* Bonus = CreateBlueprint<ACGBaseBonusActor>(World, BonusRef, FTransform::Identity);
                                 if (!TestNotNull("Bonus should exist.", Bonus))
                                     return;
 
                                 Bonus->SetBonusCharged(bCharged);
-                                const auto* PC = World->GetFirstPlayerController();
-                                if (!TestNotNull("PlayerController should exist.", PC))
-                                    return;
-
-                                Bonus->SetOwner(PC->GetPawn());
-                                Bonus->SetActorLocation(SpawnLocation);
+                                Bonus->OnBonusBeginOverlap.AddLambda(
+                                    [&](ACGCubeActor* Cube, bool bCharged)
+                                    {
+                                        BonusComponent->OnBonusBeginOverlap.Broadcast(Cube, bCharged);
+                                    });
                                 const auto* WorldSettings = Cast<AWorldSettings>(UGameplayStatics::GetActorOfClass(World, AWorldSettings::StaticClass()));
                                 if (!TestNotNull("WorldSettings should exist.", WorldSettings))
                                     return;
+
+                                Bonus->SetActorLocation(SpawnLocation);
 
                                 const auto* Found = Algo::FindByPredicate(WorldSettings->GetComponents(),
                                                                           [&](const auto* Component)
@@ -111,46 +136,42 @@ void FIntegration::Define()
                  }
 
                  {
+                     const FString CollectEffectName{"NS_Collect"};
                      using Payload = TArray<TTuple<FString, bool, FString>>;
-                     Payload TestPayload{{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'", false, "NS_Collect"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'", false, "NS_Collect"},
-                                         {"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'", false, "NS_Collect"}};
+                     const Payload TestPayload{{MissileBonusRef, false, CollectEffectName},    //
+                                               {BombBonusRef, false, CollectEffectName},       //
+                                               {ShieldBonusRef, false, CollectEffectName}};
                      for (const auto& [BonusRef, bCubeNegative, ExpectedAssetName] : TestPayload)
                      {
                          FString BonusName;
                          BonusRef.Split(".BP_CG", nullptr, &BonusName, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          BonusName.Split("Actor'", &BonusName, nullptr, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          const FString CubeName{bCubeNegative ? "NegativeCube" : "PositiveCube"};
-                         It(FString::Printf(TEXT("CollectEffectShouldBeSpawned.%sAnd%s"), *BonusName, *CubeName),
+                         It(FString::Printf(TEXT("Niagara."
+                                                 "CollectEffectShouldBeSpawned."
+                                                 "%sAnd%s"),
+                                            *BonusName, *CubeName),
                             [=, this]()
                             {
-                                const ECubeType CubeType{ECubeType::GoodCube};
                                 CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
-                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    //
-                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    //
-                                                          (bCubeNegative ? NegativeSet : PositiveSet).ToString()});
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          (bCubeNegative ? NegativeSet : PositiveSet).ToString(),                            // ChangeData
+                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                const FVector SpawnLocation{300.0};
-                                auto* Cube = CreateBlueprint<ACGCubeActor>(World, CubeRef, FTransform{SpawnLocation});
-                                if (!TestNotNull("Cube should exist.", Cube))
-                                    return;
-
-                                Cube->SetCubeType(CubeType);
                                 auto* Bonus = CreateBlueprint<ACGBaseBonusActor>(World, BonusRef, FTransform::Identity);
                                 if (!TestNotNull("Bonus should exist.", Bonus))
                                     return;
 
                                 Bonus->SetBonusCharged(true);
-                                const auto* PC = World->GetFirstPlayerController();
-                                if (!TestNotNull("PlayerController should exist.", PC))
-                                    return;
+                                Bonus->OnBonusBeginOverlap.AddLambda(
+                                    [&](ACGCubeActor* Cube, bool bCharged)
+                                    {
+                                        BonusComponent->OnBonusBeginOverlap.Broadcast(Cube, bCharged);
+                                    });
 
-                                auto* Pawn = PC->GetPawn();
-                                if (!TestNotNull("Pawn should exist.", Pawn))
-                                    return;
-
-                                Bonus->SetOwner(Pawn);
                                 Bonus->SetActorLocation(SpawnLocation);
+
                                 const auto* Found = Algo::FindByPredicate(Pawn->GetComponents(),
                                                                           [&](const auto* Component)
                                                                           {
@@ -162,6 +183,75 @@ void FIntegration::Define()
                                                                               return false;
                                                                           });
                                 TestTrueExpr(Found != nullptr);
+                            });
+                     }
+                 }
+
+                 {
+                     using Payload = TArray<FChangeData>;
+                     const Payload TestPayload{{0, 0, 0}, {42, 0, 0}, {0, 42, 0}, {0, 0, 42}, {42, 42, 42}, {42, 42, 0}, {42, 0, 42}, {0, 42, 42}};
+                     for (const auto& Payload : TestPayload)
+                     {
+                         It(FString::Printf(TEXT("AfterPlayerPicksCubeGameParametersShouldChange."
+                                                 "Score(%d)Time(%d)Speed(%d)"),
+                                            Payload.Score, Payload.Time, Payload.Speed),
+                            [=, this]()
+                            {
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          Payload.ToString(),                                                                // ChangeData
+                                                          FString::FromInt(Payload.Score + 1)});                                             // ScoreToSpeedUp
+                                const auto ScoreBefore{GameMode->GetScore()};
+                                const auto TimeBefore{GameMode->GetGameTime()};
+                                const auto SpeedBefore{GameMode->GetGameSpeed()};
+
+                                Cube->SetActorLocation(Pawn->GetActorLocation());
+
+                                TestTrueExpr(GameMode->GetScore() == ScoreBefore + Payload.Score);
+                                TestTrueExpr(GameMode->GetGameTime() == TimeBefore + Payload.Time);
+                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + Payload.Speed);
+                            });
+                     }
+                 }
+
+                 {
+                     using Payload = TArray<TTuple<FString, FChangeData>>;
+                     const Payload TestPayload{{MissileBonusRef, FChangeData{0, 0, 0}},    //
+                                               {BombBonusRef, FChangeData{42, 0, 0}},      //
+                                               {ShieldBonusRef, FChangeData{0, 42, 0}},    //
+                                               {MissileBonusRef, FChangeData{42, 42, 0}}};
+                     for (const auto& [BonusRef, ChangeData] : TestPayload)
+                     {
+                         It(FString::Printf(TEXT("AfterBonusPicksCubeGameParametersShouldChange."
+                                                 "Score(%d)Time(%d)Speed(%d)"),
+                                            ChangeData.Score, ChangeData.Time, ChangeData.Speed),
+                            [=, this]()
+                            {
+                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                          ChangeData.ToString(),                                                             // ChangeData
+                                                          FString::FromInt(ChangeData.Score + 1)});                                          // ScoreToSpeedUp
+                                auto* Bonus = CreateBlueprint<ACGBaseBonusActor>(World, BonusRef, FTransform::Identity);
+                                if (!TestNotNull("Bonus should exist.", Bonus))
+                                    return;
+
+                                Bonus->SetBonusCharged(true);
+                                Bonus->OnBonusBeginOverlap.AddLambda(
+                                    [&](ACGCubeActor* Cube, bool bCharged)
+                                    {
+                                        BonusComponent->OnBonusBeginOverlap.Broadcast(Cube, bCharged);
+                                    });
+                                const auto ScoreBefore{GameMode->GetScore()};
+                                const auto TimeBefore{GameMode->GetGameTime()};
+                                const auto SpeedBefore{GameMode->GetGameSpeed()};
+
+                                Bonus->SetActorLocation(SpawnLocation);
+
+                                TestTrueExpr(GameMode->GetScore() == ScoreBefore + ChangeData.Score);
+                                TestTrueExpr(GameMode->GetGameTime() == TimeBefore + ChangeData.Time);
+                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + ChangeData.Speed);
                             });
                      }
                  }
