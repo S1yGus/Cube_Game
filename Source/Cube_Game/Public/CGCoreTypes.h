@@ -234,3 +234,4 @@ DECLARE_MULTICAST_DELEGATE(FOnResolutionChangedSignature);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
 using FHintsStatus = TMap<EHintType, bool>;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBonusBeginOverlapSignature, class ACGCubeActor*, bool);

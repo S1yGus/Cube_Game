@@ -78,6 +78,10 @@ void UCGBonusComponent::SpawnBonus(EBonusType BonusType)
     auto* BonusActor = GetWorld()->SpawnActorDeferred<ACGBaseBonusActor>(BonusClassesMap[BonusType], SpawnTransform);
     check(BonusActor);
     BonusActor->SetBonusCharged(bBonusCharged);
-    BonusActor->SetOwner(GetOwner());
+    BonusActor->OnBonusBeginOverlap.AddLambda(
+        [&](ACGCubeActor* Cube, bool bCharged)
+        {
+            OnBonusBeginOverlap.Broadcast(Cube, bCharged);
+        });
     BonusActor->FinishSpawning(SpawnTransform);
 }
