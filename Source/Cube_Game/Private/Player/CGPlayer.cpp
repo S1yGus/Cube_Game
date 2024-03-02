@@ -9,6 +9,7 @@
 #include "Gameplay/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
 #include "EnhancedInputComponent.h"
+#include "CGUtils.h"
 
 constexpr static float MovementTimerRate{0.016f};
 constexpr static float MovementSpeed{10.0f};
@@ -165,7 +166,7 @@ void ACGPlayer::OnBonusBeginOverlap(ACGCubeActor* Cube, bool bCharged)
 {
     if (const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
-        if (bCharged && !GameMode->IsCubeNegative(Cube->GetCubeType()))
+        if (bCharged && !CubeGame::Utils::IsCubeNegative(Cube->GetCubeType(), GameMode->GetDifficultyData()))
         {
             CollectCube(Cube);
         }

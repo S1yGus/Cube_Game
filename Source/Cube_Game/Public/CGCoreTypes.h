@@ -82,6 +82,18 @@ enum class EHintType : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FSpeedData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "CentimetersPerSecond"))
+    float InitialSpeed{0.0f};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "CentimetersPerSecond"))
+    float SpeedMultiplier{0.0f};
+};
+
+USTRUCT(BlueprintType)
 struct FDifficulty
 {
     GENERATED_USTRUCT_BODY()
@@ -104,8 +116,8 @@ struct FDifficulty
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", Units = "cm"))
     float DistanceBetweenCubes{0.0f};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0", Units = "CentimetersPerSecond"))
-    FVector2D CubesSpeedRange;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
+    FSpeedData SpeedData;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
     int32 ScoreToSpeedUp{1};
@@ -235,3 +247,4 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
 using FHintsStatus = TMap<EHintType, bool>;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBonusBeginOverlapSignature, class ACGCubeActor*, bool);
+DECLARE_DELEGATE_OneParam(FOnEndPlaySignature, FDelegateHandle);

@@ -12,6 +12,7 @@
 #include "Player/CGPlayer.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Slate/SceneViewport.h"
+#include "CGUtils.h"
 
 using namespace Test;
 
@@ -25,44 +26,6 @@ END_DEFINE_SPEC(FFramework)
 
 void FFramework::Define()
 {
-    Describe("Framework.GameMode",
-             [this]()
-             {
-                 BeforeEach(
-                     [this]()
-                     {
-                         AutomationOpenMap("/Game/Levels/GameLevel");
-                         World = GetTestGameWorld();
-                         if (!TestNotNull("World should exist.", World))
-                             return;
-
-                         GameMode = World->GetAuthGameMode<ACGGameMode>();
-                         if (!TestNotNull("GameMode should exist.", GameMode))
-                             return;
-
-                         GameUserSettings = UCGGameUserSettings::Get();
-                         TestNotNull("GameUserSettings should exist.", GameUserSettings);
-                     });
-
-                 It("AllDifficultyDataShouldBeSet",
-                    [this]()
-                    {
-                        const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
-                        for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
-                        {
-                            GameUserSettings->SetDifficulty(static_cast<EDifficulty>(i));
-
-                            TestTrueExpr(GameMode->GetDifficultyData() != nullptr);
-                        }
-                    });
-
-                 AfterEach(
-                     [this]()
-                     {
-                         SpecCloseLevel(World);
-                     });
-             });
-
     Describe("Framework.GameMode",
              [this]()
              {
@@ -400,7 +363,7 @@ void FFramework::Define()
                                                           ChangeData.ToString(),                                                             // ChangeData
                                                           FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                TestTrueExpr(GameMode->IsCubeNegative(CubeType) == ExpectedValue);
+                                TestTrueExpr(CubeGame::Utils::IsCubeNegative(CubeType, GameMode->GetDifficultyData()) == ExpectedValue);
                             });
                      }
                  }

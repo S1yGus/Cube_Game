@@ -18,9 +18,9 @@ ACGBaseCubeActor::ACGBaseCubeActor()
     SetRootComponent(StaticMeshComponent);
 }
 
-void ACGBaseCubeActor::SetColor(const FCubeColorData& NewCubeColorData)
+void ACGBaseCubeActor::SetColor(const FCubeColorData& InCubeColorData)
 {
-    CubeColorData = NewCubeColorData;
+    CubeColorData = InCubeColorData;
     UMaterialInstanceDynamic* DynMaterial = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
     DynMaterial->SetVectorParameterValue(ColorParamName, CubeColorData.Color);
     DynMaterial->SetScalarParameterValue(EmissivePowerParamName, CubeColorData.EmissivePower);

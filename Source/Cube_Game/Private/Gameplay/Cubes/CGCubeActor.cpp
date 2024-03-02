@@ -4,7 +4,6 @@
 #include "Gameplay/Cubes/Components/CGMovementComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
-#include "CGGameMode.h"
 #include "CGUtils.h"
 
 ACGCubeActor::ACGCubeActor()
@@ -21,6 +20,18 @@ ACGCubeActor::ACGCubeActor()
     StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
+void ACGCubeActor::Init(const FSpeedData& InSpeedData, int32 InGameSpeed, ECubeType InCubeType, const FCubeColorData& InCubeColorData, float InLifeDistance,
+                        const FDelegateHandle& InOnSpeedChangedHandle)
+{
+    MovementComponent->SetSpeedData(InSpeedData);
+    MovementComponent->SetGameSpeed(InGameSpeed);
+    CubeType = InCubeType;
+    LifeDistance = InLifeDistance;
+    OnSpeedChangedHandle = InOnSpeedChangedHandle;
+    TrailNiagaraComponent->SetColorParameter(NiagaraColorParamName, InCubeColorData.Color);
+    SetColor(InCubeColorData);
+}
+
 void ACGCubeActor::Annihilate()
 {
     EndPlayAction();
@@ -33,11 +44,10 @@ void ACGCubeActor::Collect()
     SpawnCollectEffect();
 }
 
-void ACGCubeActor::SetColor(const FCubeColorData& NewCubeColorData)
+void ACGCubeActor::OnSpeedChanged(int32 InGameSpeed)
 {
-    Super::SetColor(NewCubeColorData);
-
-    TrailNiagaraComponent->SetColorParameter(NiagaraColorParamName, NewCubeColorData.Color);
+    MovementComponent->SetGameSpeed(InGameSpeed);
+    SetTeardownTimer();
 }
 
 void ACGCubeActor::BeginPlay()
@@ -46,19 +56,24 @@ void ACGCubeActor::BeginPlay()
 
     check(TrailNiagaraComponent->GetAsset());
 
-    SetLifeSpan(LifeDistance / GetCubeSpeed());
+    SetTeardownTimer();
 }
 
-int32 ACGCubeActor::GetCubeSpeed() const
+void ACGCubeActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    if (GetWorld())
+    Super::EndPlay(EndPlayReason);
+
+    if (OnEndPlay.IsBound())
     {
-        if (const auto* GameMode = GetWorld()->GetAuthGameMode<ACGGameMode>())
-        {
-            return GameMode->GetCubeSpeed();
-        }
+        OnEndPlay.Execute(OnSpeedChangedHandle);
     }
-    return 0;
+}
+
+void ACGCubeActor::SetTeardownTimer()
+{
+    const float CubeSpeed = MovementComponent->GetSpeed();
+    check(CubeSpeed != 0.0f);
+    GetWorldTimerManager().SetTimer(TeardownTimerHandle, this, &ThisClass::Teardown, (LifeDistance - MovementComponent->GetDistance()) / CubeSpeed);
 }
 
 void ACGCubeActor::EndPlayAction()
@@ -73,7 +88,7 @@ void ACGCubeActor::SpawnAnnihilateEffect()
     UNiagaraComponent* NiagaraFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, AnnihilateNiagaraSystem, GetActorLocation());
     check(NiagaraFX);
     NiagaraFX->SetColorParameter(NiagaraColorParamName, CubeColorData.Color * CubeColorData.EmissivePower);
-    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{-static_cast<double>(MovementComponent->GetCubeSpeed()), 0.0, 0.0});
+    NiagaraFX->SetVectorParameter(NiagaraVelocityParamName, FVector{-static_cast<double>(MovementComponent->GetSpeed()), 0.0, 0.0});
     NiagaraFX->SetVectorParameter(NiagaraCubeSizeParamName, CubeGame::Utils::GetMeshAABBBoxSize(StaticMeshComponent->GetStaticMesh()));
 }
 

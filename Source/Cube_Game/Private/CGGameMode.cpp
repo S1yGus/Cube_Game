@@ -9,11 +9,11 @@
 #include "Player/Components/CGBonusComponent.h"
 #include "Player/CGPlayerController.h"
 #include "Gameplay/CGFieldActor.h"
-#include "Player/CGPlayer.h"
 #include "NiagaraFunctionLibrary.h"
+#include "CGUtils.h"
 
 constexpr static float CountdownTimerRate{1.0f};
-constexpr static double VFXSpawnZOffset{-100.0};
+constexpr static double BackgroundVFXZOffset{-100.0};
 
 static TQueue<EHintType> HintsQueue;
 
@@ -24,74 +24,26 @@ ACGGameMode::ACGGameMode()
     HUDClass = ACGHUDGame::StaticClass();
 }
 
-int32 ACGGameMode::GetCubeSpeed() const
+const FDifficulty& ACGGameMode::GetDifficultyData() const
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData())
-    {
-        return FMath::GetMappedRangeValueClamped(SpeedRange, DifficultyData->CubesSpeedRange, static_cast<float>(GameSpeed));
-    }
-
-    return 0;
-}
-
-const FDifficulty* ACGGameMode::GetDifficultyData() const
-{
-    if (const auto* GameUserSettings = UCGGameUserSettings::Get();    //
-        GameUserSettings && DifficultyMap.Contains(GameUserSettings->GetCurrentDifficulty()))
-    {
-        return &DifficultyMap[GameUserSettings->GetCurrentDifficulty()];
-    }
-
-    return nullptr;
-}
-
-bool ACGGameMode::IsCubeNegative(ECubeType CubeType) const
-{
-    if (const FDifficulty* DifficultyData = GetDifficultyData())
-    {
-        if (DifficultyData->ScoreChangeMap.Contains(CubeType))
-        {
-            if (DifficultyData->ScoreChangeMap[CubeType] < 0)
-            {
-                return true;
-            }
-        }
-
-        if (DifficultyData->TimeChangeMap.Contains(CubeType))
-        {
-            if (DifficultyData->TimeChangeMap[CubeType] < 0)
-            {
-                return true;
-            }
-        }
-
-        if (DifficultyData->SpeedChangeMap.Contains(CubeType))
-        {
-            if (DifficultyData->SpeedChangeMap[CubeType] > 0)
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return DifficultyMap[CurrentDifficulty];
 }
 
 void ACGGameMode::ChangeGameTime(ECubeType CubeType)
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
-        DifficultyData && DifficultyData->TimeChangeMap.Contains(CubeType))
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.TimeChangeMap.Contains(CubeType))
     {
-        AddTime(DifficultyData->TimeChangeMap[CubeType]);
+        AddTime(DifficultyData.TimeChangeMap[CubeType]);
     }
 }
 
 void ACGGameMode::ChangeGameSpeed(ECubeType CubeType)
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
-        DifficultyData && DifficultyData->SpeedChangeMap.Contains(CubeType))
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.SpeedChangeMap.Contains(CubeType))
     {
-        AddGameSpeed(DifficultyData->SpeedChangeMap[CubeType]);
+        AddGameSpeed(DifficultyData.SpeedChangeMap[CubeType]);
     }
 }
 
@@ -99,14 +51,14 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
 {
     ChangeMultiplier(CubeType);
 
-    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
-        DifficultyData && DifficultyData->ScoreChangeMap.Contains(CubeType))
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.ScoreChangeMap.Contains(CubeType))
     {
-        const int32 ScoreRemains = Score % DifficultyData->ScoreToSpeedUp;
-        const int32 ScoreToAdd = Multiplier * DifficultyData->ScoreChangeMap[CubeType];
+        const int32 ScoreRemains = Score % DifficultyData.ScoreToSpeedUp;
+        const int32 ScoreToAdd = Multiplier * DifficultyData.ScoreChangeMap[CubeType];
         if (ScoreToAdd > 0)
         {
-            if (const int32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData->ScoreToSpeedUp)
+            if (const int32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData.ScoreToSpeedUp)
             {
                 AddGameSpeed(SpeedToAdd);
             }
@@ -118,7 +70,7 @@ void ACGGameMode::ChangeScore(ECubeType CubeType)
 
 void ACGGameMode::EnqueueHint(ECubeType CubeType)
 {
-    EnqueueHint(ConvertCubeTypeToHintType(CubeType));
+    EnqueueHint(CubeGame::Utils::CubeTypeToHintType(CubeType));
 }
 
 void ACGGameMode::GameOver()
@@ -138,17 +90,15 @@ void ACGGameMode::StartPlay()
 {
     Super::StartPlay();
 
-    SetupGameMode();
+#if WITH_EDITOR
+    const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
+    for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
+    {
+        check(DifficultyMap.Contains(static_cast<EDifficulty>(i)));
+    }
+#endif    // WITH_EDITOR
 
-    SetGameState(EGameState::Game);
-    GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ThisClass::OnCountdown, CountdownTimerRate, true);
-    GetWorldTimerManager().SetTimer(
-        StartupHintDelayTimerHandle,
-        [this]()
-        {
-            EnqueueHint(EHintType::Startup);
-        },
-        StartupHintDelay, false);
+    SetupGameMode();
 }
 
 bool ACGGameMode::ClearPause()
@@ -164,10 +114,7 @@ void ACGGameMode::PreInitializeComponents()
 {
     Super::PreInitializeComponents();
 
-    if (const FDifficulty* DifficultyData = GetDifficultyData())
-    {
-        GameTime = DifficultyData->InitialTime;
-    }
+    GameTime = GetDifficultyData().InitialTime;
 }
 
 void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -177,35 +124,75 @@ void ACGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
     GetWorldTimerManager().ClearTimer(StartupHintDelayTimerHandle);    // Cos the timer starts lambda.
 }
 
+ACGPlayer* ACGGameMode::GetPlayerPawn()
+{
+    return GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn<ACGPlayer>() : nullptr;
+}
+
+UCGBonusComponent* ACGGameMode::GetPlayerBonusComponent()
+{
+    if (const auto* PlayerPawn = GetPlayerPawn())
+    {
+        return PlayerPawn->FindComponentByClass<UCGBonusComponent>();
+    }
+    return nullptr;
+}
+
+ACGFieldActor* ACGGameMode::SpawnField(const FTransform& Origin)
+{
+    if (auto* Field = GetWorld()->SpawnActorDeferred<ACGFieldActor>(FieldClass, Origin))
+    {
+        Field->Init(GetDifficultyData(), GetGameSpeed(), MaxMultiplier);
+        OnSpeedChanged.AddUObject(Field, &ACGFieldActor::OnGameSpeedChanged);
+        OnMultiplierChanged.AddUObject(Field, &ACGFieldActor::OnMultiplierChanged);
+        if (auto* BonusComponent = GetPlayerBonusComponent())
+        {
+            BonusComponent->OnBonusChanged.AddUObject(Field, &ACGFieldActor::OnBonusChanged);
+        }
+        Field->FinishSpawning(Origin);
+        return Field;
+    }
+    return nullptr;
+}
+
+void ACGGameMode::SpawnBackgroundVFX(const FTransform& Origin, const FVector& FieldSize)
+{
+    UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),                 //
+                                                   BackgroundNiagaraSystem,    //
+                                                   Origin.GetLocation() + FVector{0.5 * FieldSize.X, 0.5 * FieldSize.Y, BackgroundVFXZOffset});
+}
+
 void ACGGameMode::SetupGameMode()
 {
     if (!GetWorld())
         return;
 
-    const auto Origin{FTransform::Identity};
-    const auto* Field = GetWorld()->SpawnActor<ACGFieldActor>(FieldClass, Origin);
-    check(Field);
-
-    const FVector FieldSize = Field->GetSize();
-    const auto* BackgroundVFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),                 //
-                                                                               BackgroundNiagaraSystem,    //
-                                                                               FVector{0.5 * FieldSize.X, 0.5 * FieldSize.Y, VFXSpawnZOffset});
-    check(BackgroundVFX);
-
-    if (auto* PlayerPawn = GetWorld()->GetFirstPlayerController() ? GetWorld()->GetFirstPlayerController()->GetPawn<ACGPlayer>() : nullptr)
+    if (const auto Origin{FTransform::Identity};    //
+        const auto* Field = SpawnField(Origin))
     {
-        PlayerPawn->UpdateLocation(Origin, FieldSize);
-
-        if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
+        const auto FieldSize = Field->GetSize();
+        SpawnBackgroundVFX(Origin, FieldSize);
+        if (auto* PlayerPawn = GetPlayerPawn())
         {
-            BonusComponent->OnBonusCharged.AddLambda(
-                [this](bool IsCharged)
-                {
-                    EnqueueHint(EHintType::BonusCharged);
-                });
+            PlayerPawn->UpdateLocation(Origin, FieldSize);
         }
     }
 
+    GetWorldTimerManager().SetTimer(
+        StartupHintDelayTimerHandle,
+        [this]()
+        {
+            EnqueueHint(EHintType::Startup);
+        },
+        StartupHintDelay, false);
+    if (auto* BonusComponent = GetPlayerBonusComponent())
+    {
+        BonusComponent->OnBonusCharged.AddLambda(
+            [this](bool IsCharged)
+            {
+                EnqueueHint(EHintType::BonusCharged);
+            });
+    }
     OnMultiplierChanged.AddLambda(
         [this](ECubeType, int32)
         {
@@ -226,9 +213,13 @@ void ACGGameMode::SetupGameMode()
 
     if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
+        CurrentDifficulty = GameUserSettings->GetCurrentDifficulty();
         CachedHintsStatusMap = GameUserSettings->GetHintsStatus();
         GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
     }
+
+    SetGameState(EGameState::Game);
+    GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ThisClass::OnCountdown, CountdownTimerRate, true);
 }
 
 void ACGGameMode::OnCountdown()
@@ -238,29 +229,6 @@ void ACGGameMode::OnCountdown()
     if (GameTime < LowTimeThreshold)
     {
         OnLowTime.Broadcast();
-    }
-}
-
-EHintType ACGGameMode::ConvertCubeTypeToHintType(ECubeType CubeType)
-{
-    switch (CubeType)
-    {
-        case ECubeType::GoodCube:
-            return EHintType::GoodCube;
-        case ECubeType::BadCube:
-            return EHintType::BadCube;
-        case ECubeType::ScoreCube:
-            return EHintType::ScoreCube;
-        case ECubeType::TimeCube:
-            return EHintType::TimeCube;
-        case ECubeType::BonusCube:
-            return EHintType::BonusCube;
-        case ECubeType::SpeedCube:
-            return EHintType::SpeedCube;
-        case ECubeType::VeryBadCube:
-            return EHintType::VeryBadCube;
-        default:
-            return EHintType::Max;
     }
 }
 
@@ -279,11 +247,8 @@ void ACGGameMode::FormatHints()
     if (GameplayHintsMap.Contains(EHintType::SpeedUp) && GameplayHintsMap[EHintType::SpeedUp].HintText.ToString().Contains("{0}"))
     {
         FStringFormatOrderedArguments SpeedUpHintArg;
-        if (const FDifficulty* DifficultyData = GetDifficultyData())
-        {
-            SpeedUpHintArg.Add(GetDifficultyData()->ScoreToSpeedUp);
-            GameplayHintsMap[EHintType::SpeedUp].HintText = FText::FromString(FString::Format(*GameplayHintsMap[EHintType::SpeedUp].HintText.ToString(), SpeedUpHintArg));
-        }
+        SpeedUpHintArg.Add(GetDifficultyData().ScoreToSpeedUp);
+        GameplayHintsMap[EHintType::SpeedUp].HintText = FText::FromString(FString::Format(*GameplayHintsMap[EHintType::SpeedUp].HintText.ToString(), SpeedUpHintArg));
     }
 }
 
@@ -348,10 +313,9 @@ void ACGGameMode::AddScore(int32 ScoreToAdd)
 
 void ACGGameMode::ChangeMultiplier(ECubeType CubeType)
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData();    //
-        DifficultyData                                              //
-        && DifficultyData->ScoreChangeMap.Contains(CubeType)        //
-        && DifficultyData->ScoreChangeMap[CubeType] > 0             //
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.ScoreChangeMap.Contains(CubeType)     //
+        && DifficultyData.ScoreChangeMap[CubeType] > 0       //
         && CubeType == PreviousCubeType)
     {
         if (Multiplier + 1 <= MaxMultiplier)

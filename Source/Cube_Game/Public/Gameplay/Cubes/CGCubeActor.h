@@ -19,13 +19,16 @@ class CUBE_GAME_API ACGCubeActor : public ACGBaseCubeActor
 public:
     ACGCubeActor();
 
-    void SetCubeType(ECubeType NewCubeType) { CubeType = NewCubeType; }
+    FOnEndPlaySignature OnEndPlay;
+
+    void Init(const FSpeedData& InSpeedData, int32 InGameSpeed, ECubeType InCubeType, const FCubeColorData& InCubeColorData, float InLifeDistance,
+              const FDelegateHandle& InOnSpeedChangedHandle);
     ECubeType GetCubeType() const { return CubeType; }
 
     void Annihilate();
     void Collect();
 
-    virtual void SetColor(const FCubeColorData& NewCubeColorData) override;
+    void OnSpeedChanged(int32 InGameSpeed);
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -55,15 +58,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     FName NiagaraColorParamName{"Color"};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    float LifeDistance{1800.0f};
-
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+    FTimerHandle TeardownTimerHandle;
     ECubeType CubeType{ECubeType::None};
+    float LifeDistance{0.0f};
+    FDelegateHandle OnSpeedChangedHandle;
 
-    FORCEINLINE int32 GetCubeSpeed() const;
+    FORCEINLINE void SetTeardownTimer();
     FORCEINLINE void EndPlayAction();
     FORCEINLINE void SpawnAnnihilateEffect();
     FORCEINLINE void SpawnCollectEffect();
