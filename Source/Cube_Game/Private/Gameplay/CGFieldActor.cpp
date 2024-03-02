@@ -1,13 +1,12 @@
 // Cube_Game, All rights reserved.
 
 #include "Gameplay/CGFieldActor.h"
-#include "CGGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Gameplay/Cubes/CGBaseCubeActor.h"
 #include "Gameplay/Cubes/CGCubeActor.h"
-#include "Player/Components/CGBonusComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Gameplay/Components/CGMusicComponent.h"
+#include "CGUtils.h"
 
 constexpr static float IndicatorAmplitudeMultiplier{200.0f};
 
@@ -31,6 +30,13 @@ ACGFieldActor::ACGFieldActor()
     check(MusicComponent);
 }
 
+void ACGFieldActor::Init(const FDifficulty& DifficultyData, int32 GameSpeed, int32 MaxMultiplier)
+{
+    CurrentDifficultyData = DifficultyData;
+    CurrentGameSpeed = GameSpeed;
+    BonusIndicatorPosition = MaxMultiplier - 1;
+}
+
 FVector ACGFieldActor::GetSize() const
 {
     const FBox Box = StaticMeshComponent->GetStaticMesh()->GetBoundingBox();
@@ -50,21 +56,6 @@ void ACGFieldActor::BeginPlay()
 
     check(StaticMeshComponent->GetStaticMesh());
 
-    if (auto* GameMode = GetGameMode())
-    {
-        GameMode->OnSpeedChanged.AddUObject(this, &ThisClass::OnSpeedChanged);
-        GameMode->OnMultiplierChanged.AddUObject(this, &ThisClass::OnMultiplierChanged);
-        BonusIndicatorPosition = GameMode->GetMaxMultiplier() - 1;
-    }
-
-    if (const auto* PlayerPawn = GetPlayerPawn())
-    {
-        if (auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>())
-        {
-            BonusComponent->OnBonusChanged.AddUObject(this, &ThisClass::OnBonusChanged);
-        }
-    }
-
     ChangeFieldColor(EBonusType::None);    // Set default field color.
 
     RestoreSpawnPositions();
@@ -73,106 +64,76 @@ void ACGFieldActor::BeginPlay()
 
 float ACGFieldActor::GetSpawnTimerRate() const
 {
-    const auto* GameMode = GetGameMode();
-    const auto* DifficultyData = GetDifficultyData();
-    if (GameMode && DifficultyData)
-    {
-        return DifficultyData->DistanceBetweenCubes / GameMode->GetCubeSpeed();
-    }
-
-    return 0.0f;
+    return CurrentDifficultyData.DistanceBetweenCubes / CubeGame::Utils::ComputeCubeSpeed(CurrentDifficultyData.SpeedData, CurrentGameSpeed);
 }
 
 ECubeType ACGFieldActor::GetRandomCubeType() const
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData())
+    const float RandNum = FMath::FRand();
+    TArray<ECubeType> RandItems;
+    for (const auto& [Type, Probability] : CurrentDifficultyData.SpawnWeightMap)
     {
-        const float RandNum = FMath::FRand();
-        TArray<ECubeType> RandItems;
-        for (const auto& [Type, Probability] : DifficultyData->SpawnWeightMap)
+        if (RandNum < Probability)
         {
-            if (RandNum < Probability)
-            {
-                RandItems.Add(Type);
-            }
+            RandItems.Add(Type);
         }
+    }
 
-        if (!RandItems.IsEmpty())
-        {
-            return RandItems[FMath::RandHelper(RandItems.Num())];
-        }
+    if (!RandItems.IsEmpty())
+    {
+        return RandItems[FMath::RandHelper(RandItems.Num())];
     }
 
     return ECubeType::None;
 }
 
-ACGGameMode* ACGFieldActor::GetGameMode() const
-{
-    return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-}
-
-const FDifficulty* ACGFieldActor::GetDifficultyData() const
-{
-    if (const auto* GameMode = GetGameMode(); GameMode && GameMode->GetDifficultyData())
-    {
-        return GameMode->GetDifficultyData();
-    }
-
-    return nullptr;
-}
-
-const APawn* ACGFieldActor::GetPlayerPawn() const
-{
-    if (GetWorld())
-    {
-        if (const auto* PC = GetWorld()->GetFirstPlayerController())
-        {
-            return PC->GetPawn();
-        }
-    }
-
-    return nullptr;
-}
-
 void ACGFieldActor::OnSpawnCube()
 {
-    if (const FDifficulty* DifficultyData = GetDifficultyData())
+    if (++CubesInLine <= CurrentDifficultyData.MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
     {
-        if (++CubesInLine <= DifficultyData->MaxNumOfCubesInLine && CubesInLine <= SpawnPositionsAmount)
+        const int32 RandIndex = FMath::RandHelper(SpawnPositions.Num());
+        SpawnCube(SpawnPositions[RandIndex]);
+        SpawnPositions.RemoveAt(RandIndex);
+
+        if (UKismetMathLibrary::RandomBoolWithWeight(CurrentDifficultyData.ChanceToAddCubeInLine))
         {
-            const int32 RandIndex = FMath::RandHelper(SpawnPositions.Num());
-            SpawnCube(SpawnPositions[RandIndex]);
-            SpawnPositions.RemoveAt(RandIndex);
-
-            if (UKismetMathLibrary::RandomBoolWithWeight(DifficultyData->ChanceToAddCubeInLine))
-            {
-                OnSpawnCube();
-                return;
-            }
+            OnSpawnCube();
+            return;
         }
-
-        if (bRestartSpawnAfterSpeedChanged)    // Spawn is restarting after speed have been changed.
-        {
-            GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
-            bRestartSpawnAfterSpeedChanged = false;
-        }
-
-        RestoreSpawnPositions();
     }
+
+    if (bRestartSpawnAfterSpeedChanged)    // Spawn is restarting after speed have been changed.
+    {
+        GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ThisClass::OnSpawnCube, GetSpawnTimerRate(), true);
+        bRestartSpawnAfterSpeedChanged = false;
+    }
+
+    RestoreSpawnPositions();
 }
 
 void ACGFieldActor::SpawnCube(int32 SpawnPosition)
 {
-    const FVector RelativeLocation{CubesSpawnXOffset, SpawnPosition * CubesSpawnStep + CubesSpawnYOffset, CubesSpawnZOffset};
-    const ECubeType CubeType = GetRandomCubeType();
-    const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
-    auto* SpawnedCube = SpawnCubeActor<ACGCubeActor>(SpawningCubeClass, RelativeLocation, CubeColorData);
-    SpawnedCube->SetCubeType(CubeType);
+    const auto RelativeLocation = FVector{CubesSpawnXOffset, SpawnPosition * CubesSpawnStep + CubesSpawnYOffset, CubesSpawnZOffset};
+    const auto SpawnTransform = FTransform{RelativeLocation} * GetTransform();
+    auto* SpawnedCube = GetWorld() ? GetWorld()->SpawnActorDeferred<ACGCubeActor>(SpawningCubeClass, SpawnTransform) : nullptr;
+    check(SpawnedCube);
+    const auto CubeType = GetRandomCubeType();
+    const auto ColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
+    const auto OnSpeedChangedHandle = OnSpeedChanged.AddUObject(SpawnedCube, &ACGCubeActor::OnSpeedChanged);
+    SpawnedCube->Init(CurrentDifficultyData.SpeedData, CurrentGameSpeed, CubeType, ColorData, GetSize().X, OnSpeedChangedHandle);
+    SpawnedCube->OnEndPlay.BindLambda(
+        [&](FDelegateHandle OnSpeedChangedHandle)
+        {
+            OnSpeedChanged.Remove(OnSpeedChangedHandle);
+        });
+    SpawnedCube->FinishSpawning(SpawnTransform);
 }
 
-void ACGFieldActor::OnSpeedChanged(int32 NewSpeed)
+void ACGFieldActor::OnGameSpeedChanged(int32 InSpeed)
 {
+    CurrentGameSpeed = InSpeed;
     bRestartSpawnAfterSpeedChanged = true;
+    OnSpeedChanged.Broadcast(CurrentGameSpeed);
 }
 
 void ACGFieldActor::RestoreSpawnPositions()
@@ -205,11 +166,12 @@ void ACGFieldActor::OnMultiplierChanged(ECubeType CubeType, int32 Multiplier)
 void ACGFieldActor::SpawnIndicator(ECubeType CubeType, int32 Multiplier)
 {
     // (Multiplier - 2) because the first an indicator cube spawn when Multiplier be 2.
-    const FVector RelativeLocation{(Multiplier - 2) * IndicatorsSpawnStep + IndicatorsSpawnXOffset,    //
-                                   SpawnPositionsAmount * CubesSpawnStep + CubesSpawnYOffset,          //
-                                   CubesSpawnZOffset};                                                 //
-    const auto CubeColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
-    auto* Indicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
+    const auto RelativeLocation = FVector{(Multiplier - 2) * IndicatorsSpawnStep + IndicatorsSpawnXOffset,    //
+                                          SpawnPositionsAmount * CubesSpawnStep + CubesSpawnYOffset,          //
+                                          CubesSpawnZOffset};                                                 //
+    const auto ColorData = CubeColorDataMap.Contains(CubeType) ? CubeColorDataMap[CubeType] : FCubeColorData{};
+    auto* Indicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation);
+    Indicator->SetColor(ColorData);
     Indicators.Add(Indicator);
 }
 
@@ -242,11 +204,12 @@ void ACGFieldActor::ChangeFieldColor(EBonusType BonusType)
 
 void ACGFieldActor::SpawnBonusIndicator(EBonusType BonusType)
 {
-    const FVector RelativeLocation{BonusIndicatorPosition * IndicatorsSpawnStep + IndicatorsSpawnXOffset,    //
-                                   SpawnPositionsAmount * CubesSpawnStep + CubesSpawnYOffset,                //
-                                   CubesSpawnZOffset};                                                       //
-    const auto CubeColorData = BonusColorDataMap.Contains(BonusType) ? BonusColorDataMap[BonusType] : FCubeColorData{};
-    BonusIndicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation, CubeColorData);
+    const auto RelativeLocation = FVector{BonusIndicatorPosition * IndicatorsSpawnStep + IndicatorsSpawnXOffset,    //
+                                          SpawnPositionsAmount * CubesSpawnStep + CubesSpawnYOffset,                //
+                                          CubesSpawnZOffset};                                                       //
+    const auto ColorData = BonusColorDataMap.Contains(BonusType) ? BonusColorDataMap[BonusType] : FCubeColorData{};
+    BonusIndicator = SpawnCubeActor<ACGBaseCubeActor>(IndicatorClass, RelativeLocation);
+    BonusIndicator->SetColor(ColorData);
     BonusIndicator->OnDestroyed.AddDynamic(this, &ThisClass::OnBonusIndicatorDestroyed);
 }
 

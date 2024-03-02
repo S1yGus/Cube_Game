@@ -15,7 +15,7 @@ class CUBE_GAME_API ACGBaseCubeActor : public AActor
 public:
     ACGBaseCubeActor();
 
-    virtual void SetColor(const FCubeColorData& NewCubeColorData);
+    void SetColor(const FCubeColorData& InCubeColorData);
     virtual void Teardown();
 
 protected:
@@ -39,7 +39,7 @@ protected:
 
     FCubeColorData CubeColorData;
 
-    FORCEINLINE UStaticMeshComponent* GetPlayerMesh() const;
+    UStaticMeshComponent* GetPlayerMesh() const;
 
     virtual void BeginPlay() override;
 

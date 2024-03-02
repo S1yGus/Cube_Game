@@ -60,11 +60,12 @@ void FIntegration::Define()
                          if (!TestNotNull("BonusComponent should exist.", BonusComponent))
                              return;
 
-                         Cube = CreateBlueprint<ACGCubeActor>(World, CubeRef, FTransform{SpawnLocation});
+                         Cube = CreateBlueprintDeferred<ACGCubeActor>(World, CubeRef, FTransform{SpawnLocation});
                          if (!TestNotNull("Cube should exist.", Cube))
                              return;
 
-                         Cube->SetCubeType(CubeType);
+                         Cube->Init({1, 0}, 0, CubeType, {}, 0, {});
+                         Cube->FinishSpawning(FTransform{SpawnLocation});
                          GameMode = World->GetAuthGameMode<ACGGameMode>();
                          if (!TestNotNull("GameMode should exist.", GameMode))
                              return;

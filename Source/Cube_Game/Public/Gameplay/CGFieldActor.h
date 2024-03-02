@@ -21,7 +21,12 @@ class CUBE_GAME_API ACGFieldActor : public AActor
 public:
     ACGFieldActor();
 
+    void Init(const FDifficulty& DifficultyData, int32 GameSpeed, int32 MaxMultiplier);
     FVector GetSize() const;
+
+    void OnGameSpeedChanged(int32 InSpeed);
+    void OnMultiplierChanged(ECubeType CubeType, int32 Multiplier);
+    void OnBonusChanged(EBonusType BonusType);
 
     virtual void PostInitializeComponents() override;
 
@@ -77,9 +82,13 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+    FOnSpeedChangedSignature OnSpeedChanged;
+
+    FDifficulty CurrentDifficultyData;
+    int32 CurrentGameSpeed{0};
+
     FTimerHandle SpawnTimerHandle;
     bool bRestartSpawnAfterSpeedChanged{false};
-
     int32 CubesInLine{0};
     TArray<int32> SpawnPositions;
 
@@ -92,19 +101,12 @@ private:
 
     FORCEINLINE float GetSpawnTimerRate() const;
     FORCEINLINE ECubeType GetRandomCubeType() const;
-    FORCEINLINE ACGGameMode* GetGameMode() const;
-    FORCEINLINE const FDifficulty* GetDifficultyData() const;
-    FORCEINLINE const APawn* GetPlayerPawn() const;
 
     void OnSpawnCube();
     void SpawnCube(int32 SpawnPosition);
-    void OnSpeedChanged(int32 NewSpeed);
     void RestoreSpawnPositions();
-
-    void OnMultiplierChanged(ECubeType CubeType, int32 Multiplier);
     void SpawnIndicator(ECubeType CubeType, int32 Multiplier);
 
-    void OnBonusChanged(EBonusType BonusType);
     void ChangeFieldColor(EBonusType BonusType);
     void SpawnBonusIndicator(EBonusType BonusType);
     UFUNCTION()
@@ -113,12 +115,11 @@ private:
     void OnSpectralAnalysis(const TArray<float>& Magnitudes);
 
     template <class T>
-    T* SpawnCubeActor(UClass* CubeClass, const FVector& RelativeLocation, const FCubeColorData& CubeColorData)
+    T* SpawnCubeActor(UClass* CubeClass, const FVector& RelativeLocation)
     {
         const auto SpawnTransform = FTransform{RelativeLocation} * GetTransform();
         T* SpawnedCube = GetWorld() ? GetWorld()->SpawnActor<T>(CubeClass, SpawnTransform) : nullptr;
         check(SpawnedCube);
-        SpawnedCube->SetColor(CubeColorData);
         return SpawnedCube;
     }
 };

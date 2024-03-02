@@ -9,6 +9,8 @@
 
 class ACGFieldActor;
 class UNiagaraSystem;
+class ACGPlayer;
+class UCGBonusComponent;
 
 UCLASS()
 class CUBE_GAME_API ACGGameMode : public ACGGameModeBase
@@ -27,11 +29,8 @@ public:
 
     int32 GetGameTime() const { return GameTime; }
     int32 GetGameSpeed() const { return GameSpeed; }
-    int32 GetCubeSpeed() const;
     int32 GetScore() const { return Score; }
-    const FDifficulty* GetDifficultyData() const;
-    bool IsCubeNegative(ECubeType CubeType) const;
-    int32 GetMaxMultiplier() const { return MaxMultiplier; }
+    const FDifficulty& GetDifficultyData() const;
 
     void ChangeGameTime(ECubeType CubeType);
     void ChangeGameSpeed(ECubeType CubeType);
@@ -49,19 +48,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
     TMap<EDifficulty, FDifficulty> DifficultyMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty")
-    FVector2D SpeedRange{1.0f, 999.0f};
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0", Units = "s"))
     int32 LowTimeThreshold{5};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
     TMap<EHintType, FHintData> GameplayHintsMap;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0.0", Units = "s"))
     float StartupHintDelay{2.0f};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0", Units = "s"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0.0", Units = "s"))
     float NextHintDelay{0.2f};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Multiplier", Meta = (ClampMin = "1"))
@@ -87,12 +83,16 @@ private:
 
     ECubeType PreviousCubeType{ECubeType::None};
 
+    EDifficulty CurrentDifficulty{EDifficulty::Medium};
     FHintsStatus CachedHintsStatusMap;
 
+    FORCEINLINE ACGPlayer* GetPlayerPawn();
+    FORCEINLINE UCGBonusComponent* GetPlayerBonusComponent();
+    ACGFieldActor* SpawnField(const FTransform& Origin);
+    FORCEINLINE void SpawnBackgroundVFX(const FTransform& Origin, const FVector& FieldSize);
     void SetupGameMode();
     void OnCountdown();
 
-    FORCEINLINE EHintType ConvertCubeTypeToHintType(ECubeType CubeType);
     FORCEINLINE void InvalidateHintStatus(EHintType HintType);
     void FormatHints();
     void EnqueueHint(EHintType HintType);
