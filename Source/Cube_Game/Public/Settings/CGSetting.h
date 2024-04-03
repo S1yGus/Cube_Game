@@ -17,7 +17,7 @@ public:
 private:
     FText Name;
 
-    void SetName(const FText& NewName) { Name = NewName; }
+    void SetName(FText&& NewName) { Name = MoveTemp(NewName); }
 
     friend class UCGGameUserSettings;
 };

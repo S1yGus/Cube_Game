@@ -214,8 +214,9 @@ void ACGGameMode::SetupGameMode()
     if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
         CurrentDifficulty = GameUserSettings->GetCurrentDifficulty();
-        CachedHintsStatusMap = GameUserSettings->GetHintsStatus();
-        GameUserSettings->OnHintsStatusChanged.AddUObject(this, &ThisClass::OnHintsStatusChanged);
+        CachedHintSettings.bHintsEnabled = GameUserSettings->AreHintsEnabled();
+        CachedHintSettings.HintsStatusMap = GameUserSettings->GetHintsStatus();
+        GameUserSettings->OnHintSettingsChanged.AddUObject(this, &ThisClass::OnHintSettingsChanged);
     }
 
     SetGameState(EGameState::Game);
@@ -234,10 +235,11 @@ void ACGGameMode::OnCountdown()
 
 void ACGGameMode::InvalidateHintStatus(EHintType HintType)
 {
-    CachedHintsStatusMap[HintType] = true;
+    auto& HintsStatus = CachedHintSettings.HintsStatusMap;
+    HintsStatus[HintType] = true;
     if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameUserSettings->SetHintsStatus(CachedHintsStatusMap);
+        GameUserSettings->SetHintsStatus(HintsStatus);
     }
 }
 
@@ -254,7 +256,8 @@ void ACGGameMode::FormatHints()
 
 void ACGGameMode::EnqueueHint(EHintType HintType)
 {
-    if (CachedHintsStatusMap.Contains(HintType) && !CachedHintsStatusMap[HintType])
+    const auto& HintsStatus = CachedHintSettings.HintsStatusMap;
+    if (CachedHintSettings.bHintsEnabled && HintsStatus.Contains(HintType) && !HintsStatus[HintType])
     {
         HintsQueue.Enqueue(HintType);
 
@@ -269,7 +272,8 @@ void ACGGameMode::OnShowHint()
 {
     if (EHintType HintType; HintsQueue.Dequeue(HintType))
     {
-        if (CachedHintsStatusMap.Contains(HintType) && !CachedHintsStatusMap[HintType] && GameplayHintsMap.Contains(HintType))
+        const auto& HintsStatus = CachedHintSettings.HintsStatusMap;
+        if (HintsStatus.Contains(HintType) && !HintsStatus[HintType] && GameplayHintsMap.Contains(HintType))
         {
             SetPauseAndChangeGameState(EGameState::PopUpHint);
             OnShowPopUpHint.Broadcast(GameplayHintsMap[HintType]);
@@ -283,9 +287,9 @@ void ACGGameMode::OnShowHint()
     }
 }
 
-void ACGGameMode::OnHintsStatusChanged(const FHintsStatus& NewHintsStatus)
+void ACGGameMode::OnHintSettingsChanged(const FHintSettings& NewHintSettings)
 {
-    CachedHintsStatusMap = NewHintsStatus;
+    CachedHintSettings = NewHintSettings;
 }
 
 void ACGGameMode::AddTime(int32 TimeToAdd)

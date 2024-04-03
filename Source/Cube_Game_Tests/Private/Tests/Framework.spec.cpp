@@ -196,7 +196,7 @@ void FFramework::Define()
                                               ++PopUpHintAmount;
                                           });
 
-                                      GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
+                                      GameUserSettings->OnHintSettingsChanged.Broadcast({true, NewHintsStatus});
 
                                       for (int32 i = 0; i < StaticEnum<ECubeType>()->NumEnums() - 3; ++i)
                                       {
@@ -249,7 +249,7 @@ void FFramework::Define()
                                               ++PopUpHintAmount;
                                           });
 
-                                      GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
+                                      GameUserSettings->OnHintSettingsChanged.Broadcast({true, NewHintsStatus});
 
                                       for (int32 i = 1; i < StaticEnum<ECubeType>()->NumEnums() - 2; ++i)
                                       {
@@ -294,7 +294,7 @@ void FFramework::Define()
                                               ++PopUpHintAmount;
                                           });
 
-                                      GameUserSettings->OnHintsStatusChanged.Broadcast(NewHintsStatus);
+                                      GameUserSettings->OnHintSettingsChanged.Broadcast({true, NewHintsStatus});
 
                                       GameMode->EnqueueHint(ECubeType::GoodCube);
                                       GameMode->EnqueueHint(ECubeType::GoodCube);
