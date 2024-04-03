@@ -84,7 +84,7 @@ private:
     ECubeType PreviousCubeType{ECubeType::None};
 
     EDifficulty CurrentDifficulty{EDifficulty::Medium};
-    FHintsStatus CachedHintsStatusMap;
+    FHintSettings CachedHintSettings;
 
     FORCEINLINE ACGPlayer* GetPlayerPawn();
     FORCEINLINE UCGBonusComponent* GetPlayerBonusComponent();
@@ -97,7 +97,7 @@ private:
     void FormatHints();
     void EnqueueHint(EHintType HintType);
     void OnShowHint();
-    void OnHintsStatusChanged(const FHintsStatus& NewHintsStatus);
+    void OnHintSettingsChanged(const FHintSettings& NewHintSettings);
 
     FORCEINLINE void AddTime(int32 TimeToAdd);
     FORCEINLINE void AddGameSpeed(int32 SpeedToAdd);

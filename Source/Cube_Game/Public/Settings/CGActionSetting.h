@@ -21,9 +21,9 @@ private:
     TFunction<void()> Action;
     TFunction<bool()> Status;
 
-    void SetActionName(const FText& NewActionName) { ActionName = NewActionName; }
-    void AddActionFunc(TFunction<void()> Func) { Action = Func; }
-    void AddStatusFunc(TFunction<bool()> Func) { Status = Func; }
+    void SetActionName(FText&& NewActionName) { ActionName = MoveTemp(NewActionName); }
+    void AddActionFunc(TFunction<void()>&& Func) { Action = MoveTemp(Func); }
+    void AddStatusFunc(TFunction<bool()>&& Func) { Status = MoveTemp(Func); }
 
     friend class UCGGameUserSettings;
 };

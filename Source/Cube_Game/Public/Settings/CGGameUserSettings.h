@@ -13,6 +13,9 @@ class UCGFloatSetting;
 class UCGActionSetting;
 class UCGSettingsSave;
 
+template <class T>
+concept IsSetting = std::derived_from<T, UCGSetting>;
+
 UCLASS()
 class CUBE_GAME_API UCGGameUserSettings : public UGameUserSettings
 {
@@ -21,7 +24,7 @@ class CUBE_GAME_API UCGGameUserSettings : public UGameUserSettings
 public:
     FOnResolutionChangedSignature OnResolutionChanged;
     FOnPopUpTypeChangedSignature OnPopUpTypeChanged;
-    FOnHintsStatusChangedSignature OnHintsStatusChanged;
+    FOnHintSettingsChangedSignature OnHintSettingsChanged;
 
     UCGGameUserSettings();
 
@@ -30,6 +33,7 @@ public:
     const TArray<TObjectPtr<UCGSetting>>& GetSoundSettings() const { return SoundSettings; }
     const TArray<TObjectPtr<UCGSetting>>& GetGameSettings() const { return GameSettings; }
     EPopUpType GetPopUpType() const;
+    bool AreHintsEnabled() const;
     const FHintsStatus& GetHintsStatus() const;
     void SetHintsStatus(const FHintsStatus& NewHintsMap);
     EDifficulty GetCurrentDifficulty() const { return CurrentDifficulty; }
@@ -67,18 +71,17 @@ private:
 
     void CheckSettingsSave();
 
-    FORCEINLINE TObjectPtr<UCGIntSetting> CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo);
-    FORCEINLINE TObjectPtr<UCGFloatSetting> CreateFloatSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo);
-    FORCEINLINE TObjectPtr<UCGActionSetting> CreateActionSetting(const FText& Name, const FText& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE TObjectPtr<UCGIntSetting> CreateIntSetting(FText&& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE TObjectPtr<UCGFloatSetting> CreateFloatSetting(FText&& Name, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE TObjectPtr<UCGActionSetting> CreateActionSetting(FText&& Name, FText&& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo);
 
-    template <class T>
-    TObjectPtr<T> CreateSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
+    template <IsSetting T>
+    TObjectPtr<T> CreateSetting(FText&& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
     {
         TObjectPtr<T> Setting = NewObject<T>();
-        checkf(Setting->IsA(UCGSetting::StaticClass()), TEXT("T must be based on UCGSetting"));
-        Setting->SetName(Name);
+        check(Setting);
+        Setting->SetName(MoveTemp(Name));
         AddTo.Add(Setting);
-
         return Setting;
     }
 };

@@ -44,6 +44,7 @@ static bool operator==(const FCultureData& Data, const FString& Str)
 
 UCGGameUserSettings::UCGGameUserSettings()
 {
+    InitStringTable();
     InitVideoSettings();
     InitSoundSettings();
     InitGameSettings();
@@ -59,14 +60,19 @@ EPopUpType UCGGameUserSettings::GetPopUpType() const
     return SettingsSave->GameSettings.PopUpType;
 }
 
+bool UCGGameUserSettings::AreHintsEnabled() const
+{
+    return SettingsSave->GameSettings.HintSettings.bHintsEnabled;
+}
+
 const FHintsStatus& UCGGameUserSettings::GetHintsStatus() const
 {
-    return SettingsSave->GameSettings.HintsStatusMap;
+    return SettingsSave->GameSettings.HintSettings.HintsStatusMap;
 }
 
 void UCGGameUserSettings::SetHintsStatus(const FHintsStatus& NewHintsMap)
 {
-    SettingsSave->GameSettings.HintsStatusMap = NewHintsMap;
+    SettingsSave->GameSettings.HintSettings.HintsStatusMap = NewHintsMap;
     SaveSettings();
 }
 
@@ -240,7 +246,7 @@ void UCGGameUserSettings::InitGameSettings()
         TArray<FText> LanguageOptions;
         for (const auto& Culture : CultureData)
         {
-            LanguageOptions.Add(Culture.CultureName);
+            LanguageOptions.Emplace(Culture.CultureName);
         }
 
         auto Setting = CreateIntSetting(LOCTEXT("Language_Loc", "Language"), LanguageOptions, GameSettings);
@@ -272,21 +278,35 @@ void UCGGameUserSettings::InitGameSettings()
     }
 
     {
+        auto Setting = CreateIntSetting(LOCTEXT("Hints_Loc", "Hints"), HintOptions, GameSettings);
+        Setting->AddGetter(
+            [&]()
+            {
+                return static_cast<int32>(SettingsSave->GameSettings.HintSettings.bHintsEnabled);
+            });
+        Setting->AddSetter(
+            [&](int32 NewValue)
+            {
+                SettingsSave->GameSettings.HintSettings.bHintsEnabled = static_cast<bool>(NewValue);
+                OnHintSettingsChanged.Broadcast(SettingsSave->GameSettings.HintSettings);
+            });
+    }
+
+    {
         auto Setting = CreateActionSetting(LOCTEXT("ResetHints_Loc", "Reset hints"), LOCTEXT("ResetHintsButton_Loc", "RESET"), GameSettings);
         Setting->AddActionFunc(
             [&]()
             {
-                for (auto& HintPair : SettingsSave->GameSettings.HintsStatusMap)
+                for (auto& HintPair : SettingsSave->GameSettings.HintSettings.HintsStatusMap)
                 {
                     HintPair.Value = false;
                 }
-
-                OnHintsStatusChanged.Broadcast(SettingsSave->GameSettings.HintsStatusMap);
+                OnHintSettingsChanged.Broadcast(SettingsSave->GameSettings.HintSettings);
             });
         Setting->AddStatusFunc(
             [&]()
             {
-                for (const auto& HintPair : SettingsSave->GameSettings.HintsStatusMap)
+                for (const auto& HintPair : SettingsSave->GameSettings.HintSettings.HintsStatusMap)
                 {
                     if (HintPair.Value)    // If hint already have been shown.
                     {
@@ -424,25 +444,25 @@ void UCGGameUserSettings::CheckSettingsSave()
     check(SettingsSave);
 }
 
-TObjectPtr<UCGIntSetting> UCGGameUserSettings::CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo)
+TObjectPtr<UCGIntSetting> UCGGameUserSettings::CreateIntSetting(FText&& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
-    const auto Setting = CreateSetting<UCGIntSetting>(Name, AddTo);
+    const auto Setting = CreateSetting<UCGIntSetting>(MoveTemp(Name), AddTo);
     Setting->SetOptions(Options);
 
     return Setting;
 }
 
-TObjectPtr<UCGFloatSetting> UCGGameUserSettings::CreateFloatSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
+TObjectPtr<UCGFloatSetting> UCGGameUserSettings::CreateFloatSetting(FText&& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
-    const auto Setting = CreateSetting<UCGFloatSetting>(Name, AddTo);
+    const auto Setting = CreateSetting<UCGFloatSetting>(MoveTemp(Name), AddTo);
 
     return Setting;
 }
 
-TObjectPtr<UCGActionSetting> UCGGameUserSettings::CreateActionSetting(const FText& Name, const FText& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo)
+TObjectPtr<UCGActionSetting> UCGGameUserSettings::CreateActionSetting(FText&& Name, FText&& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
-    const auto Setting = CreateSetting<UCGActionSetting>(Name, AddTo);
-    Setting->SetActionName(ActionName);
+    const auto Setting = CreateSetting<UCGActionSetting>(MoveTemp(Name), AddTo);
+    Setting->SetActionName(MoveTemp(ActionName));
 
     return Setting;
 }

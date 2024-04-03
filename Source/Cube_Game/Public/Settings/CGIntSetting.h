@@ -22,8 +22,8 @@ private:
     TFunction<void(int32)> Setter;
 
     void SetOptions(const TArray<FText>& NewOptions) { Options = NewOptions; }
-    void AddGetter(TFunction<int32()> Func) { Getter = Func; }
-    void AddSetter(TFunction<void(int32)> Func) { Setter = Func; }
+    void AddGetter(TFunction<int32()>&& Func) { Getter = MoveTemp(Func); }
+    void AddSetter(TFunction<void(int32)>&& Func) { Setter = MoveTemp(Func); }
 
     friend class UCGGameUserSettings;
 };

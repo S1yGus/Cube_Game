@@ -19,8 +19,8 @@ private:
     TFunction<float()> Getter;
     TFunction<void(float)> Setter;
 
-    void AddGetter(TFunction<float()> Func) { Getter = Func; }
-    void AddSetter(TFunction<void(float)> Func) { Setter = Func; }
+    void AddGetter(TFunction<float()>&& Func) { Getter = MoveTemp(Func); }
+    void AddSetter(TFunction<void(float)>&& Func) { Setter = MoveTemp(Func); }
 
     friend class UCGGameUserSettings;
 };

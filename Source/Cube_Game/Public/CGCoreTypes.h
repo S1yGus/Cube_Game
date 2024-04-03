@@ -4,6 +4,8 @@
 
 #include "CGCoreTypes.generated.h"
 
+using FHintsStatus = TMap<EHintType, bool>;
+
 UENUM(BlueprintType)
 enum class EGameState : uint8
 {
@@ -163,12 +165,12 @@ struct FSoundSettings
 };
 
 USTRUCT(BlueprintType)
-struct FGameSettings
+struct FHintSettings
 {
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    EPopUpType PopUpType{EPopUpType::Multiplier};
+    bool bHintsEnabled{true};
 
     // clang-format off
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
@@ -185,6 +187,18 @@ struct FGameSettings
                                             {EHintType::SpeedCube,    false},
                                             {EHintType::VeryBadCube,  false}};
     // clang-format on
+};
+
+USTRUCT(BlueprintType)
+struct FGameSettings
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    EPopUpType PopUpType{EPopUpType::Multiplier};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    FHintSettings HintSettings;
 };
 
 USTRUCT(BlueprintType)
@@ -244,7 +258,6 @@ DECLARE_MULTICAST_DELEGATE(FOnPressedEscSignature);
 DECLARE_MULTICAST_DELEGATE(FOnPressedEnterSignature);
 DECLARE_MULTICAST_DELEGATE(FOnResolutionChangedSignature);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
-using FHintsStatus = TMap<EHintType, bool>;
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintsStatusChangedSignature, const FHintsStatus&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintSettingsChangedSignature, const FHintSettings&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBonusBeginOverlapSignature, class ACGCubeActor*, bool);
 DECLARE_DELEGATE_OneParam(FOnEndPlaySignature, FDelegateHandle);
