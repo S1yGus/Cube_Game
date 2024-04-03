@@ -315,6 +315,59 @@ void FFramework::Define()
                         TestTrueExpr(PopUpHintAmount == 1);
                     });
 
+                 It("DisabledHintsShouldNotBeShown", EAsyncExecution::ThreadPool,
+                    [this]()
+                    {
+                        const APawn* PlayerPawn = World->GetFirstPlayerController() ? World->GetFirstPlayerController()->GetPawn() : nullptr;
+                        if (!TestNotNull("PlayerPawn should exist.", PlayerPawn))
+                            return;
+
+                        const auto* BonusComponent = PlayerPawn->FindComponentByClass<UCGBonusComponent>();
+                        if (!TestNotNull("BonusComponent should exist.", BonusComponent))
+                            return;
+
+                        int32 PopUpHintAmount{0};
+                        const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, false},   {EHintType::Multiplier, false},   {EHintType::LowTime, false},
+                                                             {EHintType::SpeedUp, false},   {EHintType::BonusCharged, false}, {EHintType::GoodCube, false},
+                                                             {EHintType::BadCube, false},   {EHintType::ScoreCube, false},    {EHintType::TimeCube, false},
+                                                             {EHintType::BonusCube, false}, {EHintType::SpeedCube, false},    {EHintType::VeryBadCube, false}};
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameMode->OnShowPopUpHint.AddLambda(
+                                          [&](const FHintData&)
+                                          {
+                                              ++PopUpHintAmount;
+                                          });
+
+                                      GameUserSettings->OnHintSettingsChanged.Broadcast({false, NewHintsStatus});
+
+                                      for (int32 i = 0; i < StaticEnum<ECubeType>()->NumEnums() - 3; ++i)
+                                      {
+                                          GameMode->EnqueueHint(static_cast<ECubeType>(i));
+                                      }
+                                      GameMode->OnMultiplierChanged.Broadcast(static_cast<ECubeType>(0), 0);
+                                      GameMode->OnLowTime.Broadcast();
+                                      GameMode->OnSpeedChanged.Broadcast(0);
+                                      BonusComponent->OnBonusCharged.Broadcast(true);
+                                  });
+
+                        const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
+                        const float StartupHintDelay = GetPropertyValueByName<float>(GameMode, "StartupHintDelay");
+                        const float ThreadSyncDelta{0.5f};
+                        FPlatformProcess::Sleep(FMath::Max(NextHintDelay * NewHintsStatus.Num(), StartupHintDelay) + ThreadSyncDelta);
+
+                        AsyncTask(ENamedThreads::GameThread,
+                                  [&]()
+                                  {
+                                      GameUserSettings->SetHintsStatus(OldHintsStatus);
+                                  });
+                        FPlatformProcess::Sleep(ThreadSyncDelta);
+
+                        TestTrueExpr(PopUpHintAmount == 0);
+                    });
+
                  {
                      using Payload = TArray<TTuple<ECubeType, FChangeData, bool>>;
                      // clang-format off
