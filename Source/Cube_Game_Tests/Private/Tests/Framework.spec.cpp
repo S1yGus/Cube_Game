@@ -52,29 +52,43 @@ void FFramework::Define()
                          It(FString::Printf(TEXT("GameSpeedShouldBeChanged.Speed(%d)"), Speed),
                             [=, this]()
                             {
-                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(1)});    // Turning off the significance of the multiplier.
-                                auto SpeedBefore = GameMode->GetGameSpeed();
+                                const int32 MaxMultiplier(3);
+                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(MaxMultiplier)});
                                 const auto CubeType{ECubeType::GoodCube};
-                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
-                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
-                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
-                                                          FChangeData{.Speed = FMath::Abs(Speed)}.ToString(),                                // Speed
-                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                GameMode->UpdateGameMetrics(CubeType);
+                                if (Speed < 0)
+                                {
+                                    // Ensure that the speed value are sufficient for adding negative values
+                                    CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                             {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                              FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                              FChangeData{.Speed = FMath::Abs(Speed)}.ToString(),                                // Speed
+                                                              FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + FMath::Abs(Speed));
+                                    for (int32 i = 0; i < MaxMultiplier; ++i)
+                                    {
+                                        GameMode->UpdateGameMetrics(CubeType);
+                                    }
 
-                                SpeedBefore = GameMode->GetGameSpeed();
+                                    // Reset Multiplier
+                                    const auto AnotherCubeType{static_cast<ECubeType>((static_cast<int32>(CubeType) + 1) % static_cast<int32>(ECubeType::Max))};
+                                    GameMode->UpdateGameMetrics(AnotherCubeType);
+                                }
+
                                 CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
                                                          {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
                                                           FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
                                                           FChangeData{.Speed = Speed}.ToString(),                                            // Speed
                                                           FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                GameMode->UpdateGameMetrics(CubeType);
+                                for (int32 i = 1; i <= MaxMultiplier; ++i)
+                                {
+                                    const auto SpeedBefore = GameMode->GetGameSpeed();
 
-                                TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + Speed);
+                                    GameMode->UpdateGameMetrics(CubeType);
+
+                                    TestTrueExpr(GameMode->GetGameSpeed() == SpeedBefore + Speed * i);
+                                }
                             });
                      }
                  }
@@ -86,29 +100,43 @@ void FFramework::Define()
                          It(FString::Printf(TEXT("GameTimeShouldBeChanged.Time(%d)"), Time),
                             [=, this]()
                             {
-                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(1)});    // Turning off the significance of the multiplier.
-                                auto TimeBefore = GameMode->GetGameTime();
+                                const int32 MaxMultiplier(3);
+                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(MaxMultiplier)});
                                 const auto CubeType{ECubeType::GoodCube};
-                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
-                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
-                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
-                                                          FChangeData{.Time = FMath::Abs(Time)}.ToString(),                                  // Time
-                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                GameMode->UpdateGameMetrics(CubeType);
+                                if (Time < 0)
+                                {
+                                    // Ensure that the tiem value are sufficient for adding negative values
+                                    CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                             {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                              FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                              FChangeData{.Time = FMath::Abs(Time)}.ToString(),                                  // Time
+                                                              FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                TestTrueExpr(GameMode->GetGameTime() == TimeBefore + FMath::Abs(Time));
+                                    for (int32 i = 0; i < MaxMultiplier; ++i)
+                                    {
+                                        GameMode->UpdateGameMetrics(CubeType);
+                                    }
 
-                                TimeBefore = GameMode->GetGameTime();
+                                    // Reset Multiplier
+                                    const auto AnotherCubeType{static_cast<ECubeType>((static_cast<int32>(CubeType) + 1) % static_cast<int32>(ECubeType::Max))};
+                                    GameMode->UpdateGameMetrics(AnotherCubeType);
+                                }
+
                                 CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
                                                          {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
                                                           FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
                                                           FChangeData{.Time = Time}.ToString(),                                              // Time
                                                           FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                GameMode->UpdateGameMetrics(CubeType);
+                                for (int32 i = 1; i <= MaxMultiplier; ++i)
+                                {
+                                    const auto TimeBefore = GameMode->GetGameTime();
 
-                                TestTrueExpr(GameMode->GetGameTime() == TimeBefore + Time);
+                                    GameMode->UpdateGameMetrics(CubeType);
+
+                                    TestTrueExpr(GameMode->GetGameTime() == TimeBefore + Time * i);
+                                }
                             });
                      }
                  }
@@ -120,29 +148,43 @@ void FFramework::Define()
                          It(FString::Printf(TEXT("GameScoreShouldBeChanged.Score(%d)"), Score),
                             [=, this]()
                             {
-                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(1)});    // Turning off the significance of the multiplier.
-                                auto ScoreBefore = GameMode->GetScore();
+                                const int32 MaxMultiplier(3);
+                                CallFuncByNameWithParams(GameMode, "SetMaxMultiplier", {FString::FromInt(MaxMultiplier)});
                                 const auto CubeType{ECubeType::GoodCube};
-                                CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
-                                                         {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
-                                                          FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
-                                                          FChangeData{.Score = FMath::Abs(Score)}.ToString(),                                // Score
-                                                          FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                GameMode->UpdateGameMetrics(CubeType);
+                                if (Score < 0)
+                                {
+                                    // Ensure that the score value are sufficient for adding negative values
+                                    CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
+                                                             {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
+                                                              FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
+                                                              FChangeData{.Score = FMath::Abs(Score)}.ToString(),                                // Score
+                                                              FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                TestTrueExpr(GameMode->GetScore() == ScoreBefore + FMath::Abs(Score));
+                                    for (int32 i = 0; i < MaxMultiplier; ++i)
+                                    {
+                                        GameMode->UpdateGameMetrics(CubeType);
+                                    }
 
-                                ScoreBefore = GameMode->GetScore();
+                                    // Reset Multiplier
+                                    const auto AnotherCubeType{static_cast<ECubeType>((static_cast<int32>(CubeType) + 1) % static_cast<int32>(ECubeType::Max))};
+                                    GameMode->UpdateGameMetrics(AnotherCubeType);
+                                }
+
                                 CallFuncByNameWithParams(GameMode, "SetTestDifficultyData",
                                                          {FString::FromInt(static_cast<int32>(GameUserSettings->GetCurrentDifficulty())),    // Difficulty
                                                           FString::FromInt(static_cast<int32>(CubeType)),                                    // CubeType
                                                           FChangeData{.Score = Score}.ToString(),                                            // Score
                                                           FString::FromInt(1)});                                                             // ScoreToSpeedUp
 
-                                GameMode->UpdateGameMetrics(CubeType);    // Multiplier x2
+                                for (int32 i = 1; i <= MaxMultiplier; ++i)
+                                {
+                                    const auto ScoreBefore = GameMode->GetScore();
 
-                                TestTrueExpr(GameMode->GetScore() == ScoreBefore + Score);
+                                    GameMode->UpdateGameMetrics(CubeType);
+
+                                    TestTrueExpr(GameMode->GetScore() == ScoreBefore + Score * i);
+                                }
                             });
                      }
                  }
