@@ -24,53 +24,22 @@ ACGGameMode::ACGGameMode()
     HUDClass = ACGHUDGame::StaticClass();
 }
 
-const FDifficulty& ACGGameMode::GetDifficultyData() const
-{
-    return DifficultyMap[CurrentDifficulty];
-}
-
-void ACGGameMode::ChangeGameTime(ECubeType CubeType)
-{
-    if (const auto& DifficultyData = GetDifficultyData();    //
-        DifficultyData.TimeChangeMap.Contains(CubeType))
-    {
-        AddTime(DifficultyData.TimeChangeMap[CubeType]);
-    }
-}
-
-void ACGGameMode::ChangeGameSpeed(ECubeType CubeType)
-{
-    if (const auto& DifficultyData = GetDifficultyData();    //
-        DifficultyData.SpeedChangeMap.Contains(CubeType))
-    {
-        AddGameSpeed(DifficultyData.SpeedChangeMap[CubeType]);
-    }
-}
-
-void ACGGameMode::ChangeScore(ECubeType CubeType)
+void ACGGameMode::UpdateGameMetrics(ECubeType CubeType)
 {
     ChangeMultiplier(CubeType);
-
-    if (const auto& DifficultyData = GetDifficultyData();    //
-        DifficultyData.ScoreChangeMap.Contains(CubeType))
-    {
-        const int32 ScoreRemains = Score % DifficultyData.ScoreToSpeedUp;
-        const int32 ScoreToAdd = Multiplier * DifficultyData.ScoreChangeMap[CubeType];
-        if (ScoreToAdd > 0)
-        {
-            if (const int32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData.ScoreToSpeedUp)
-            {
-                AddGameSpeed(SpeedToAdd);
-            }
-        }
-
-        AddScore(ScoreToAdd);
-    }
+    ChangeGameTime(CubeType);
+    ChangeGameSpeed(CubeType);
+    ChangeScore(CubeType);
 }
 
 void ACGGameMode::EnqueueHint(ECubeType CubeType)
 {
     EnqueueHint(CubeGame::Utils::CubeTypeToHintType(CubeType));
+}
+
+const FDifficulty& ACGGameMode::GetDifficultyData() const
+{
+    return DifficultyMap[CurrentDifficulty];
 }
 
 void ACGGameMode::GameOver()
@@ -317,10 +286,7 @@ void ACGGameMode::AddScore(int32 ScoreToAdd)
 
 void ACGGameMode::ChangeMultiplier(ECubeType CubeType)
 {
-    if (const auto& DifficultyData = GetDifficultyData();    //
-        DifficultyData.ScoreChangeMap.Contains(CubeType)     //
-        && DifficultyData.ScoreChangeMap[CubeType] > 0       //
-        && CubeType == PreviousCubeType)
+    if (CubeType == PreviousCubeType && CubeGame::Utils::IsCubeAffectsMetrics(CubeType, DifficultyMap[CurrentDifficulty]))
     {
         if (Multiplier + 1 <= MaxMultiplier)
         {
@@ -335,4 +301,41 @@ void ACGGameMode::ChangeMultiplier(ECubeType CubeType)
     }
 
     PreviousCubeType = CubeType;
+}
+
+void ACGGameMode::ChangeGameTime(ECubeType CubeType)
+{
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.TimeChangeMap.Contains(CubeType))
+    {
+        AddTime(Multiplier * DifficultyData.TimeChangeMap[CubeType]);
+    }
+}
+
+void ACGGameMode::ChangeGameSpeed(ECubeType CubeType)
+{
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.SpeedChangeMap.Contains(CubeType))
+    {
+        AddGameSpeed(Multiplier * DifficultyData.SpeedChangeMap[CubeType]);
+    }
+}
+
+void ACGGameMode::ChangeScore(ECubeType CubeType)
+{
+    if (const auto& DifficultyData = GetDifficultyData();    //
+        DifficultyData.ScoreChangeMap.Contains(CubeType))
+    {
+        const int32 ScoreRemains = Score % DifficultyData.ScoreToSpeedUp;
+        const int32 ScoreToAdd = Multiplier * DifficultyData.ScoreChangeMap[CubeType];
+        if (ScoreToAdd > 0)
+        {
+            if (const int32 SpeedToAdd = (ScoreRemains + ScoreToAdd) / DifficultyData.ScoreToSpeedUp)
+            {
+                AddGameSpeed(SpeedToAdd);
+            }
+        }
+
+        AddScore(ScoreToAdd);
+    }
 }

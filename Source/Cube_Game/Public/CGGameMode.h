@@ -27,15 +27,13 @@ public:
     FOnMultiplierChangedSignature OnMultiplierChanged;
     FOnShowPopUpHintSignature OnShowPopUpHint;
 
+    void UpdateGameMetrics(ECubeType CubeType);
+    void EnqueueHint(ECubeType CubeType);
+
     int32 GetGameTime() const { return GameTime; }
     int32 GetGameSpeed() const { return GameSpeed; }
     int32 GetScore() const { return Score; }
     const FDifficulty& GetDifficultyData() const;
-
-    void ChangeGameTime(ECubeType CubeType);
-    void ChangeGameSpeed(ECubeType CubeType);
-    void ChangeScore(ECubeType CubeType);
-    void EnqueueHint(ECubeType CubeType);
 
     void GameOver();
     void SetPauseAndChangeGameState(EGameState NewGameState);
@@ -102,5 +100,9 @@ private:
     FORCEINLINE void AddTime(int32 TimeToAdd);
     FORCEINLINE void AddGameSpeed(int32 SpeedToAdd);
     FORCEINLINE void AddScore(int32 ScoreToAdd);
+
     void ChangeMultiplier(ECubeType CubeType);
+    void ChangeGameTime(ECubeType CubeType);
+    void ChangeGameSpeed(ECubeType CubeType);
+    void ChangeScore(ECubeType CubeType);
 };

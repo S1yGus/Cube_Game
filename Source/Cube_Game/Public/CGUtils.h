@@ -17,6 +17,7 @@ public:
     static float ComputeCubeSpeed(const FSpeedData& DifficultySpeedData, int32 CurrentGameSpeed);
     static EHintType CubeTypeToHintType(ECubeType CubeType);
     static bool IsCubeNegative(ECubeType CubeType, const FDifficulty& DifficultyData);
+    static bool IsCubeAffectsMetrics(ECubeType CubeType, const FDifficulty& DifficultyData);
 };
 
 }    // namespace CubeGame
