@@ -210,9 +210,7 @@ void ACGPlayer::UpdateGameMode(ECubeType CubeType)
 {
     if (auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
     {
-        GameMode->ChangeGameTime(CubeType);
-        GameMode->ChangeGameSpeed(CubeType);
-        GameMode->ChangeScore(CubeType);
+        GameMode->UpdateGameMetrics(CubeType);
         GameMode->EnqueueHint(CubeType);
     }
 }

@@ -68,3 +68,8 @@ bool CubeGame::Utils::IsCubeNegative(ECubeType CubeType, const FDifficulty& Diff
 
     return false;
 }
+
+bool CubeGame::Utils::IsCubeAffectsMetrics(ECubeType CubeType, const FDifficulty& DifficultyData)
+{
+    return DifficultyData.ScoreChangeMap.Contains(CubeType) || DifficultyData.TimeChangeMap.Contains(CubeType) || DifficultyData.SpeedChangeMap.Contains(CubeType);
+}
