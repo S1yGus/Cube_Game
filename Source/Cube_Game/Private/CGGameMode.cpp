@@ -136,16 +136,15 @@ void ACGGameMode::SetupGameMode()
     if (!GetWorld())
         return;
 
-    if (const auto Origin{FTransform::Identity};    //
-        const auto* Field = SpawnField(Origin))
+    if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
-        const auto FieldSize = Field->GetSize();
-        SpawnBackgroundVFX(Origin, FieldSize);
-        if (auto* PlayerPawn = GetPlayerPawn())
-        {
-            PlayerPawn->UpdateLocation(Origin, FieldSize);
-        }
+        CurrentDifficulty = GameUserSettings->GetCurrentDifficulty();
+        CachedHintSettings.bHintsEnabled = GameUserSettings->AreHintsEnabled();
+        CachedHintSettings.HintsStatusMap = GameUserSettings->GetHintsStatus();
+        GameUserSettings->OnHintSettingsChanged.AddUObject(this, &ThisClass::OnHintSettingsChanged);
     }
+
+    FormatHints();
 
     GetWorldTimerManager().SetTimer(
         StartupHintDelayTimerHandle,
@@ -178,14 +177,15 @@ void ACGGameMode::SetupGameMode()
             EnqueueHint(EHintType::SpeedUp);
         });
 
-    FormatHints();
-
-    if (auto* GameUserSettings = UCGGameUserSettings::Get())
+    if (const auto Origin{FTransform::Identity};    //
+        const auto* Field = SpawnField(Origin))
     {
-        CurrentDifficulty = GameUserSettings->GetCurrentDifficulty();
-        CachedHintSettings.bHintsEnabled = GameUserSettings->AreHintsEnabled();
-        CachedHintSettings.HintsStatusMap = GameUserSettings->GetHintsStatus();
-        GameUserSettings->OnHintSettingsChanged.AddUObject(this, &ThisClass::OnHintSettingsChanged);
+        const auto FieldSize = Field->GetSize();
+        SpawnBackgroundVFX(Origin, FieldSize);
+        if (auto* PlayerPawn = GetPlayerPawn())
+        {
+            PlayerPawn->UpdateLocation(Origin, FieldSize);
+        }
     }
 
     SetGameState(EGameState::Game);

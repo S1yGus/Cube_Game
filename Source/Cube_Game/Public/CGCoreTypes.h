@@ -26,8 +26,7 @@ enum class EGameState : uint8
 UENUM(BlueprintType)
 enum class EDifficulty : uint8
 {
-    Easy = 0,
-    Medium,
+    Normal = 0,
     Hard,
     Max
 };
@@ -127,7 +126,7 @@ struct FDifficulty
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "1"))
     int32 MaxNumOfCubesInLine{1};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Difficulty", Meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float ChanceToAddCubeInLine{0.0f};
 };
 
