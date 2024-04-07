@@ -38,7 +38,6 @@ public:
     void SetHintsStatus(const FHintsStatus& NewHintsMap);
     EDifficulty GetCurrentDifficulty() const { return CurrentDifficulty; }
     void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
-    FText GetDifficultyDisplayName(EDifficulty Difficylty) const;
 
     void SetLastConfirmedResolutionSettings();
     void InitSoundVolume();
@@ -47,7 +46,7 @@ public:
     virtual void SaveSettings() override;
 
 private:
-    EDifficulty CurrentDifficulty{EDifficulty::Medium};
+    EDifficulty CurrentDifficulty{EDifficulty::Normal};
     UPROPERTY()
     TArray<TObjectPtr<UCGSetting>> VideoSettings;
     UPROPERTY()

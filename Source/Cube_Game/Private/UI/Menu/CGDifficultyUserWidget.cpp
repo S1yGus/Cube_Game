@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundMix.h"
 #include "Settings/CGGameUserSettings.h"
+#include "CGUtils.h"
 
 void UCGDifficultyUserWidget::NativeOnInitialized()
 {
@@ -30,23 +31,23 @@ void UCGDifficultyUserWidget::InitDifficultyButtons()
 
 void UCGDifficultyUserWidget::CreateAndAddDifficultyButton(EDifficulty Difficulty)
 {
-    if (auto* GameUserSettings = UCGGameUserSettings::Get())
+    if (const FText DifficultyDisplayName = CubeGame::Utils::GetDifficultyDisplayName(Difficulty);    //
+        !DifficultyDisplayName.IsEmpty())
     {
-        if (const FText DifficultyDisplayName = GameUserSettings->GetDifficultyDisplayName(Difficulty);    //
-            !DifficultyDisplayName.IsEmpty())
-        {
-            auto* Button = CreateWidget<UCGButtonUserWidget>(GetWorld(), DifficultyButtonWidgetClass);
-            check(Button);
-            Button->SetText(DifficultyDisplayName);
-            Button->OnClickedButton.AddLambda(
-                [=, this]()
+        auto* Button = CreateWidget<UCGButtonUserWidget>(GetWorld(), DifficultyButtonWidgetClass);
+        check(Button);
+        Button->SetText(DifficultyDisplayName);
+        Button->OnClickedButton.AddLambda(
+            [Difficulty, this]()
+            {
+                if (auto* GameUserSettings = UCGGameUserSettings::Get())
                 {
                     GameUserSettings->SetDifficulty(Difficulty);
                     ShowFadeoutAnimation();
                     UGameplayStatics::PushSoundMixModifier(this, FadeOutSoundMix);    // Smoothly mutes all sounds.
-                });
-            DifficultyButtonsVerticalBox->AddChild(Button);
-        }
+                }
+            });
+        DifficultyButtonsVerticalBox->AddChild(Button);
     }
 }
 

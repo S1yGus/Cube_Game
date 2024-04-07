@@ -81,7 +81,7 @@ private:
 
     ECubeType PreviousCubeType{ECubeType::None};
 
-    EDifficulty CurrentDifficulty{EDifficulty::Medium};
+    EDifficulty CurrentDifficulty{EDifficulty::Normal};
     FHintSettings CachedHintSettings;
 
     FORCEINLINE ACGPlayer* GetPlayerPawn();

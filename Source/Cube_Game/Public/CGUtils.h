@@ -18,6 +18,7 @@ public:
     static EHintType CubeTypeToHintType(ECubeType CubeType);
     static bool IsCubeNegative(ECubeType CubeType, const FDifficulty& DifficultyData);
     static bool IsCubeAffectsMetrics(ECubeType CubeType, const FDifficulty& DifficultyData);
+    static FText GetDifficultyDisplayName(EDifficulty Difficylty);
 };
 
 }    // namespace CubeGame

@@ -73,3 +73,16 @@ bool CubeGame::Utils::IsCubeAffectsMetrics(ECubeType CubeType, const FDifficulty
 {
     return DifficultyData.ScoreChangeMap.Contains(CubeType) || DifficultyData.TimeChangeMap.Contains(CubeType) || DifficultyData.SpeedChangeMap.Contains(CubeType);
 }
+
+FText CubeGame::Utils::GetDifficultyDisplayName(EDifficulty Difficylty)
+{
+    switch (Difficylty)
+    {
+        case EDifficulty::Normal:
+            return NSLOCTEXT("Utils", "DifficultyNormal_Loc", "Normal");
+        case EDifficulty::Hard:
+            return NSLOCTEXT("Utils", "DifficultyHard_Loc", "Hard");
+        default:
+            return FText::GetEmpty();
+    }
+}

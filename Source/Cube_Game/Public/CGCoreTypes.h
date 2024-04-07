@@ -26,8 +26,7 @@ enum class EGameState : uint8
 UENUM(BlueprintType)
 enum class EDifficulty : uint8
 {
-    Easy = 0,
-    Medium,
+    Normal = 0,
     Hard,
     Max
 };

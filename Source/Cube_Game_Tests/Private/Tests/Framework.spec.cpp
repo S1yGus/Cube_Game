@@ -556,7 +556,7 @@ void FFramework::Define()
                         const UEnum* DifficultyEnum = StaticEnum<EDifficulty>();
                         for (int32 i = 0; i < DifficultyEnum->NumEnums() - 2; ++i)
                         {
-                            TestTrueExpr(!GameUserSettings->GetDifficultyDisplayName(static_cast<EDifficulty>(i)).IsEmpty());
+                            TestTrueExpr(!CubeGame::Utils::GetDifficultyDisplayName(static_cast<EDifficulty>(i)).IsEmpty());
                         }
                     });
 
