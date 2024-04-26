@@ -17,3 +17,5 @@ Documentation/
 *.log
 .vsconfig
 HoloLensEngine.ini
+**/config.bat
+**/*.log
