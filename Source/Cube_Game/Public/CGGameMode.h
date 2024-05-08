@@ -49,8 +49,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Time", Meta = (ClampMin = "0", Units = "s"))
     int32 LowTimeThreshold{5};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TMap<EHintType, FHintData> GameplayHintsMap;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ToolTip = "To specify the number of score to increase speed, use the argument {0}."))
+    FText SpeedIncreasedHint;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints", Meta = (ClampMin = "0.0", Units = "s"))
     float StartupHintDelay{2.0f};
@@ -83,9 +83,11 @@ private:
 
     EDifficulty CurrentDifficulty{EDifficulty::Normal};
     FHintSettings CachedHintSettings;
+    TMap<EHintType, FHintData> CachedHintsMap;
 
     FORCEINLINE ACGPlayer* GetPlayerPawn();
     FORCEINLINE UCGBonusComponent* GetPlayerBonusComponent();
+
     ACGFieldActor* SpawnField(const FTransform& Origin);
     FORCEINLINE void SpawnBackgroundVFX(const FTransform& Origin, const FVector& FieldSize);
     void SetupGameMode();

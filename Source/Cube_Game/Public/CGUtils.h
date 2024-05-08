@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "CGCoreTypes.h"
 
+class UInputMappingContext;
+class UInputAction;
+
 namespace CubeGame
 {
 
@@ -19,6 +22,7 @@ public:
     static bool IsCubeNegative(ECubeType CubeType, const FDifficulty& DifficultyData);
     static bool IsCubeAffectsMetrics(ECubeType CubeType, const FDifficulty& DifficultyData);
     static FText GetDifficultyDisplayName(EDifficulty Difficylty);
+    static FText GetActionKeyName(TObjectPtr<const UInputMappingContext> MappingContext, TObjectPtr<const UInputAction> Action);
 };
 
 }    // namespace CubeGame

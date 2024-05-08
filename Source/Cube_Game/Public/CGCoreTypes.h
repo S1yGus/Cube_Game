@@ -68,9 +68,9 @@ UENUM(BlueprintType)
 enum class EHintType : uint8
 {
     Startup = 0,
-    SpeedUp,
-    Multiplier,
-    LowTime,
+    SpeedIncreased,
+    Combo,
+    TimeRunningOut,
     BonusCharged,
     GoodCube,
     BadCube,
@@ -173,18 +173,18 @@ struct FHintSettings
 
     // clang-format off
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    TMap<EHintType, bool> HintsStatusMap = {{EHintType::Startup,      false},
-                                            {EHintType::Multiplier,   false},
-                                            {EHintType::LowTime,      false},
-                                            {EHintType::SpeedUp,      false},
-                                            {EHintType::BonusCharged, false},
-                                            {EHintType::GoodCube,     false},
-                                            {EHintType::BadCube,      false},
-                                            {EHintType::ScoreCube,    false},
-                                            {EHintType::TimeCube,     false},
-                                            {EHintType::BonusCube,    false},
-                                            {EHintType::SpeedCube,    false},
-                                            {EHintType::VeryBadCube,  false}};
+    TMap<EHintType, bool> HintsStatusMap = {{EHintType::Startup,        false},
+                                            {EHintType::Combo,          false},
+                                            {EHintType::TimeRunningOut, false},
+                                            {EHintType::SpeedIncreased, false},
+                                            {EHintType::BonusCharged,   false},
+                                            {EHintType::GoodCube,       false},
+                                            {EHintType::BadCube,        false},
+                                            {EHintType::ScoreCube,      false},
+                                            {EHintType::TimeCube,       false},
+                                            {EHintType::BonusCube,      false},
+                                            {EHintType::SpeedCube,      false},
+                                            {EHintType::VeryBadCube,    false}};
     // clang-format on
 };
 

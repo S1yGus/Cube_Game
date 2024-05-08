@@ -4,6 +4,8 @@
 #include "CGGameMode.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "CGGameInstance.h"
+#include "CGUtils.h"
 
 void ACGPlayerController::SetupInputComponent()
 {
@@ -28,13 +30,29 @@ void ACGPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (const auto GameModeBase = GetGameModeBase())
+    check(InputMapping);
+    check(EnterAction);
+    check(EscapeAction);
+    check(MoveLeftAction);
+    check(MoveRightAction);
+    check(UseCurrentBonusAction);
+
+    if (auto* GameModeBase = GetGameModeBase())
     {
         GameModeBase->OnGameStateChanged.AddUObject(this, &ThisClass::OnGameStateChanged);
     }
+
+    if (auto* GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>())
+    {
+        using namespace CubeGame;
+        const auto MoveLeftKeyName = Utils::GetActionKeyName(InputMapping, MoveLeftAction).ToUpper();
+        const auto MoveRightKeyName = Utils::GetActionKeyName(InputMapping, MoveRightAction).ToUpper();
+        const auto UseCurrentBonusKeyName = Utils::GetActionKeyName(InputMapping, UseCurrentBonusAction).ToUpper();
+        GameInstance->FormatHints(MoveLeftKeyName, MoveRightKeyName, UseCurrentBonusKeyName);
+    }
 }
 
-TObjectPtr<ACGGameModeBase> ACGPlayerController::GetGameModeBase() const
+ACGGameModeBase* ACGPlayerController::GetGameModeBase() const
 {
     return GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameModeBase>() : nullptr;
 }

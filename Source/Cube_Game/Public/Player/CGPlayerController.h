@@ -28,13 +28,22 @@ protected:
     TObjectPtr<UInputAction> EscapeAction;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TObjectPtr<UInputAction> UseCurrentBonusAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TObjectPtr<UInputAction> MoveRightAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+    TObjectPtr<UInputAction> MoveLeftAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
     TObjectPtr<UInputMappingContext> InputMapping;
 
     virtual void SetupInputComponent() override;
     virtual void BeginPlay() override;
 
 private:
-    FORCEINLINE TObjectPtr<ACGGameModeBase> GetGameModeBase() const;
+    FORCEINLINE ACGGameModeBase* GetGameModeBase() const;
 
     void OnGameStateChanged(EGameState NewGameState);
     void OnPressEnter();

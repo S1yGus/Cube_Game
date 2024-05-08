@@ -93,9 +93,7 @@ FText UCGGameOverUserWidget::FormatGameOverText(int32 Score)
 {
     if (GameOverFormat.ToString().Contains("{0}"))
     {
-        FStringFormatOrderedArguments GameOverArg;
-        GameOverArg.Add(Score);
-        return FText::FromString(FString::Format(*GameOverFormat.ToString(), GameOverArg));
+        return FText::FormatOrdered(GameOverFormat, LOCGEN_NUMBER_UNGROUPED(Score, ""));
     }
 
     return GameOverFormat;
