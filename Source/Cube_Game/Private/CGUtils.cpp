@@ -1,6 +1,8 @@
 // Cube_Game, All rights reserved.
 
 #include "CGUtils.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
 
 FVector CubeGame::Utils::GetMeshAABBBoxSize(const UStaticMesh* Mesh)
 {
@@ -85,4 +87,15 @@ FText CubeGame::Utils::GetDifficultyDisplayName(EDifficulty Difficylty)
         default:
             return FText::GetEmpty();
     }
+}
+
+FText CubeGame::Utils::GetActionKeyName(TObjectPtr<const UInputMappingContext> MappingContext, TObjectPtr<const UInputAction> Action)
+{
+    auto* FoundMapping = MappingContext->GetMappings().FindByPredicate(
+        [&](const FEnhancedActionKeyMapping& ActionKeyMapping)
+        {
+            return ActionKeyMapping.Action == Action;
+        });
+
+    return FoundMapping ? FoundMapping->Key.GetDisplayName() : FText::AsCultureInvariant("");
 }

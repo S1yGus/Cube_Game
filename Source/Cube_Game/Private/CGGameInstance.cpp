@@ -5,6 +5,41 @@
 #include "Saves/CGLeaderboardSave.h"
 #include "Settings/CGGameUserSettings.h"
 
+TArray<FHintData> UCGGameInstance::GetHints() const
+{
+    TArray<FHintData> Hints;
+    HintsMap.GenerateValueArray(Hints);
+    return Hints;
+}
+
+void UCGGameInstance::FormatHints(const FText& MoveLeftKeyName, const FText& MoveRightKeyName, const FText& UseCurrentBonusKeyName)
+{
+    if (bHintsFormatted)
+        return;
+
+    // Format Startup hint.
+    if (HintsMap.Contains(EHintType::Startup))
+    {
+        auto& StartupHint = HintsMap[EHintType::Startup].HintText;
+        if (StartupHint.ToString().Contains("{0}") && StartupHint.ToString().Contains("{1}"))
+        {
+            StartupHint = FText::FormatOrdered(StartupHint, MoveLeftKeyName, MoveRightKeyName);
+        }
+    }
+
+    // Format BonusCube hint.
+    if (HintsMap.Contains(EHintType::BonusCube))
+    {
+        auto& BonusCubeHint = HintsMap[EHintType::BonusCube].HintText;
+        if (BonusCubeHint.ToString().Contains("{0}"))
+        {
+            BonusCubeHint = FText::FormatOrdered(BonusCubeHint, UseCurrentBonusKeyName);
+        }
+    }
+
+    bHintsFormatted = true;
+}
+
 TArray<FPlayerRecord> UCGGameInstance::GetLeaderboard() const
 {
     if (LeaderboardSave)

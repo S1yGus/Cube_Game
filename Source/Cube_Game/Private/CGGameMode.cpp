@@ -13,7 +13,6 @@
 #include "CGUtils.h"
 
 constexpr static float CountdownTimerRate{1.0f};
-constexpr static double BackgroundVFXZOffset{-100.0};
 
 static TQueue<EHintType> HintsQueue;
 
@@ -126,6 +125,7 @@ ACGFieldActor* ACGGameMode::SpawnField(const FTransform& Origin)
 
 void ACGGameMode::SpawnBackgroundVFX(const FTransform& Origin, const FVector& FieldSize)
 {
+    constexpr double BackgroundVFXZOffset{-100.0};
     UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),                 //
                                                    BackgroundNiagaraSystem,    //
                                                    Origin.GetLocation() + FVector{0.5 * FieldSize.X, 0.5 * FieldSize.Y, BackgroundVFXZOffset});
@@ -142,6 +142,11 @@ void ACGGameMode::SetupGameMode()
         CachedHintSettings.bHintsEnabled = GameUserSettings->AreHintsEnabled();
         CachedHintSettings.HintsStatusMap = GameUserSettings->GetHintsStatus();
         GameUserSettings->OnHintSettingsChanged.AddUObject(this, &ThisClass::OnHintSettingsChanged);
+    }
+
+    if (const auto* GameInstance = GetWorld()->GetGameInstance<UCGGameInstance>())
+    {
+        CachedHintsMap = GameInstance->GetHintsMap();
     }
 
     FormatHints();
@@ -164,17 +169,17 @@ void ACGGameMode::SetupGameMode()
     OnMultiplierChanged.AddLambda(
         [this](ECubeType, int32)
         {
-            EnqueueHint(EHintType::Multiplier);
+            EnqueueHint(EHintType::Combo);
         });
     OnLowTime.AddLambda(
         [this]()
         {
-            EnqueueHint(EHintType::LowTime);
+            EnqueueHint(EHintType::TimeRunningOut);
         });
     OnSpeedChanged.AddLambda(
         [this](int32)
         {
-            EnqueueHint(EHintType::SpeedUp);
+            EnqueueHint(EHintType::SpeedIncreased);
         });
 
     if (const auto Origin{FTransform::Identity};    //
@@ -214,12 +219,10 @@ void ACGGameMode::InvalidateHintStatus(EHintType HintType)
 
 void ACGGameMode::FormatHints()
 {
-    // Format SpeedUp hint.
-    if (GameplayHintsMap.Contains(EHintType::SpeedUp) && GameplayHintsMap[EHintType::SpeedUp].HintText.ToString().Contains("{0}"))
+    // Format SpeedIncreased hint.
+    if (CachedHintsMap.Contains(EHintType::SpeedIncreased) && SpeedIncreasedHint.ToString().Contains("{0}"))
     {
-        FStringFormatOrderedArguments SpeedUpHintArg;
-        SpeedUpHintArg.Add(GetDifficultyData().ScoreToSpeedUp);
-        GameplayHintsMap[EHintType::SpeedUp].HintText = FText::FromString(FString::Format(*GameplayHintsMap[EHintType::SpeedUp].HintText.ToString(), SpeedUpHintArg));
+        CachedHintsMap[EHintType::SpeedIncreased].HintText = FText::FormatOrdered(SpeedIncreasedHint, LOCGEN_NUMBER_UNGROUPED(GetDifficultyData().ScoreToSpeedUp, ""));
     }
 }
 
@@ -242,10 +245,10 @@ void ACGGameMode::OnShowHint()
     if (EHintType HintType; HintsQueue.Dequeue(HintType))
     {
         const auto& HintsStatus = CachedHintSettings.HintsStatusMap;
-        if (HintsStatus.Contains(HintType) && !HintsStatus[HintType] && GameplayHintsMap.Contains(HintType))
+        if (HintsStatus.Contains(HintType) && !HintsStatus[HintType] && CachedHintsMap.Contains(HintType))
         {
             SetPauseAndChangeGameState(EGameState::PopUpHint);
-            OnShowPopUpHint.Broadcast(GameplayHintsMap[HintType]);
+            OnShowPopUpHint.Broadcast(CachedHintsMap[HintType]);
             InvalidateHintStatus(HintType);
         }
     }

@@ -44,7 +44,6 @@ static bool operator==(const FCultureData& Data, const FString& Str)
 
 UCGGameUserSettings::UCGGameUserSettings()
 {
-    InitStringTable();
     InitVideoSettings();
     InitSoundSettings();
     InitGameSettings();

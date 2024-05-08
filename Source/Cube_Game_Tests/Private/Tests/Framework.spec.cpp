@@ -227,10 +227,10 @@ void FFramework::Define()
 
                         int32 PopUpHintAmount{0};
                         const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
-                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, false},   {EHintType::Multiplier, false},   {EHintType::LowTime, false},
-                                                             {EHintType::SpeedUp, false},   {EHintType::BonusCharged, false}, {EHintType::GoodCube, false},
-                                                             {EHintType::BadCube, false},   {EHintType::ScoreCube, false},    {EHintType::TimeCube, false},
-                                                             {EHintType::BonusCube, false}, {EHintType::SpeedCube, false},    {EHintType::VeryBadCube, false}};
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, false},        {EHintType::Combo, false},        {EHintType::TimeRunningOut, false},
+                                                             {EHintType::SpeedIncreased, false}, {EHintType::BonusCharged, false}, {EHintType::GoodCube, false},
+                                                             {EHintType::BadCube, false},        {EHintType::ScoreCube, false},    {EHintType::TimeCube, false},
+                                                             {EHintType::BonusCube, false},      {EHintType::SpeedCube, false},    {EHintType::VeryBadCube, false}};
                         AsyncTask(ENamedThreads::GameThread,
                                   [&]()
                                   {
@@ -254,7 +254,7 @@ void FFramework::Define()
 
                         const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
                         const float StartupHintDelay = GetPropertyValueByName<float>(GameMode, "StartupHintDelay");
-                        const float ThreadSyncDelta{0.5f};
+                        const float ThreadSyncDelta{1.0f};
                         FPlatformProcess::Sleep(FMath::Max(NextHintDelay * NewHintsStatus.Num(), StartupHintDelay) + ThreadSyncDelta);
 
                         AsyncTask(ENamedThreads::GameThread,
@@ -280,10 +280,10 @@ void FFramework::Define()
 
                         int32 PopUpHintAmount{0};
                         const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
-                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},   {EHintType::Multiplier, true},   {EHintType::LowTime, true},
-                                                             {EHintType::SpeedUp, true},   {EHintType::BonusCharged, true}, {EHintType::GoodCube, true},
-                                                             {EHintType::BadCube, true},   {EHintType::ScoreCube, true},    {EHintType::TimeCube, true},
-                                                             {EHintType::BonusCube, true}, {EHintType::SpeedCube, true},    {EHintType::VeryBadCube, true}};
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},        {EHintType::Combo, true},        {EHintType::TimeRunningOut, true},
+                                                             {EHintType::SpeedIncreased, true}, {EHintType::BonusCharged, true}, {EHintType::GoodCube, true},
+                                                             {EHintType::BadCube, true},        {EHintType::ScoreCube, true},    {EHintType::TimeCube, true},
+                                                             {EHintType::BonusCube, true},      {EHintType::SpeedCube, true},    {EHintType::VeryBadCube, true}};
                         AsyncTask(ENamedThreads::GameThread,
                                   [&]()
                                   {
@@ -307,7 +307,7 @@ void FFramework::Define()
 
                         const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
                         const float StartupHintDelay = GetPropertyValueByName<float>(GameMode, "StartupHintDelay");
-                        const float ThreadSyncDelta{0.5f};
+                        const float ThreadSyncDelta{1.0f};
                         FPlatformProcess::Sleep(FMath::Max(NextHintDelay * NewHintsStatus.Num(), StartupHintDelay) + ThreadSyncDelta);
 
                         AsyncTask(ENamedThreads::GameThread,
@@ -325,10 +325,10 @@ void FFramework::Define()
                     {
                         int32 PopUpHintAmount{0};
                         const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
-                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},   {EHintType::Multiplier, true},   {EHintType::LowTime, true},
-                                                             {EHintType::SpeedUp, true},   {EHintType::BonusCharged, true}, {EHintType::GoodCube, false},
-                                                             {EHintType::BadCube, true},   {EHintType::ScoreCube, true},    {EHintType::TimeCube, true},
-                                                             {EHintType::BonusCube, true}, {EHintType::SpeedCube, true},    {EHintType::VeryBadCube, true}};
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, true},        {EHintType::Combo, true},        {EHintType::TimeRunningOut, true},
+                                                             {EHintType::SpeedIncreased, true}, {EHintType::BonusCharged, true}, {EHintType::GoodCube, false},
+                                                             {EHintType::BadCube, true},        {EHintType::ScoreCube, true},    {EHintType::TimeCube, true},
+                                                             {EHintType::BonusCube, true},      {EHintType::SpeedCube, true},    {EHintType::VeryBadCube, true}};
                         AsyncTask(ENamedThreads::GameThread,
                                   [&]()
                                   {
@@ -346,7 +346,7 @@ void FFramework::Define()
                                   });
 
                         const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
-                        const float ThreadSyncDelta{0.5f};
+                        const float ThreadSyncDelta{1.0f};
                         FPlatformProcess::Sleep(NextHintDelay * 3 + ThreadSyncDelta);
 
                         AsyncTask(ENamedThreads::GameThread,
@@ -372,10 +372,10 @@ void FFramework::Define()
 
                         int32 PopUpHintAmount{0};
                         const FHintsStatus OldHintsStatus = GameUserSettings->GetHintsStatus();
-                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, false},   {EHintType::Multiplier, false},   {EHintType::LowTime, false},
-                                                             {EHintType::SpeedUp, false},   {EHintType::BonusCharged, false}, {EHintType::GoodCube, false},
-                                                             {EHintType::BadCube, false},   {EHintType::ScoreCube, false},    {EHintType::TimeCube, false},
-                                                             {EHintType::BonusCube, false}, {EHintType::SpeedCube, false},    {EHintType::VeryBadCube, false}};
+                        const FHintsStatus NewHintsStatus = {{EHintType::Startup, false},        {EHintType::Combo, false},        {EHintType::TimeRunningOut, false},
+                                                             {EHintType::SpeedIncreased, false}, {EHintType::BonusCharged, false}, {EHintType::GoodCube, false},
+                                                             {EHintType::BadCube, false},        {EHintType::ScoreCube, false},    {EHintType::TimeCube, false},
+                                                             {EHintType::BonusCube, false},      {EHintType::SpeedCube, false},    {EHintType::VeryBadCube, false}};
                         AsyncTask(ENamedThreads::GameThread,
                                   [&]()
                                   {
@@ -399,7 +399,7 @@ void FFramework::Define()
 
                         const float NextHintDelay = GetPropertyValueByName<float>(GameMode, "NextHintDelay");
                         const float StartupHintDelay = GetPropertyValueByName<float>(GameMode, "StartupHintDelay");
-                        const float ThreadSyncDelta{0.5f};
+                        const float ThreadSyncDelta{1.0f};
                         FPlatformProcess::Sleep(FMath::Max(NextHintDelay * NewHintsStatus.Num(), StartupHintDelay) + ThreadSyncDelta);
 
                         AsyncTask(ENamedThreads::GameThread,

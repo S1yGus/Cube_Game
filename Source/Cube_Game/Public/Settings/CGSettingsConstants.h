@@ -9,12 +9,6 @@
 namespace SettingsConstants
 {
 
-void InitStringTable()
-{
-    FStringTableRegistry::Get().UnregisterStringTable("CommonWords");
-    LOCTABLE_FROMFILE_GAME("CommonWords", "CommonWordsss", "/Localization/ST_CommonWords.csv");
-}
-
 // clang-format off
 const FString SettingsSaveSlotName = "SettingsSave";
 
@@ -39,8 +33,8 @@ const TArray<FText> FullscreenOptions    //
 
 const TArray<FText> VSyncOptions    //
     {
-        LOCTABLE("CommonWords", "Disable_Loc"),    //
-        LOCTABLE("CommonWords", "Enable_Loc"),     //
+        LOCTEXT("Disable_Loc", "Disable"),    //
+        LOCTEXT("Enable_Loc", "Enable")       //
     };
 
 const TArray<FText> FramerateOptions    //
@@ -70,8 +64,8 @@ const TArray<FText> PopUpTypeOptions    //
 
 const TArray<FText> HintOptions    //
     {
-        LOCTABLE("CommonWords", "Disable_Loc"),    //
-        LOCTABLE("CommonWords", "Enable_Loc"),     //
+        LOCTEXT("Disable_Loc", "Disable"),    //
+        LOCTEXT("Enable_Loc", "Enable")       //
     };
 
 }    // namespace SettingsConstants

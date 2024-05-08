@@ -49,9 +49,10 @@ void UCGHowToPlayUserWidget::ShowHint(int32 HintIndex)
 {
     if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
-        TitleText->SetText(GameInstance->GetHowToPlayHints()[HintIndex].Title);
-        TitleText->SetColor(GameInstance->GetHowToPlayHints()[HintIndex].TitleColor);
-        HintTextBlock->SetText(GameInstance->GetHowToPlayHints()[HintIndex].HintText);
+        const auto Hints = GameInstance->GetHints();
+        TitleText->SetText(Hints[HintIndex].Title);
+        TitleText->SetColor(Hints[HintIndex].TitleColor);
+        HintTextBlock->SetText(Hints[HintIndex].HintText);
     }
 }
 
@@ -75,7 +76,7 @@ void UCGHowToPlayUserWidget::OnClickedNextButton()
 
     if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
-        CurrentHintIndex = (CurrentHintIndex + 1) % GameInstance->GetHowToPlayHints().Num();
+        CurrentHintIndex = (CurrentHintIndex + 1) % GameInstance->GetHints().Num();
     }
 
     PlayAnimation(FadeoutHintAnimation);
@@ -88,7 +89,7 @@ void UCGHowToPlayUserWidget::OnClickedPrevButton()
 
     if (const auto* GameInstance = GetWorld() ? GetWorld()->GetGameInstance<UCGGameInstance>() : nullptr)
     {
-        CurrentHintIndex = CurrentHintIndex - 1 < 0 ? GameInstance->GetHowToPlayHints().Num() - 1 : CurrentHintIndex - 1;
+        CurrentHintIndex = CurrentHintIndex - 1 < 0 ? GameInstance->GetHints().Num() - 1 : CurrentHintIndex - 1;
         PlayAnimation(FadeoutHintAnimation);
     }
 }

@@ -15,7 +15,9 @@ class CUBE_GAME_API UCGGameInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
-    const TArray<FHintData>& GetHowToPlayHints() const { return HowToPlayHints; }
+    const TMap<EHintType, FHintData>& GetHintsMap() const { return HintsMap; }
+    TArray<FHintData> GetHints() const;
+    void FormatHints(const FText& MoveLeftKeyName, const FText& MoveRightKeyName, const FText& UseCurrentBonusKeyName);
 
     TArray<FPlayerRecord> GetLeaderboard() const;
     void AddToLeaderboard(const FPlayerRecord& PlayerRecord);
@@ -37,13 +39,14 @@ protected:
     FString LeaderboardSaveSlotName{"LeaderboardSave"};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Hints")
-    TArray<FHintData> HowToPlayHints;
+    TMap<EHintType, FHintData> HintsMap;
 
     virtual void OnStart() override;
 
 private:
     UPROPERTY()
     TObjectPtr<UCGLeaderboardSave> LeaderboardSave;
+    bool bHintsFormatted{false};
 
     void CheckLeaderboardSave();
 };
