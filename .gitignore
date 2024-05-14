@@ -19,3 +19,4 @@ Documentation/
 HoloLensEngine.ini
 **/config.bat
 **/*.log
+**/A_*.uasset
