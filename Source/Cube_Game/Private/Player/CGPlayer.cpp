@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Player/Components/CGFXComponent.h"
-#include "Gameplay/Cubes/CGCubeActor.h"
+#include "World/Cubes/CGCubeActor.h"
 #include "CGGameMode.h"
 #include "EnhancedInputComponent.h"
 #include "CGUtils.h"

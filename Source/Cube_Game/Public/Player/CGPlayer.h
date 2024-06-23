@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Player/CGPlayerCamera.h"
 #include "CGCoreTypes.h"
-#include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "CGPlayer.generated.h"
 
 class UWidgetComponent;

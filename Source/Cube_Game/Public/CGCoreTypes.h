@@ -260,3 +260,4 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnPopUpTypeChangedSignature, EPopUpType);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintSettingsChangedSignature, const FHintSettings&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBonusBeginOverlapSignature, class ACGCubeActor*, bool);
 DECLARE_DELEGATE_OneParam(FOnEndPlaySignature, FDelegateHandle);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAudioPlaybackMagnitudeSignature, TArray<float>);

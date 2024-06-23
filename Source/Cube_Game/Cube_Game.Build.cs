@@ -14,7 +14,8 @@ public class Cube_Game : ModuleRules
             OptimizeCode = CodeOptimization.Never;
         }
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore", "Niagara", "AudioMixer", "EnhancedInput" });
+        PublicDependencyModuleNames.AddRange(
+            new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore", "Niagara", "AudioMixer", "EnhancedInput", "AudioSynesthesia" });
         PublicIncludePaths.AddRange(new string[] { "Cube_Game/Public" });
     }
 }
