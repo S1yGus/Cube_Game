@@ -9,7 +9,7 @@
 #include "Misc/AutomationTest.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
+#include "World/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "Player/CGPlayer.h"
 
 using namespace Test;

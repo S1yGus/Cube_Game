@@ -8,8 +8,9 @@
 #include "Settings/CGGameUserSettings.h"
 #include "Player/Components/CGBonusComponent.h"
 #include "Player/CGPlayerController.h"
-#include "Gameplay/CGFieldActor.h"
-#include "NiagaraFunctionLibrary.h"
+#include "World/CGFieldActor.h"
+#include "World/CGBackgroundActor.h"
+#include "World/CGMusicActor.h"
 #include "CGUtils.h"
 
 constexpr static float CountdownTimerRate{1.0f};
@@ -106,31 +107,6 @@ UCGBonusComponent* ACGGameMode::GetPlayerBonusComponent()
     return nullptr;
 }
 
-ACGFieldActor* ACGGameMode::SpawnField(const FTransform& Origin)
-{
-    if (auto* Field = GetWorld()->SpawnActorDeferred<ACGFieldActor>(FieldClass, Origin))
-    {
-        Field->Init(GetDifficultyData(), GetGameSpeed(), MaxMultiplier);
-        OnSpeedChanged.AddUObject(Field, &ACGFieldActor::OnGameSpeedChanged);
-        OnMultiplierChanged.AddUObject(Field, &ACGFieldActor::OnMultiplierChanged);
-        if (auto* BonusComponent = GetPlayerBonusComponent())
-        {
-            BonusComponent->OnBonusChanged.AddUObject(Field, &ACGFieldActor::OnBonusChanged);
-        }
-        Field->FinishSpawning(Origin);
-        return Field;
-    }
-    return nullptr;
-}
-
-void ACGGameMode::SpawnBackgroundVFX(const FTransform& Origin, const FVector& FieldSize)
-{
-    constexpr double BackgroundVFXZOffset{-100.0};
-    UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(),                 //
-                                                   BackgroundNiagaraSystem,    //
-                                                   Origin.GetLocation() + FVector{0.5 * FieldSize.X, 0.5 * FieldSize.Y, BackgroundVFXZOffset});
-}
-
 void ACGGameMode::SetupGameMode()
 {
     if (!GetWorld())
@@ -149,6 +125,15 @@ void ACGGameMode::SetupGameMode()
         CachedHintsMap = GameInstance->GetHintsMap();
     }
 
+    SetupHints();
+    SpawnActors();
+
+    SetGameState(EGameState::Game);
+    GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ThisClass::OnCountdown, CountdownTimerRate, true);
+}
+
+void ACGGameMode::SetupHints()
+{
     FormatHints();
 
     GetWorldTimerManager().SetTimer(
@@ -181,20 +166,42 @@ void ACGGameMode::SetupGameMode()
         {
             EnqueueHint(EHintType::SpeedIncreased);
         });
+}
 
-    if (const auto Origin{FTransform::Identity};    //
-        const auto* Field = SpawnField(Origin))
+void ACGGameMode::SpawnActors()
+{
+    // MusicActor
+    const auto* MusicActor = GetWorld()->SpawnActor<ACGMusicActor>(MusicActorClass, FTransform::Identity);
+    check(MusicActor);
+
+    // FieldActor
+    const auto Origin{FTransform::Identity};
+    auto* FieldActor = GetWorld()->SpawnActorDeferred<ACGFieldActor>(FieldActorClass, Origin);
+    check(FieldActor);
+    FieldActor->Init(GetDifficultyData(), GetGameSpeed(), MaxMultiplier);
+    OnSpeedChanged.AddUObject(FieldActor, &ACGFieldActor::OnGameSpeedChanged);
+    OnMultiplierChanged.AddUObject(FieldActor, &ACGFieldActor::OnMultiplierChanged);
+    if (auto* BonusComponent = GetPlayerBonusComponent())
     {
-        const auto FieldSize = Field->GetSize();
-        SpawnBackgroundVFX(Origin, FieldSize);
-        if (auto* PlayerPawn = GetPlayerPawn())
-        {
-            PlayerPawn->UpdateLocation(Origin, FieldSize);
-        }
+        BonusComponent->OnBonusChanged.AddUObject(FieldActor, &ACGFieldActor::OnBonusChanged);
     }
+    FieldActor->FinishSpawning(Origin);
 
-    SetGameState(EGameState::Game);
-    GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ThisClass::OnCountdown, CountdownTimerRate, true);
+    // BackgroundActor
+    const auto FieldSize = FieldActor->GetSize();
+    const auto FieldCentre = Origin * FTransform{FVector{FieldSize.X / 2, FieldSize.Y / 2, 0.0}};
+    const auto* BackgroundActor = GetWorld()->SpawnActor<ACGBackgroundActor>(BackgroundActorClass, FieldCentre);
+    check(BackgroundActor);
+
+    UpdatePlayerPawnLocation(Origin, FieldSize);
+}
+
+void ACGGameMode::UpdatePlayerPawnLocation(const FTransform& Origin, const FVector& FieldSize)
+{
+    if (auto* PlayerPawn = GetPlayerPawn())
+    {
+        PlayerPawn->UpdateLocation(Origin, FieldSize);
+    }
 }
 
 void ACGGameMode::OnCountdown()

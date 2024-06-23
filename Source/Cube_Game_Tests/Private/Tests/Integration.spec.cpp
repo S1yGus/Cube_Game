@@ -6,8 +6,8 @@
 #include "Misc/AutomationTest.h"
 #include "Tests/TestUtils.h"
 #include "Tests/CGTestUtils.h"
-#include "Gameplay/Cubes/CGCubeActor.h"
-#include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
+#include "World/Cubes/CGCubeActor.h"
+#include "World/Cubes/Bonuses/CGBaseBonusActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/WorldSettings.h"
 #include "NiagaraComponent.h"
@@ -27,10 +27,10 @@ APawn* Pawn;
 UCGBonusComponent* BonusComponent;
 ACGCubeActor* Cube;
 
-const FString CubeRef{"Blueprint'/Game/Gameplay/Cubes/BP_CGCubeActor.BP_CGCubeActor'"};
-const FString MissileBonusRef{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'"};
-const FString BombBonusRef{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'"};
-const FString ShieldBonusRef{"Blueprint'/Game/Gameplay/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'"};
+const FString CubeRef{"Blueprint'/Game/World/Cubes/BP_CGCubeActor.BP_CGCubeActor'"};
+const FString MissileBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'"};
+const FString BombBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'"};
+const FString ShieldBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'"};
 const FVector SpawnLocation{500.0};
 const ECubeType CubeType{ECubeType::GoodCube};
 const FChangeData NegativeSet{-1, -1, 1};

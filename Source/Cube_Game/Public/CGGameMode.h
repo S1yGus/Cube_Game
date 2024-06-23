@@ -7,8 +7,9 @@
 #include "CGCoreTypes.h"
 #include "CGGameMode.generated.h"
 
+class ACGMusicActor;
 class ACGFieldActor;
-class UNiagaraSystem;
+class ACGBackgroundActor;
 class ACGPlayer;
 class UCGBonusComponent;
 
@@ -62,10 +63,13 @@ protected:
     int32 MaxMultiplier{8};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    TSubclassOf<ACGFieldActor> FieldClass;
+    TSubclassOf<ACGMusicActor> MusicActorClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
-    TObjectPtr<UNiagaraSystem> BackgroundNiagaraSystem;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSubclassOf<ACGFieldActor> FieldActorClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSubclassOf<ACGBackgroundActor> BackgroundActorClass;
 
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -88,9 +92,10 @@ private:
     FORCEINLINE ACGPlayer* GetPlayerPawn();
     FORCEINLINE UCGBonusComponent* GetPlayerBonusComponent();
 
-    ACGFieldActor* SpawnField(const FTransform& Origin);
-    FORCEINLINE void SpawnBackgroundVFX(const FTransform& Origin, const FVector& FieldSize);
     void SetupGameMode();
+    void SetupHints();
+    void SpawnActors();
+    void UpdatePlayerPawnLocation(const FTransform& Origin, const FVector& FieldSize);
     void OnCountdown();
 
     FORCEINLINE void InvalidateHintStatus(EHintType HintType);

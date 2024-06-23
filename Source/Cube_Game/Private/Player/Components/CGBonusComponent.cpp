@@ -1,7 +1,7 @@
 // Cube_Game, All rights reserved.
 
 #include "Player/Components/CGBonusComponent.h"
-#include "Gameplay/Cubes/Bonuses/CGBaseBonusActor.h"
+#include "World/Cubes/Bonuses/CGBaseBonusActor.h"
 
 UCGBonusComponent::UCGBonusComponent()
 {
