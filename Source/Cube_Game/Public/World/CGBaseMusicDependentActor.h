@@ -16,7 +16,7 @@ public:
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio Analyzer", Meta = (ClampMin = "0.0"))
-    float MagnitudeFactor{1.0f};
+    FVector MagnitudeFactor{1.0f};
 
     virtual void BeginPlay() override;
 

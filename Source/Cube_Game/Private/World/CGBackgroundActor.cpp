@@ -11,13 +11,12 @@ void ACGBackgroundActor::BeginPlay()
 
     const double HalfHeight = (RowsNum - 1) * DistanceBetweenBands / 2;
     const double HalfWidth = (ColumnsNum - 1) * DistanceBetweenBands / 2;
-    const double ZLocation = -100.0;
 
     for (int32 i = 0; i < RowsNum; ++i)
     {
         for (int32 j = 0; j < ColumnsNum; ++j)
         {
-            const FVector SpawnLocation = FVector{-HalfHeight + (i * DistanceBetweenBands), -HalfWidth + (j * DistanceBetweenBands), ZLocation} + GetActorLocation();
+            const FVector SpawnLocation = FVector{-HalfHeight + (i * DistanceBetweenBands), -HalfWidth + (j * DistanceBetweenBands), 0.0} + GetActorLocation();
             auto* Band = GetWorld()->SpawnActor(BandActorClass, &SpawnLocation);
             check(Band);
             Bands.Add(Band);
@@ -35,7 +34,7 @@ void ACGBackgroundActor::OnAudioPlaybackMagnitude(TArray<float> Magnitudes)
     {
         if (IsValid(Band))
         {
-            Band->SetActorScale3D(FVector(Magnitudes[MagnitudeIndex] * MagnitudeFactor));
+            Band->SetActorScale3D(Magnitudes[MagnitudeIndex] * MagnitudeFactor);
             MagnitudeIndex = (MagnitudeIndex + 1) % Magnitudes.Num();
         }
     }

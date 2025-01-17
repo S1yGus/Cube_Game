@@ -2,10 +2,15 @@
 
 #include "CGGameModeBase.h"
 #include "Player/CGPlayerController.h"
+#include "UObject/ConstructorHelpers.h"
 
 ACGGameModeBase::ACGGameModeBase()
 {
-    PlayerControllerClass = ACGPlayerController::StaticClass();
+    static ConstructorHelpers::FClassFinder<ACGPlayerController> PC(TEXT("/Game/Player/BP_PlayerController"));
+    if (PC.Class)
+    {
+        PlayerControllerClass = PC.Class;
+    }
 }
 
 void ACGGameModeBase::SetGameState(EGameState NewGameState)

@@ -15,4 +15,11 @@ public:
     ACGGameModeMenu();
 
     virtual void StartPlay() override;
+
+protected:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = "0.0"))
+    float CameraRotationSpeed{0.3f};
+
+private:
+    void OnCameraRotation();
 };

@@ -218,7 +218,7 @@ void ACGFieldActor::OnAudioPlaybackMagnitude(TArray<float> Magnitudes)
         if (IsValid(Indicators[i]))
         {
             FVector NewLocation = Indicators[i]->GetActorLocation();
-            NewLocation.Z = Magnitudes[i * SplitFactor] * MagnitudeFactor;
+            NewLocation.Z = Magnitudes[i * SplitFactor] * MagnitudeFactor.Z;
             Indicators[i]->SetActorLocation(NewLocation);
         }
     }
@@ -226,7 +226,7 @@ void ACGFieldActor::OnAudioPlaybackMagnitude(TArray<float> Magnitudes)
     if (IsValid(BonusIndicator))
     {
         FVector NewLocation = BonusIndicator->GetActorLocation();
-        NewLocation.Z = Magnitudes[BonusIndicatorPosition * SplitFactor] * MagnitudeFactor;
+        NewLocation.Z = Magnitudes[BonusIndicatorPosition * SplitFactor] * MagnitudeFactor.Z;
         BonusIndicator->SetActorLocation(NewLocation);
     }
 }

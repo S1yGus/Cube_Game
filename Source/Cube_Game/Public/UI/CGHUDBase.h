@@ -14,7 +14,7 @@ class CUBE_GAME_API ACGHUDBase : public AHUD
 
 public:
     TObjectPtr<UUserWidget> GetCurretnWidget() { return CurrentWidget; }
-    virtual void BackToRootMenu(){};
+    virtual void BackToRootMenu() {};
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")

@@ -23,7 +23,7 @@ bool FBonusComponentTests::RunTest(const FString& Parameters)
 
     {
         UWorld* World = GetTestGameWorld();
-        const FString PlayerBlueprintName{"Blueprint'/Game/Player/BP_CGPlayer.BP_CGPlayer'"};
+        const FString PlayerBlueprintName{"Blueprint'/Game/Player/BP_Player.BP_Player'"};
         const FTransform SpawnTransform{FVector{1000.0f}};
         const auto* Playr = CreateBlueprint<ACGPlayer>(World, PlayerBlueprintName, SpawnTransform);
         if (!TestNotNull("Player must exists.", Playr))

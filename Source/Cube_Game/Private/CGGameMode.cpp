@@ -7,11 +7,11 @@
 #include "UI/CGHUDGame.h"
 #include "Settings/CGGameUserSettings.h"
 #include "Player/Components/CGBonusComponent.h"
-#include "Player/CGPlayerController.h"
 #include "World/CGFieldActor.h"
 #include "World/CGBackgroundActor.h"
 #include "World/CGMusicActor.h"
 #include "CGUtils.h"
+#include "UObject/ConstructorHelpers.h"
 
 constexpr static float CountdownTimerRate{1.0f};
 
@@ -19,9 +19,17 @@ static TQueue<EHintType> HintsQueue;
 
 ACGGameMode::ACGGameMode()
 {
-    PlayerControllerClass = ACGPlayerController::StaticClass();
-    DefaultPawnClass = ACGPlayer::StaticClass();
-    HUDClass = ACGHUDGame::StaticClass();
+    static ConstructorHelpers::FClassFinder<ACGPlayer> Player(TEXT("/Game/Player/BP_Player"));
+    if (Player.Class)
+    {
+        DefaultPawnClass = Player.Class;
+    }
+
+    static ConstructorHelpers::FClassFinder<ACGHUDGame> HUD(TEXT("/Game/Framework/BP_HUDGame"));
+    if (HUD.Class)
+    {
+        HUDClass = HUD.Class;
+    }
 }
 
 void ACGGameMode::UpdateGameMetrics(ECubeType CubeType)
