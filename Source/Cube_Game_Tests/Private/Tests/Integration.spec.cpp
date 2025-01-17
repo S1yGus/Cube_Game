@@ -27,10 +27,10 @@ APawn* Pawn;
 UCGBonusComponent* BonusComponent;
 ACGCubeActor* Cube;
 
-const FString CubeRef{"Blueprint'/Game/World/Cubes/BP_CGCubeActor.BP_CGCubeActor'"};
-const FString MissileBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_CGMissileBonusActor.BP_CGMissileBonusActor'"};
-const FString BombBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_CGBombBonusActor.BP_CGBombBonusActor'"};
-const FString ShieldBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_CGShieldBonusActor.BP_CGShieldBonusActor'"};
+const FString CubeRef{"Blueprint'/Game/World/Cubes/BP_CubeActor.BP_CubeActor'"};
+const FString MissileBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_MissileBonusActor.BP_MissileBonusActor'"};
+const FString BombBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_BombBonusActor.BP_BombBonusActor'"};
+const FString ShieldBonusRef{"Blueprint'/Game/World/Cubes/Bonuses/BP_ShieldBonusActor.BP_ShieldBonusActor'"};
 const FVector SpawnLocation{500.0};
 const ECubeType CubeType{ECubeType::GoodCube};
 const FChangeData NegativeSet{-1, -1, 1};
@@ -89,7 +89,7 @@ void FIntegration::Define()
                      for (const auto& [BonusRef, bCharged, bCubeNegative, ExpectedAssetName] : TestPayload)
                      {
                          FString BonusName;
-                         BonusRef.Split(".BP_CG", nullptr, &BonusName, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
+                         BonusRef.Split(".BP_", nullptr, &BonusName, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          BonusName.Split("Actor'", &BonusName, nullptr, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          const FString BonusCondition{bCharged ? "Charged" : "Uncharged"};
                          const FString CubeEffect{bCubeNegative ? "Negative" : "Positive"};
@@ -145,7 +145,7 @@ void FIntegration::Define()
                      for (const auto& [BonusRef, bCubeNegative, ExpectedAssetName] : TestPayload)
                      {
                          FString BonusName;
-                         BonusRef.Split(".BP_CG", nullptr, &BonusName, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
+                         BonusRef.Split(".BP_", nullptr, &BonusName, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          BonusName.Split("Actor'", &BonusName, nullptr, ESearchCase::Type::IgnoreCase, ESearchDir::Type::FromEnd);
                          const FString CubeName{bCubeNegative ? "NegativeCube" : "PositiveCube"};
                          It(FString::Printf(TEXT("Niagara."

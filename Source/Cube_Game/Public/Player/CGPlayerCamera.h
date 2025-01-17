@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "CGPlayerCamera.generated.h"
 
+class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
@@ -17,6 +18,9 @@ public:
     ACGPlayerCamera();
 
 protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<USpringArmComponent> SpringArmComponent;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UCameraComponent> CameraComponent;
 };
