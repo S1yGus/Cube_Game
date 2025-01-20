@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"EngineAssociation": "5.5",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -27,8 +27,8 @@
 	],
 	"Plugins": [
 		{
-			"Name": "Metasound",
-			"Enabled": false
+			"Name": "AudioSynesthesia",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

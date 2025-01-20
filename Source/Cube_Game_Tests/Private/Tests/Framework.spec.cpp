@@ -16,7 +16,7 @@
 
 using namespace Test;
 
-BEGIN_DEFINE_SPEC(FFramework, "CubeGame", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::HighPriority)
+BEGIN_DEFINE_SPEC(FFramework, "CubeGame", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::HighPriority)
 
 UWorld* World;
 ACGGameMode* GameMode;
