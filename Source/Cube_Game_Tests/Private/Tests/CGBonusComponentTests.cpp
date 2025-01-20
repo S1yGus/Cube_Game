@@ -15,7 +15,7 @@
 using namespace Test;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBonusComponentTests, "CubeGame.Components.BonusComponentTests",
-                                 EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::HighPriority);
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::HighPriority);
 
 bool FBonusComponentTests::RunTest(const FString& Parameters)
 {

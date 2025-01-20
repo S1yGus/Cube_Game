@@ -6,7 +6,7 @@
 #include "Misc/AutomationTest.h"
 #include "Player/Components/CGBonusComponent.h"
 
-DEFINE_SPEC(FStress, "CubeGame", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::StressFilter | EAutomationTestFlags::LowPriority)
+DEFINE_SPEC(FStress, "CubeGame", EAutomationTestFlags::EditorContext | EAutomationTestFlags::StressFilter | EAutomationTestFlags::LowPriority)
 
 void FStress::Define()
 {
