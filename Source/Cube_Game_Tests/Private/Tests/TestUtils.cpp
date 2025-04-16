@@ -4,6 +4,7 @@
 #include "Misc/OutputDeviceNull.h"
 #include "AutomationBlueprintFunctionLibrary.h"
 #include "BufferVisualizationData.h"
+#include "Editor.h"
 
 namespace Test
 {
@@ -208,9 +209,9 @@ void FTakeUIScreenshotLatentCommand::SetBufferVisualization(const FName& Visuali
 
 void SpecCloseLevel(UWorld* World)
 {
-    if (APlayerController* PC = World->GetFirstPlayerController())
+    if (GEditor)
     {
-        PC->ConsoleCommand(TEXT("Exit"), true);
+        GEditor->RequestEndPlayMap();
     }
 }
 
