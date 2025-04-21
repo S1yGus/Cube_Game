@@ -64,7 +64,7 @@ private:
 
     TArray<FText> GetScreenResolutions() const;
     void UpdateResolutionSetting();
-    void SetAllVideoSettings(int32 NewValue);
+    void SetAllVideoSettings(int32 NewQuality);
     void SetLowestResolution();
     void SetSoundClassVolume(const FString& SoundClassName, float NewVolume);
 

@@ -19,6 +19,7 @@ ACGFieldActor::ACGFieldActor()
     check(WidgetComponent);
     WidgetComponent->SetWidgetSpace(EWidgetSpace::World);
     WidgetComponent->SetDrawAtDesiredSize(true);
+    WidgetComponent->SetCastShadow(false);
     WidgetComponent->SetupAttachment(GetRootComponent());
 }
 

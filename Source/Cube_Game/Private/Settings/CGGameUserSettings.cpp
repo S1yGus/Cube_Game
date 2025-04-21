@@ -17,6 +17,8 @@
 
 using namespace SettingsConstants;
 
+DEFINE_LOG_CATEGORY_STATIC(LogCGGameUserSettings, All, All)
+
 #define LOCTEXT_NAMESPACE "GameUserSettings"
 
 #define BIND_SOUND_GETTER(VolumeType)                  \
@@ -32,6 +34,8 @@ using namespace SettingsConstants;
         SettingsSave->SoundSettings.VolumeType = NewValue; \
     }
 
+constexpr int32 MinPostProcessQualityLevel{1};
+
 static bool operator==(const FText& Lhs, const FText& Rhs)
 {
     return Lhs.ToString() == Rhs.ToString();
@@ -40,6 +44,20 @@ static bool operator==(const FText& Lhs, const FText& Rhs)
 static bool operator==(const FCultureData& Data, const FString& Str)
 {
     return Data.Culture == Str;
+}
+
+static void SetMSAALevel(int32 MSAASamples)
+{
+    if (MSAASamples != 0 && MSAASamples != 2 && MSAASamples != 4 && MSAASamples != 8)
+    {
+        UE_LOG(LogCGGameUserSettings, Warning, TEXT("Invalid MSAA value: %d. Use 0, 2, 4, or 8."), MSAASamples);
+        return;
+    }
+
+    if (auto* MSAACount = IConsoleManager::Get().FindConsoleVariable(TEXT("r.MSAACount")))
+    {
+        MSAACount->Set(MSAASamples);
+    }
 }
 
 UCGGameUserSettings::UCGGameUserSettings()
@@ -359,18 +377,36 @@ void UCGGameUserSettings::UpdateResolutionSetting()
     ResolutionSetting->SetOptions(GetScreenResolutions());
 }
 
-void UCGGameUserSettings::SetAllVideoSettings(int32 NewValue)
+void UCGGameUserSettings::SetAllVideoSettings(int32 NewQuality)
 {
-    SetViewDistanceQuality(NewValue);
-    SetAntiAliasingQuality(NewValue);
-    SetPostProcessingQuality(NewValue);
-    SetShadowQuality(NewValue);
-    SetGlobalIlluminationQuality(NewValue);
-    SetReflectionQuality(NewValue);
-    SetTextureQuality(NewValue);
-    SetVisualEffectQuality(NewValue);
-    SetFoliageQuality(NewValue);
-    SetShadingQuality(NewValue);
+    switch (NewQuality)
+    {
+        case 0:    // Low
+            SetMSAALevel(0);
+            break;
+        case 1:    // Medium
+            SetMSAALevel(2);
+            break;
+        case 2:    // High
+            SetMSAALevel(4);
+            break;
+        case 3:    // Epic
+            SetMSAALevel(8);
+            break;
+        default:
+            break;
+    }
+
+    SetViewDistanceQuality(NewQuality);
+    SetAntiAliasingQuality(NewQuality);
+    SetPostProcessingQuality(FMath::Max(MinPostProcessQualityLevel, NewQuality));
+    SetShadowQuality(NewQuality);
+    SetGlobalIlluminationQuality(NewQuality);
+    SetReflectionQuality(NewQuality);
+    SetTextureQuality(NewQuality);
+    SetVisualEffectQuality(NewQuality);
+    SetFoliageQuality(NewQuality);
+    SetShadingQuality(NewQuality);
 }
 
 void UCGGameUserSettings::SetLowestResolution()
