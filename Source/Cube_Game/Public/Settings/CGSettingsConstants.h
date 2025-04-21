@@ -48,11 +48,10 @@ const TArray<FText> FramerateOptions    //
 
 const TArray<FText> GraphicsQualityOptions    //
     {
-        LOCTEXT("GraphicsQualityLow_Loc", "Low"),               //
-        LOCTEXT("GraphicsQualityMedium_Loc", "Medium"),         //
-        LOCTEXT("GraphicsQualityHigh_Loc", "High"),             //
-        LOCTEXT("GraphicsQualityEpic_Loc", "Epic"),             //
-        LOCTEXT("GraphicsQualityCinematic_Loc", "Cinematic")    //
+        LOCTEXT("GraphicsQualityLow_Loc", "Low"),          //
+        LOCTEXT("GraphicsQualityMedium_Loc", "Medium"),    //
+        LOCTEXT("GraphicsQualityHigh_Loc", "High"),        //
+        LOCTEXT("GraphicsQualityEpic_Loc", "Epic"),        //
     };
 
 const TArray<FText> PopUpTypeOptions    //
