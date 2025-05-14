@@ -12,7 +12,7 @@ class CUBE_GAME_API UCGFloatSetting : public UCGSetting
     GENERATED_BODY()
 
 public:
-    float GetCurrentValue() const;
+    [[nodiscard]] float GetCurrentValue() const;
     void SetValue(float NewValue);
 
 private:

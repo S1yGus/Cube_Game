@@ -42,10 +42,10 @@ void UCGPopUpHintUserWidget::ResetWidget()
 
 void UCGPopUpHintUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::PopUpHint)
-        return;
-
-    ResetWidget();
+    if (NewGameState == EGameState::PopUpHint)
+    {
+        ResetWidget();
+    }
 }
 
 void UCGPopUpHintUserWidget::OnPressedEnter()
@@ -68,15 +68,10 @@ void UCGPopUpHintUserWidget::OnClickedResumeButton()
     ShowFadeoutAnimation();
 }
 
-void UCGPopUpHintUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGPopUpHintUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
-        if (ACGGameModeBase* GameMode = GetGameModeBase())
-        {
-            GameMode->ClearPause();
-        }
+        GameMode->ClearPause();
     }
 }

@@ -39,6 +39,8 @@ protected:
 
     virtual void NativeOnInitialized() override;
 
+    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+
 private:
     int32 CurrentHintIndex{0};
 
@@ -53,5 +55,5 @@ private:
     void OnClickedPrevButton();
     void OnPressedEscape();
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

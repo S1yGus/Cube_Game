@@ -12,12 +12,12 @@ class CUBE_GAME_API UCGSetting : public UObject
     GENERATED_BODY()
 
 public:
-    const FText& GetName() const { return Name; }
+    [[nodiscard]] const FText& GetName() const { return Name; }
 
 private:
     FText Name;
 
-    void SetName(FText&& NewName) { Name = MoveTemp(NewName); }
+    void SetName(const FText& NewName) { Name = NewName; }
 
     friend class UCGGameUserSettings;
 };

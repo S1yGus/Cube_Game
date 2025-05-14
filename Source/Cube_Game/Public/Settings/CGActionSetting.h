@@ -13,15 +13,15 @@ class CUBE_GAME_API UCGActionSetting : public UCGSetting
 
 public:
     void DoAction();
-    bool IsActionAvailable();
-    const FText& GetActionName() const { return ActionName; }
+    [[nodiscard]] bool IsActionAvailable();
+    [[nodiscard]] const FText& GetActionName() const { return ActionName; }
 
 private:
     FText ActionName;
     TFunction<void()> Action;
     TFunction<bool()> Status;
 
-    void SetActionName(FText&& NewActionName) { ActionName = MoveTemp(NewActionName); }
+    void SetActionName(const FText& NewActionName) { ActionName = NewActionName; }
     void AddActionFunc(TFunction<void()>&& Func) { Action = MoveTemp(Func); }
     void AddStatusFunc(TFunction<bool()>&& Func) { Status = MoveTemp(Func); }
 

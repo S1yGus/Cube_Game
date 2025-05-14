@@ -32,5 +32,5 @@ private:
     void InitDifficultyButtons();
     void CreateAndAddDifficultyButton(EDifficulty Difficulty);
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

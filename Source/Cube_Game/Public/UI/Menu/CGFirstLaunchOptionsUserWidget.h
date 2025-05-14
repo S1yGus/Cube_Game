@@ -4,33 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "UI/CGAnimatedUserWidget.h"
-#include "CGCoreTypes.h"
-#include "CGOptionsUserWidget.generated.h"
+#include "CGFirstLaunchOptionsUserWidget.generated.h"
 
 class UCGButtonUserWidget;
+class UCGSetting;
 class UCGComboBoxSettingUserWidget;
 class UCGSliderSettingUserWidget;
 class UCGButtonSettingUserWidget;
-class UCGSetting;
 class UVerticalBox;
 
 UCLASS()
-class CUBE_GAME_API UCGOptionsUserWidget : public UCGAnimatedUserWidget
+class CUBE_GAME_API UCGFirstLaunchOptionsUserWidget : public UCGAnimatedUserWidget
 {
     GENERATED_BODY()
 
 protected:
     UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UVerticalBox> VideoSettingsVerticalBox;
+    TObjectPtr<UVerticalBox> SettingsVerticalBox;
 
     UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UVerticalBox> SoundSettingsVerticalBox;
-
-    UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UVerticalBox> GameSettingsVerticalBox;
-
-    UPROPERTY(Meta = (BindWidget))
-    TObjectPtr<UCGButtonUserWidget> BackButton;
+    TObjectPtr<UCGButtonUserWidget> OkButton;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UCGComboBoxSettingUserWidget> ComboBoxSettingWidgetClass;
@@ -44,17 +37,14 @@ protected:
     virtual void NativeOnInitialized() override;
 
 private:
-    void InitSettingsWidgets(const TArray<TObjectPtr<UCGSetting>>& SettingsArray, UVerticalBox* VerticalBox);
+    void InitSettingsWidgets(const TArray<TObjectPtr<UCGSetting>>& SettingsArray);
     void Setup();
     void ResetWidget();
-    void UpdateOptions();
-    FORCEINLINE void UpdateSettingsWidget(UVerticalBox* Container);
+    void UpdateSettingsWidget();
 
-    void OnGameStateChanged(EGameState NewGameState);
-    void OnResolutionChanged();
     void OnLanguageChanged();
-    void OnClickedBackButton();
-    void OnPressedEscape();
+    void OnClickedOkButton();
+    void OnPressedEnter();
 
     virtual void OnFadeoutAnimationFinished() override;
 };

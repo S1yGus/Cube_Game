@@ -46,5 +46,5 @@ private:
     void OnSaveSettings();
     void OnCancelSettings();
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

@@ -53,5 +53,5 @@ private:
     void OnClickedDateButton();
     void OnClickedBackButton();
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

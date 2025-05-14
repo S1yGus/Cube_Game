@@ -12,8 +12,8 @@ class CUBE_GAME_API UCGIntSetting : public UCGSetting
     GENERATED_BODY()
 
 public:
-    const TArray<FText>& GetOptions() const { return Options; }
-    int32 GetCurrentValue() const;
+    [[nodiscard]] const TArray<FText>& GetOptions() const { return Options; }
+    [[nodiscard]] int32 GetCurrentValue() const;
     void SetValue(int32 NewValue);
 
 private:

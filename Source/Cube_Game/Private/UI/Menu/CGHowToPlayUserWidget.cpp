@@ -17,6 +17,17 @@ void UCGHowToPlayUserWidget::NativeOnInitialized()
     ShowHint(CurrentHintIndex);
 }
 
+void UCGHowToPlayUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+{
+    Super::OnAnimationFinished_Implementation(Animation);
+
+    if (Animation == FadeoutHintAnimation)
+    {
+        ShowHint(CurrentHintIndex);
+        PlayAnimation(FadeInHintAnimation);
+    }
+}
+
 void UCGHowToPlayUserWidget::Setup()
 {
     check(TitleText);
@@ -58,10 +69,10 @@ void UCGHowToPlayUserWidget::ShowHint(int32 HintIndex)
 
 void UCGHowToPlayUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::HowToPlay)
-        return;
-
-    ResetWidget();
+    if (NewGameState == EGameState::HowToPlay)
+    {
+        ResetWidget();
+    }
 }
 
 void UCGHowToPlayUserWidget::OnClickedBackButton()
@@ -102,21 +113,10 @@ void UCGHowToPlayUserWidget::OnPressedEscape()
     OnClickedBackButton();
 }
 
-void UCGHowToPlayUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGHowToPlayUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
+    if (auto* HUD = GetOwningPlayer() ? GetOwningPlayer()->GetHUD<ACGHUDBase>() : nullptr)
     {
-        if (auto* HUD = GetOwningPlayer() ? GetOwningPlayer()->GetHUD<ACGHUDBase>() : nullptr)
-        {
-            HUD->BackToRootMenu();
-        }
-    }
-
-    if (Animation == FadeoutHintAnimation)
-    {
-        ShowHint(CurrentHintIndex);
-        PlayAnimation(FadeInHintAnimation);
+        HUD->BackToRootMenu();
     }
 }

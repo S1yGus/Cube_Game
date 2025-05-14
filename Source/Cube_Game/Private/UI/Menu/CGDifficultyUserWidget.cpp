@@ -51,16 +51,11 @@ void UCGDifficultyUserWidget::CreateAndAddDifficultyButton(EDifficulty Difficult
     }
 }
 
-void UCGDifficultyUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGDifficultyUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
+    if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
     {
-        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
-        {
-            GameInstnce->StartGame();
-            UGameplayStatics::PopSoundMixModifier(this, FadeOutSoundMix);    // Smoothly returns all sounds.
-        }
+        GameInstnce->StartGame();
+        UGameplayStatics::PopSoundMixModifier(this, FadeOutSoundMix);    // Smoothly returns all sounds.
     }
 }

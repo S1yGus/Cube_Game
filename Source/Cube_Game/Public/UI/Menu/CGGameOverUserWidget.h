@@ -64,5 +64,5 @@ private:
 
     FText FormatGameOverText(int32 Score);
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

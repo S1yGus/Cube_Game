@@ -16,7 +16,7 @@ void UCGAnimatedUserWidget::ShowFadeoutAnimation()
     UGameplayStatics::PlaySound2D(GetWorld(), FadeoutSound);
 }
 
-void UCGAnimatedUserWidget::ShowFadeoutAnimationAndSetGameState(EGameState GameState)
+void UCGAnimatedUserWidget::TransitionToGameState(EGameState GameState)
 {
     GameStateToSet = GameState;
     ShowFadeoutAnimation();
@@ -43,4 +43,12 @@ void UCGAnimatedUserWidget::OnAnimationFinished_Implementation(const UWidgetAnim
     {
         UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
     }
+    else if (Animation == FadeoutAnimation)
+    {
+        OnFadeoutAnimationFinished();
+    }
+}
+
+void UCGAnimatedUserWidget::OnFadeoutAnimationFinished()
+{
 }

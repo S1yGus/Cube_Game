@@ -19,8 +19,6 @@ using namespace SettingsConstants;
 
 DEFINE_LOG_CATEGORY_STATIC(LogCGGameUserSettings, All, All)
 
-#define LOCTEXT_NAMESPACE "GameUserSettings"
-
 #define BIND_SOUND_GETTER(VolumeType)                  \
     [&]()                                              \
     {                                                  \
@@ -70,6 +68,17 @@ UCGGameUserSettings::UCGGameUserSettings()
 UCGGameUserSettings* UCGGameUserSettings::Get()
 {
     return GEngine ? Cast<UCGGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
+}
+
+bool UCGGameUserSettings::IsFistLaunch() const
+{
+    return SettingsSave->GameSettings.bFirstLaunch;
+}
+
+void UCGGameUserSettings::FistLaunchDone()
+{
+    SettingsSave->GameSettings.bFirstLaunch = false;
+    SaveSettings();
 }
 
 EPopUpType UCGGameUserSettings::GetPopUpType() const
@@ -126,7 +135,7 @@ void UCGGameUserSettings::SaveSettings()
 void UCGGameUserSettings::InitVideoSettings()
 {
     {
-        auto Setting = CreateIntSetting(LOCTEXT("ScreenMode_Loc", "Screen mode"), FullscreenOptions, VideoSettings);
+        auto Setting = CreateIntSetting(VideoSettingName::ScreenMode, FullscreenOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -142,7 +151,7 @@ void UCGGameUserSettings::InitVideoSettings()
     }
 
     {
-        ResolutionSetting = CreateIntSetting(LOCTEXT("Resolution_Loc", "Resolution"), GetScreenResolutions(), VideoSettings);
+        ResolutionSetting = CreateIntSetting(VideoSettingName::Resolution, GetScreenResolutions(), VideoSettings);
         ResolutionSetting->AddGetter(
             [&]() -> int32
             {
@@ -168,7 +177,7 @@ void UCGGameUserSettings::InitVideoSettings()
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("VSync_Loc", "V-Sync"), VSyncOptions, VideoSettings);
+        auto Setting = CreateIntSetting(VideoSettingName::VSync, VSyncOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -183,7 +192,7 @@ void UCGGameUserSettings::InitVideoSettings()
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("FramerateLimit_Loc", "Framerate limit"), FramerateOptions, VideoSettings);
+        auto Setting = CreateIntSetting(VideoSettingName::FramerateLimit, FramerateOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -200,7 +209,7 @@ void UCGGameUserSettings::InitVideoSettings()
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("GraphicsQuality_Loc", "Quality"), GraphicsQualityOptions, VideoSettings);
+        auto Setting = CreateIntSetting(VideoSettingName::GraphicsQuality, GraphicsQualityOptions, VideoSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -218,25 +227,25 @@ void UCGGameUserSettings::InitVideoSettings()
 void UCGGameUserSettings::InitSoundSettings()
 {
     {
-        auto Setting = CreateFloatSetting(LOCTEXT("MasterVolume_Loc", "Master"), SoundSettings);
+        auto Setting = CreateFloatSetting(SoundSettingName::MasterVolume, SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MasterVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCMasterName, MasterVolume));
     }
 
     {
-        auto Setting = CreateFloatSetting(LOCTEXT("UIVolume_Loc", "Interface"), SoundSettings);
+        auto Setting = CreateFloatSetting(SoundSettingName::UIVolume, SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(UIVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCUIName, UIVolume));
     }
 
     {
-        auto Setting = CreateFloatSetting(LOCTEXT("FXVolume_Loc", "Effects"), SoundSettings);
+        auto Setting = CreateFloatSetting(SoundSettingName::FXVolume, SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(FXVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCFXName, FXVolume));
     }
 
     {
-        auto Setting = CreateFloatSetting(LOCTEXT("MusicVolume_Loc", "Music"), SoundSettings);
+        auto Setting = CreateFloatSetting(SoundSettingName::MusicVolume, SoundSettings);
         Setting->AddGetter(BIND_SOUND_GETTER(MusicVolume));
         Setting->AddSetter(BIND_SOUND_SETTER(SCMusicName, MusicVolume));
     }
@@ -251,21 +260,24 @@ void UCGGameUserSettings::InitGameSettings()
             LanguageOptions.Emplace(Culture.CultureName);
         }
 
-        auto Setting = CreateIntSetting(LOCTEXT("Language_Loc", "Language"), LanguageOptions, GameSettings);
+        auto Setting = CreateIntSetting(GameSettingName::Language, LanguageOptions, GameSettings);
         Setting->AddGetter(
-            []()
+            [&]()
             {
                 return CultureData.IndexOfByKey(UKismetInternationalizationLibrary::GetCurrentCulture());
             });
         Setting->AddSetter(
-            [](int32 NewValue)
+            [&](int32 NewValue)
             {
-                UKismetInternationalizationLibrary::SetCurrentCulture(CultureData[NewValue].Culture, true);
+                if (UKismetInternationalizationLibrary::SetCurrentCulture(CultureData[NewValue].Culture, true))
+                {
+                    OnLanguageChanged.Broadcast();
+                }
             });
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("PopUpType_Loc", "Pop-up type"), PopUpTypeOptions, GameSettings);
+        auto Setting = CreateIntSetting(GameSettingName::PopUpType, PopUpTypeOptions, GameSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -280,7 +292,7 @@ void UCGGameUserSettings::InitGameSettings()
     }
 
     {
-        auto Setting = CreateIntSetting(LOCTEXT("Hints_Loc", "Hints"), HintOptions, GameSettings);
+        auto Setting = CreateIntSetting(GameSettingName::Hints, HintOptions, GameSettings);
         Setting->AddGetter(
             [&]()
             {
@@ -295,7 +307,7 @@ void UCGGameUserSettings::InitGameSettings()
     }
 
     {
-        auto Setting = CreateActionSetting(LOCTEXT("ResetHints_Loc", "Reset hints"), LOCTEXT("ResetHintsButton_Loc", "RESET"), GameSettings);
+        auto Setting = CreateActionSetting(GameSettingName::ResetHints, ActionName::ResetHints, GameSettings);
         Setting->AddActionFunc(
             [&]()
             {
@@ -321,7 +333,7 @@ void UCGGameUserSettings::InitGameSettings()
     }
 
     {
-        auto Setting = CreateActionSetting(LOCTEXT("ClearLeaderboard_Loc", "Clear leaderboard"), LOCTEXT("ClearLeaderboardButton_Loc", "CLEAR"), GameSettings);
+        auto Setting = CreateActionSetting(GameSettingName::ClearLeaderboard, ActionName::ClearLeaderboard, GameSettings);
         Setting->AddActionFunc(
             []()
             {
@@ -464,27 +476,25 @@ void UCGGameUserSettings::CheckSettingsSave()
     check(SettingsSave);
 }
 
-TObjectPtr<UCGIntSetting> UCGGameUserSettings::CreateIntSetting(FText&& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo)
+TObjectPtr<UCGIntSetting> UCGGameUserSettings::CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
-    const auto Setting = CreateSetting<UCGIntSetting>(MoveTemp(Name), AddTo);
+    const auto Setting = CreateSetting<UCGIntSetting>(Name, AddTo);
     Setting->SetOptions(Options);
 
     return Setting;
 }
 
-TObjectPtr<UCGFloatSetting> UCGGameUserSettings::CreateFloatSetting(FText&& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
+TObjectPtr<UCGFloatSetting> UCGGameUserSettings::CreateFloatSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
-    const auto Setting = CreateSetting<UCGFloatSetting>(MoveTemp(Name), AddTo);
+    const auto Setting = CreateSetting<UCGFloatSetting>(Name, AddTo);
 
     return Setting;
 }
 
-TObjectPtr<UCGActionSetting> UCGGameUserSettings::CreateActionSetting(FText&& Name, FText&& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo)
+TObjectPtr<UCGActionSetting> UCGGameUserSettings::CreateActionSetting(const FText& Name, const FText& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo)
 {
-    const auto Setting = CreateSetting<UCGActionSetting>(MoveTemp(Name), AddTo);
-    Setting->SetActionName(MoveTemp(ActionName));
+    const auto Setting = CreateSetting<UCGActionSetting>(Name, AddTo);
+    Setting->SetActionName(ActionName);
 
     return Setting;
 }
-
-#undef LOCTEXT_NAMESPACE

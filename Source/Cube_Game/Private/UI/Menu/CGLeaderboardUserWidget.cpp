@@ -65,11 +65,11 @@ void UCGLeaderboardUserWidget::UpdateLeaderboard()
 
 void UCGLeaderboardUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::Leaderboard)
-        return;
-
-    ResetWidget();
-    UpdateLeaderboard();
+    if (NewGameState == EGameState::Leaderboard)
+    {
+        ResetWidget();
+        UpdateLeaderboard();
+    }
 }
 
 void UCGLeaderboardUserWidget::OnPressedEscape()
@@ -133,15 +133,10 @@ void UCGLeaderboardUserWidget::OnClickedBackButton()
     ShowFadeoutAnimation();
 }
 
-void UCGLeaderboardUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGLeaderboardUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
+    if (ACGGameModeBase* GameMode = GetGameModeBase())
     {
-        if (ACGGameModeBase* GameMode = GetGameModeBase())
-        {
-            GameMode->SetGameState(EGameState::MainMenu);
-        }
+        GameMode->SetGameState(EGameState::MainMenu);
     }
 }
