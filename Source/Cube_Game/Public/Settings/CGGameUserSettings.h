@@ -25,18 +25,21 @@ public:
     FOnResolutionChangedSignature OnResolutionChanged;
     FOnPopUpTypeChangedSignature OnPopUpTypeChanged;
     FOnHintSettingsChangedSignature OnHintSettingsChanged;
+    FOnLanguageChangedSignature OnLanguageChanged;
 
     UCGGameUserSettings();
 
-    static UCGGameUserSettings* Get();
-    const TArray<TObjectPtr<UCGSetting>>& GetVideoSettings() const { return VideoSettings; }
-    const TArray<TObjectPtr<UCGSetting>>& GetSoundSettings() const { return SoundSettings; }
-    const TArray<TObjectPtr<UCGSetting>>& GetGameSettings() const { return GameSettings; }
-    EPopUpType GetPopUpType() const;
-    bool AreHintsEnabled() const;
-    const FHintsStatus& GetHintsStatus() const;
+    [[nodiscard]] static UCGGameUserSettings* Get();
+    [[nodiscard]] const TArray<TObjectPtr<UCGSetting>>& GetVideoSettings() const { return VideoSettings; }
+    [[nodiscard]] const TArray<TObjectPtr<UCGSetting>>& GetSoundSettings() const { return SoundSettings; }
+    [[nodiscard]] const TArray<TObjectPtr<UCGSetting>>& GetGameSettings() const { return GameSettings; }
+    [[nodiscard]] bool IsFistLaunch() const;
+    void FistLaunchDone();
+    [[nodiscard]] EPopUpType GetPopUpType() const;
+    [[nodiscard]] bool AreHintsEnabled() const;
+    [[nodiscard]] const FHintsStatus& GetHintsStatus() const;
     void SetHintsStatus(const FHintsStatus& NewHintsMap);
-    EDifficulty GetCurrentDifficulty() const { return CurrentDifficulty; }
+    [[nodiscard]] EDifficulty GetCurrentDifficulty() const { return CurrentDifficulty; }
     void SetDifficulty(EDifficulty NewDifficylty) { CurrentDifficulty = NewDifficylty; }
 
     void SetLastConfirmedResolutionSettings();
@@ -62,7 +65,7 @@ private:
     void InitSoundSettings();
     void InitGameSettings();
 
-    TArray<FText> GetScreenResolutions() const;
+    FORCEINLINE [[nodiscard]] TArray<FText> GetScreenResolutions() const;
     void UpdateResolutionSetting();
     void SetAllVideoSettings(int32 NewQuality);
     void SetLowestResolution();
@@ -70,16 +73,16 @@ private:
 
     void CheckSettingsSave();
 
-    FORCEINLINE TObjectPtr<UCGIntSetting> CreateIntSetting(FText&& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo);
-    FORCEINLINE TObjectPtr<UCGFloatSetting> CreateFloatSetting(FText&& Name, TArray<TObjectPtr<UCGSetting>>& AddTo);
-    FORCEINLINE TObjectPtr<UCGActionSetting> CreateActionSetting(FText&& Name, FText&& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE [[nodiscard]] TObjectPtr<UCGIntSetting> CreateIntSetting(const FText& Name, const TArray<FText>& Options, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE [[nodiscard]] TObjectPtr<UCGFloatSetting> CreateFloatSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo);
+    FORCEINLINE [[nodiscard]] TObjectPtr<UCGActionSetting> CreateActionSetting(const FText& Name, const FText& ActionName, TArray<TObjectPtr<UCGSetting>>& AddTo);
 
     template <IsSetting T>
-    TObjectPtr<T> CreateSetting(FText&& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
+    TObjectPtr<T> CreateSetting(const FText& Name, TArray<TObjectPtr<UCGSetting>>& AddTo)
     {
         TObjectPtr<T> Setting = NewObject<T>();
         check(Setting);
-        Setting->SetName(MoveTemp(Name));
+        Setting->SetName(Name);
         AddTo.Add(Setting);
         return Setting;
     }

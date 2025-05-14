@@ -11,6 +11,7 @@ enum class EGameState : uint8
 {
     WaitingToStart = 0,
     MainMenu,
+    FirstLaunchOptions,
     Options,
     OptionsWarning,
     DifficultySelection,
@@ -194,6 +195,9 @@ struct FGameSettings
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    bool bFirstLaunch{true};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     EPopUpType PopUpType{EPopUpType::Multiplier};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
@@ -261,3 +265,4 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnHintSettingsChangedSignature, const FHint
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBonusBeginOverlapSignature, class ACGCubeActor*, bool);
 DECLARE_DELEGATE_OneParam(FOnEndPlaySignature, FDelegateHandle);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAudioPlaybackMagnitudeSignature, TArray<float>);
+DECLARE_MULTICAST_DELEGATE(FOnLanguageChangedSignature);

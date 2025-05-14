@@ -47,5 +47,5 @@ private:
     void OnClickedOptionsButton();
     void OnClickedQuitButton();
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

@@ -37,5 +37,5 @@ private:
     void OnShowPopUpHint(const FHintData& HintData);
     void OnClickedResumeButton();
 
-    virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+    virtual void OnFadeoutAnimationFinished() override;
 };

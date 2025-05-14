@@ -34,9 +34,13 @@ protected:
 
     EGameState GameStateToSet{EGameState::WaitingToStart};
 
-    void ShowFadeoutAnimationAndSetGameState(EGameState GameState);
+    void TransitionToGameState(EGameState GameState);
     TObjectPtr<ACGGameModeBase> GetGameModeBase() const;
 
     virtual void SetGameState(EGameState NewGameState);
+
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
+
+private:
+    virtual void OnFadeoutAnimationFinished();
 };

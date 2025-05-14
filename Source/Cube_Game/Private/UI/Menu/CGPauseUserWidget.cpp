@@ -55,10 +55,10 @@ void UCGPauseUserWidget::ResetWidget()
 
 void UCGPauseUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::Pause)
-        return;
-
-    ResetWidget();
+    if (NewGameState == EGameState::Pause)
+    {
+        ResetWidget();
+    }
 }
 
 void UCGPauseUserWidget::OnPressedEscape()
@@ -71,22 +71,22 @@ void UCGPauseUserWidget::OnPressedEscape()
 
 void UCGPauseUserWidget::OnClickedResumeButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::Game);
+    TransitionToGameState(EGameState::Game);
 }
 
 void UCGPauseUserWidget::OnClickedHowButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::HowToPlay);
+    TransitionToGameState(EGameState::HowToPlay);
 }
 
 void UCGPauseUserWidget::OnClickedOptionsButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::Options);
+    TransitionToGameState(EGameState::Options);
 }
 
 void UCGPauseUserWidget::OnClickedMenuButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::MainMenu);
+    TransitionToGameState(EGameState::MainMenu);
 }
 
 void UCGPauseUserWidget::OnClickedQuitButton()
@@ -107,22 +107,17 @@ void UCGPauseUserWidget::SetGameState(EGameState NewGameState)
     }
 }
 
-void UCGPauseUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGPauseUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
+    if (GameStateToSet == EGameState::MainMenu)
     {
-        if (GameStateToSet == EGameState::MainMenu)
+        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
         {
-            if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
-            {
-                GameInstnce->OpenMainMenu();
-            }
+            GameInstnce->OpenMainMenu();
         }
-        else
-        {
-            SetGameState(GameStateToSet);
-        }
+    }
+    else
+    {
+        SetGameState(GameStateToSet);
     }
 }

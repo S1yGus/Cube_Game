@@ -56,12 +56,12 @@ void UCGGameOverUserWidget::OnClickedAddButton()
 
 void UCGGameOverUserWidget::OnClickedPlayAgainButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::Game);
+    TransitionToGameState(EGameState::Game);
 }
 
 void UCGGameOverUserWidget::OnClickedMenuButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::MainMenu);
+    TransitionToGameState(EGameState::MainMenu);
 }
 
 void UCGGameOverUserWidget::OnClickedQuitButton()
@@ -74,14 +74,13 @@ void UCGGameOverUserWidget::OnClickedQuitButton()
 
 void UCGGameOverUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::GameOver)
-        return;
-
-    const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr;
-    if (!GameMode)
-        return;
-
-    GameOverText->SetText(FormatGameOverText(GameMode->GetScore()));
+    if (NewGameState == EGameState::GameOver)
+    {
+        if (const auto* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode<ACGGameMode>() : nullptr)
+        {
+            GameOverText->SetText(FormatGameOverText(GameMode->GetScore()));
+        }
+    }
 }
 
 void UCGGameOverUserWidget::OnNameTextChanged(const FText& NewText)
@@ -99,25 +98,20 @@ FText UCGGameOverUserWidget::FormatGameOverText(int32 Score)
     return GameOverFormat;
 }
 
-void UCGGameOverUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGGameOverUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
+    if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
     {
-        if (auto* GameInstnce = GetGameInstance<UCGGameInstance>())
+        switch (GameStateToSet)
         {
-            switch (GameStateToSet)
-            {
-                case EGameState::Game:
-                    GameInstnce->StartGame();
-                    break;
-                case EGameState::MainMenu:
-                    GameInstnce->OpenMainMenu();
-                    break;
-                default:
-                    break;
-            }
+            case EGameState::Game:
+                GameInstnce->StartGame();
+                break;
+            case EGameState::MainMenu:
+                GameInstnce->OpenMainMenu();
+                break;
+            default:
+                break;
         }
     }
 }

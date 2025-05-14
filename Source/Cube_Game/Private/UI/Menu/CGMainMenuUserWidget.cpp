@@ -5,6 +5,7 @@
 #include "CGGameInstance.h"
 #include "CGGameModeBase.h"
 #include "Player/CGPlayerController.h"
+#include "Settings/CGGameUserSettings.h"
 
 void UCGMainMenuUserWidget::NativeOnInitialized()
 {
@@ -53,10 +54,10 @@ void UCGMainMenuUserWidget::ResetWidget()
 
 void UCGMainMenuUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::MainMenu)
-        return;
-
-    ResetWidget();
+    if (NewGameState == EGameState::MainMenu)
+    {
+        ResetWidget();
+    }
 }
 
 void UCGMainMenuUserWidget::OnPressedEscape()
@@ -69,22 +70,30 @@ void UCGMainMenuUserWidget::OnPressedEscape()
 
 void UCGMainMenuUserWidget::OnClickedGameButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::DifficultySelection);
+    if (auto* GameUserSettings = UCGGameUserSettings::Get(); GameUserSettings && GameUserSettings->IsFistLaunch())
+    {
+        GameUserSettings->FistLaunchDone();
+        TransitionToGameState(EGameState::FirstLaunchOptions);
+    }
+    else
+    {
+        TransitionToGameState(EGameState::DifficultySelection);
+    }
 }
 
 void UCGMainMenuUserWidget::OnClickedLeaderButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::Leaderboard);
+    TransitionToGameState(EGameState::Leaderboard);
 }
 
 void UCGMainMenuUserWidget::OnClickedHowButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::HowToPlay);
+    TransitionToGameState(EGameState::HowToPlay);
 }
 
 void UCGMainMenuUserWidget::OnClickedOptionsButton()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::Options);
+    TransitionToGameState(EGameState::Options);
 }
 
 void UCGMainMenuUserWidget::OnClickedQuitButton()
@@ -95,12 +104,7 @@ void UCGMainMenuUserWidget::OnClickedQuitButton()
     }
 }
 
-void UCGMainMenuUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGMainMenuUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
-    {
-        SetGameState(GameStateToSet);
-    }
+    SetGameState(GameStateToSet);
 }

@@ -3,11 +3,52 @@
 #pragma once
 
 #include "Internationalization/StringTableRegistry.h"
+#include "CGCoreTypes.h"
 
 #define LOCTEXT_NAMESPACE "SettingsConstants"
 
 namespace SettingsConstants
 {
+
+struct VideoSettingName
+{
+    VideoSettingName() = delete;
+
+    static FText ScreenMode;
+    static FText Resolution;
+    static FText VSync;
+    static FText FramerateLimit;
+    static FText GraphicsQuality;
+};
+
+struct SoundSettingName
+{
+    SoundSettingName() = delete;
+
+    static FText MasterVolume;
+    static FText UIVolume;
+    static FText FXVolume;
+    static FText MusicVolume;
+};
+
+struct GameSettingName
+{
+    GameSettingName() = delete;
+
+    static FText Language;
+    static FText PopUpType;
+    static FText Hints;
+    static FText ResetHints;
+    static FText ClearLeaderboard;
+};
+
+struct ActionName
+{
+    ActionName() = delete;
+
+    static FText ResetHints;
+    static FText ClearLeaderboard;
+};
 
 // clang-format off
 const FString SettingsSaveSlotName = "SettingsSave";
@@ -43,7 +84,8 @@ const TArray<FText> FramerateOptions    //
         FText::FromString("30"),                           //
         FText::FromString("60"),                           //
         FText::FromString("120"),                          //
-        FText::FromString("144")                           //
+        FText::FromString("144"),                          //
+        FText::FromString("175")                           //
     };
 
 const TArray<FText> GraphicsQualityOptions    //

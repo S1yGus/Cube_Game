@@ -12,13 +12,16 @@ class CUBE_GAME_API ACGHUDMenu : public ACGHUDBase
     GENERATED_BODY()
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> MainMenuWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
+    TSubclassOf<UUserWidget> FirstLaunchOptionsWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> DifficultySelectionWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> LeaderboardWidgetClass;
 
     virtual void BeginPlay() override;

@@ -63,10 +63,10 @@ void UCGOptionsWarningUserWidget::ResetWidget()
 
 void UCGOptionsWarningUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::OptionsWarning)
-        return;
-
-    ResetWidget();
+    if (NewGameState == EGameState::OptionsWarning)
+    {
+        ResetWidget();
+    }
 }
 
 void UCGOptionsWarningUserWidget::OnPressedEnter()
@@ -107,12 +107,7 @@ void UCGOptionsWarningUserWidget::OnCancelSettings()
     ShowFadeoutAnimation();
 }
 
-void UCGOptionsWarningUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGOptionsWarningUserWidget::OnFadeoutAnimationFinished()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
-
-    if (Animation == FadeoutAnimation)
-    {
-        SetGameState(EGameState::Options);
-    }
+    SetGameState(EGameState::Options);
 }

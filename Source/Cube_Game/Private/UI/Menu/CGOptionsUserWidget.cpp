@@ -2,17 +2,19 @@
 
 #include "UI/Menu/CGOptionsUserWidget.h"
 #include "UI/Menu/CGButtonUserWidget.h"
-#include "Settings/CGGameUserSettings.h"
 #include "UI/Menu/CGComboBoxSettingUserWidget.h"
 #include "UI/Menu/CGSliderSettingUserWidget.h"
 #include "UI/Menu/CGButtonSettingUserWidget.h"
-#include "CGGameModeBase.h"
 #include "UI/CGHUDBase.h"
+#include "CGGameModeBase.h"
+#include "Settings/CGGameUserSettings.h"
 #include "Settings/CGIntSetting.h"
 #include "Settings/CGFloatSetting.h"
 #include "Settings/CGActionSetting.h"
 #include "Interfaces/CGSettingWidgetInterface.h"
 #include "Player/CGPlayerController.h"
+#include "Components/VerticalBox.h"
+#include "CGUtils.h"
 
 void UCGOptionsUserWidget::NativeOnInitialized()
 {
@@ -23,21 +25,23 @@ void UCGOptionsUserWidget::NativeOnInitialized()
 
 void UCGOptionsUserWidget::InitSettingsWidgets(const TArray<TObjectPtr<UCGSetting>>& SettingsArray, UVerticalBox* VerticalBox)
 {
+    using namespace CubeGame;
+
     VerticalBox->ClearChildren();
 
     for (auto& Setting : SettingsArray)
     {
         if (auto* IntSetting = Cast<UCGIntSetting>(Setting))
         {
-            CreateAndAddSettingWidget<UCGComboBoxSettingUserWidget>(ComboBoxSettingWidgetClass, IntSetting, VerticalBox);
+            Utils::CreateAndAddSettingWidget<UCGComboBoxSettingUserWidget>(GetWorld(), ComboBoxSettingWidgetClass, IntSetting, VerticalBox);
         }
         else if (auto* FloatSetting = Cast<UCGFloatSetting>(Setting))
         {
-            CreateAndAddSettingWidget<UCGSliderSettingUserWidget>(SliderSettingWidgetClass, FloatSetting, VerticalBox);
+            Utils::CreateAndAddSettingWidget<UCGSliderSettingUserWidget>(GetWorld(), SliderSettingWidgetClass, FloatSetting, VerticalBox);
         }
         else if (auto* ActionSetting = Cast<UCGActionSetting>(Setting))
         {
-            CreateAndAddSettingWidget<UCGButtonSettingUserWidget>(ButtonSettingWidgetClass, ActionSetting, VerticalBox);
+            Utils::CreateAndAddSettingWidget<UCGButtonSettingUserWidget>(GetWorld(), ButtonSettingWidgetClass, ActionSetting, VerticalBox);
         }
     }
 }
@@ -48,14 +52,18 @@ void UCGOptionsUserWidget::Setup()
     check(SoundSettingsVerticalBox);
     check(GameSettingsVerticalBox);
     check(BackButton);
+    check(ComboBoxSettingWidgetClass);
+    check(SliderSettingWidgetClass);
+    check(ButtonSettingWidgetClass);
 
     if (auto* GameUserSettings = UCGGameUserSettings::Get())
     {
-        GameUserSettings->OnResolutionChanged.AddUObject(this, &ThisClass::OnResolutionChanged);
-
         InitSettingsWidgets(GameUserSettings->GetVideoSettings(), VideoSettingsVerticalBox);
         InitSettingsWidgets(GameUserSettings->GetSoundSettings(), SoundSettingsVerticalBox);
         InitSettingsWidgets(GameUserSettings->GetGameSettings(), GameSettingsVerticalBox);
+
+        GameUserSettings->OnResolutionChanged.AddUObject(this, &ThisClass::OnResolutionChanged);
+        GameUserSettings->OnLanguageChanged.AddUObject(this, &ThisClass::OnLanguageChanged);
     }
 
     BackButton->OnClickedButton.AddUObject(this, &ThisClass::OnClickedBackButton);
@@ -98,23 +106,20 @@ void UCGOptionsUserWidget::UpdateSettingsWidget(UVerticalBox* Container)
 
 void UCGOptionsUserWidget::OnGameStateChanged(EGameState NewGameState)
 {
-    if (NewGameState != EGameState::Options)
-        return;
-
-    ResetWidget();
-}
-
-void UCGOptionsUserWidget::OnPressedEscape()
-{
-    if (!IsVisible() || IsAnyAnimationPlaying())
-        return;
-
-    OnClickedBackButton();
+    if (NewGameState == EGameState::Options)
+    {
+        ResetWidget();
+    }
 }
 
 void UCGOptionsUserWidget::OnResolutionChanged()
 {
-    ShowFadeoutAnimationAndSetGameState(EGameState::OptionsWarning);
+    TransitionToGameState(EGameState::OptionsWarning);
+}
+
+void UCGOptionsUserWidget::OnLanguageChanged()
+{
+    ResetWidget();
 }
 
 void UCGOptionsUserWidget::OnClickedBackButton()
@@ -127,19 +132,22 @@ void UCGOptionsUserWidget::OnClickedBackButton()
     ShowFadeoutAnimation();
 }
 
-void UCGOptionsUserWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+void UCGOptionsUserWidget::OnPressedEscape()
 {
-    Super::OnAnimationFinished_Implementation(Animation);
+    if (!IsVisible() || IsAnyAnimationPlaying())
+        return;
 
-    if (Animation == FadeoutAnimation)
+    OnClickedBackButton();
+}
+
+void UCGOptionsUserWidget::OnFadeoutAnimationFinished()
+{
+    if (GameStateToSet == EGameState::OptionsWarning)
     {
-        if (GameStateToSet == EGameState::OptionsWarning)
-        {
-            SetGameState(GameStateToSet);
-        }
-        else if (auto* HUD = GetOwningPlayer() ? GetOwningPlayer()->GetHUD<ACGHUDBase>() : nullptr)
-        {
-            HUD->BackToRootMenu();
-        }
+        SetGameState(GameStateToSet);
+    }
+    else if (auto* HUD = GetOwningPlayer() ? GetOwningPlayer()->GetHUD<ACGHUDBase>() : nullptr)
+    {
+        HUD->BackToRootMenu();
     }
 }
