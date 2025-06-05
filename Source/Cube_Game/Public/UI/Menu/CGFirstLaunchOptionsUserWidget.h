@@ -45,6 +45,4 @@ private:
     void OnLanguageChanged();
     void OnClickedOkButton();
     void OnPressedEnter();
-
-    virtual void OnFadeoutAnimationFinished() override;
 };

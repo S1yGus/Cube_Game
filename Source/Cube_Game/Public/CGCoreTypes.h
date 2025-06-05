@@ -10,6 +10,8 @@ UENUM(BlueprintType)
 enum class EGameState : uint8
 {
     WaitingToStart = 0,
+    Authors,
+    Title,
     MainMenu,
     FirstLaunchOptions,
     Options,

@@ -103,8 +103,3 @@ void UCGMainMenuUserWidget::OnClickedQuitButton()
         GameInstnce->QuitGame(GetOwningPlayer());
     }
 }
-
-void UCGMainMenuUserWidget::OnFadeoutAnimationFinished()
-{
-    SetGameState(GameStateToSet);
-}

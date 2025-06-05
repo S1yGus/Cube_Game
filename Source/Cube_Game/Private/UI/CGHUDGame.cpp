@@ -2,7 +2,7 @@
 
 #include "UI/CGHUDGame.h"
 #include "CGGameModeBase.h"
-#include "UI/CGAnimatedUserWidget.h"
+#include "Blueprint/UserWidget.h"
 
 void ACGHUDGame::BeginPlay()
 {

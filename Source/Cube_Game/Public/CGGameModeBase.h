@@ -18,6 +18,6 @@ public:
 
     virtual void SetGameState(EGameState NewGameState);
 
-private:
+protected:
     EGameState CurrentGameState = EGameState::WaitingToStart;
 };

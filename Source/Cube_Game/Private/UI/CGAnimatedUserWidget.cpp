@@ -41,7 +41,7 @@ void UCGAnimatedUserWidget::OnAnimationFinished_Implementation(const UWidgetAnim
 
     if (Animation == StartupAnimation)
     {
-        UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
+        OnStartupAnimationFinished();
     }
     else if (Animation == FadeoutAnimation)
     {
@@ -49,6 +49,12 @@ void UCGAnimatedUserWidget::OnAnimationFinished_Implementation(const UWidgetAnim
     }
 }
 
+void UCGAnimatedUserWidget::OnStartupAnimationFinished()
+{
+    UGameplayStatics::PlaySound2D(GetWorld(), StartupSound);
+}
+
 void UCGAnimatedUserWidget::OnFadeoutAnimationFinished()
 {
+    SetGameState(GameStateToSet);
 }
