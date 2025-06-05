@@ -116,8 +116,3 @@ void UCGFirstLaunchOptionsUserWidget::OnPressedEnter()
 
     OnClickedOkButton();
 }
-
-void UCGFirstLaunchOptionsUserWidget::OnFadeoutAnimationFinished()
-{
-    SetGameState(GameStateToSet);
-}

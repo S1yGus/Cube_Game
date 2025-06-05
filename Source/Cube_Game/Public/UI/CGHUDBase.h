@@ -17,13 +17,13 @@ public:
     virtual void BackToRootMenu() {};
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> OptionsWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> OptionsWarningWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> HowToPlayWidgetClass;
 
     UPROPERTY()

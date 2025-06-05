@@ -42,5 +42,6 @@ protected:
     virtual void OnAnimationFinished_Implementation(const UWidgetAnimation* Animation) override;
 
 private:
+    virtual void OnStartupAnimationFinished();
     virtual void OnFadeoutAnimationFinished();
 };

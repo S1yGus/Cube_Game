@@ -12,16 +12,16 @@ class CUBE_GAME_API ACGHUDGame : public ACGHUDBase
     GENERATED_BODY()
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> HUDWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> PopUpHintWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> PauseWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Classes")
     TSubclassOf<UUserWidget> GameOverWidgetClass;
 
     virtual void BeginPlay() override;

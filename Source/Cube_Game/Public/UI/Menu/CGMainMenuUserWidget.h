@@ -46,6 +46,4 @@ private:
     void OnClickedHowButton();
     void OnClickedOptionsButton();
     void OnClickedQuitButton();
-
-    virtual void OnFadeoutAnimationFinished() override;
 };
