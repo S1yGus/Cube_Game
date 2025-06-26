@@ -37,7 +37,7 @@ void ACGGameModeMenu::OnCameraRotation()
     {
         if (const auto* PC = GetWorld()->GetFirstPlayerController())
         {
-            if (auto* Camera = PC->GetPawn())
+            if (auto Camera = PC->GetPawn())
             {
                 Camera->AddActorWorldRotation(FRotator{0.0, CameraRotationSpeed, 0.0});
             }
