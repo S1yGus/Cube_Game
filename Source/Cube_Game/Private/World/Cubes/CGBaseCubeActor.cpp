@@ -38,7 +38,7 @@ UStaticMeshComponent* ACGBaseCubeActor::GetPlayerMesh() const
 {
     if (const auto* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr)
     {
-        if (const auto* Pawn = PC->GetPawn())
+        if (const auto Pawn = PC->GetPawn())
         {
             return Pawn->FindComponentByClass<UStaticMeshComponent>();
         }
