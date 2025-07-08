@@ -142,7 +142,7 @@ struct FHintData
     FText Title;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    FLinearColor TitleColor;
+    FLinearColor TitleColor{FLinearColor::White};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     FText HintText;
@@ -215,7 +215,7 @@ struct FPlayerRecord
     FText Name;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PlayerRecord")
-    int32 Score;
+    int32 Score{0};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "PlayerRecord")
     FDateTime DateTime;
